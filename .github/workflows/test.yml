@@ -26,5 +26,7 @@ jobs:
         run: node tools/eval_players.js 6
       - name: v0.30 마디 고정 검사
         run: node tools/test_locks_v030.js
+      - name: v0.33 리듬 v2 검사
+        run: node tools/test_rhythm_v033.js
       - name: 커밋된 index.html 일치 확인
         run: git diff --exit-code -- index.html

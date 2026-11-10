@@ -282,8 +282,10 @@ function analyzeHarmony(bars,keyPc,bpb){
 /* ── 리듬 토큰(박 단위) ──
    Q=박 위 4분 · E=8분 2개 · Uh=앞음 지속+엇박 진입(당김) · Ur=쉼+엇박 진입 · T=8분 3연음 · H=지속 · R=쉼 */
 const TOK=['R','H','Q','E','Ur','Uh','T','Tr'];
-const NOTE_TOK={Q:1,E:1,Ur:1,Uh:1,T:1};
-const ALLOWED=[null,{Q:1,H:1,R:1},{Q:1,H:1,R:1,E:1,Ur:1,Uh:1},{Q:1,H:1,R:1,E:1,Ur:1,Uh:1,T:1}];
+const NOTE_TOK={Q:1,Qs:1,E:1,Ur:1,Uh:1,T:1};
+const ALLOWED=[null,{Q:1,H:1,R:1},{Q:1,Qs:1,H:1,R:1,E:1,Ur:1,Uh:1},{Q:1,Qs:1,H:1,R:1,E:1,Ur:1,Uh:1,T:1}];
+/* v0.33 Qs = 정박 8분 + 8분 쉼(짧게 끊는 음). 앞이 끊긴 토큰 뒤에는 이어짐(H·Uh)이 올 수 없다 */
+const CUT_TOK={R:1,T:1,Qs:1};
 
 function sampleQuart(rng,q,lo,hi){ /* 사분위 [Q1,Q2,Q3] → 대략적 분포 샘플 */
   const r=rng();let v;
@@ -324,8 +326,8 @@ function rhythmToken(k,prev,first,diff,fp,rng,density){
   if((k==='E'||k==='T')&&density<1&&rng()>density)k='Q';
   if(first&&k==='Uh')k=diff>=2?'Ur':'Q';
   if(first&&!NOTE_TOK[k])k='Q';
-  if(k==='H'&&(prev==='R'||prev==='T'))k='Q';
-  if(k==='Uh'&&(prev==='R'||prev==='T'))k=diff>=2?'Ur':'Q';
+  if(k==='H'&&CUT_TOK[prev])k='Q';
+  if(k==='Uh'&&CUT_TOK[prev])k=diff>=2?'Ur':'Q';
   return k;
 }
 function fitRhythmTemplate(src,need,diff,fp,rng,density){
@@ -335,7 +337,7 @@ function fitRhythmTemplate(src,need,diff,fp,rng,density){
     const k=j===need-1&&need>1?'H':src[j%Math.max(1,src.length-1)];
     out.push(rhythmToken(k,out[j-1]||'R',j===0,diff,fp,rng,density));
   }
-  if(need>1){if(out[need-2]==='R'||out[need-2]==='T')out[need-2]='Q';out[need-1]='H'}
+  if(need>1){if(CUT_TOK[out[need-2]])out[need-2]='Q';out[need-1]='H'}
   return out;
 }
 function rhythmBeatRow(bp){return 1+((bp-1)%4)} /* 실측 표는 1~4박만 제공 */
@@ -462,6 +464,22 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     TOK.forEach((t,i)=>{const k=t==='Tr'?'T':t;o[k]=(o[k]||0)+row[i]*(t==='Tr'?0.5:1)});
     return o;
   };
+  /* v0.33 리듬 v2 — WJD 박 토큰 2차 전이(전체) × 프로필 1차 전이 기울기. 난이도 2·3에서 기본 */
+  const R2=SD&&SD.rhy2&&diff>=2&&opts.rhythmV2!==false?SD.rhy2:null;
+  const r2Bi=R2?(R2.bi[styleId]||R2.bi.all):null;
+  const transRow2=(bp,p2,p1,isFirst)=>{
+    const b=String(rhythmBeatRow(bp)),T2=R2.tok,o={};
+    if(isFirst){const f=R2.first[b];T2.forEach((t,i)=>o[t]=f[i]);return o}
+    const tri=R2.tri[b+p2+'|'+p1],all=R2.bi.all[b+p1],pr=r2Bi[b+p1];
+    const base=tri||all||pr;
+    if(!base){T2.forEach(t=>o[t]=t==='E'?2:1);return o}
+    T2.forEach((t,i)=>{
+      let w=base[i];
+      if(pr&&all&&all[i]>0)w*=Math.min(2,Math.max(0.5,pr[i]/all[i]));   /* 연주자 기울기 */
+      o[t]=w;
+    });
+    return o;
+  };
   const events=[]; /* {t,d,midi,trip,ph,strong,first,last} */
   let motif=null;
   phrases.forEach((ph,pi)=>{
@@ -471,35 +489,34 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     /* v0.27 프레이즈 리듬 템플릿 선택 */
     let tpl=null;
     const need=ph.e-ph.s+1;
-    if(diff>=2&&!recall&&need>=4&&rng()<0.55){
+    if(diff>=2&&!R2&&!recall&&need>=4&&rng()<0.55){
       tpl=fitRhythmTemplate(RHY_TPL[Math.floor(rng()*RHY_TPL.length)],need,diff,FP,rng,densityAt(ph.s));
       tag(Math.floor(ph.s/BPB),'리듬 템플릿');
     }
-    let prev='R';
+    let prev='R',prev2='R';
     for(let bt=ph.s;bt<=ph.e;bt++){
       const bp=(bt%BPB)+1,isFirst=bt===ph.s,isLast=bt===ph.e;
       if(recall&&bt-ph.s<motif.toks.length){
         const k=rhythmToken(motif.toks[bt-ph.s],prev,isFirst,diff,FP,rng,densityAt(bt));
-        toks.push(k);prev=k;continue;
+        toks.push(k);prev2=prev;prev=k;continue;
       }
       let k;
       if(tpl){k=tpl[bt-ph.s]||'Q'}
       else{
-      const row=transRow(bp,prev),al=ALLOWED[diff];
+      const row=R2?transRow2(bp,prev2,prev,isFirst):transRow(bp,prev),al=ALLOWED[diff];
       const c=[];
       for(const k2 in row){
         if(!al[k2])continue;
         let w=row[k2];
         const density=densityAt(bt);
-        if(k2==='T')w*=FP.T*density*density;else if(k2==='E')w*=FP.E*density*density;else if(k2==='Q'||k2==='H')w*=FP.QH/density;
+        if(k2==='T')w*=FP.T*density*density;else if(k2==='E')w*=FP.E*density*density;else if(k2==='Q'||k2==='Qs'||k2==='H')w*=FP.QH/density;
         if(isFirst&&!NOTE_TOK[k2])continue;
         if(isFirst&&k2==='Uh')continue;
         if(!isFirst&&k2==='R')w*=0.25;
-        if(isLast&&!(k2==='Q'||k2==='E'||k2==='Uh'||(k2==='Ur'&&diff>=2)))continue;
-        if((k2==='H'||k2==='Uh')&&prev==='T')continue;
-        if(k2==='H'&&prev==='R')continue;
-        if(k2==='Uh'&&prev==='R')continue;
+        if(isLast&&!(k2==='Q'||k2==='Qs'||k2==='E'||k2==='Uh'||(k2==='Ur'&&diff>=2)))continue;
+        if((k2==='H'||k2==='Uh')&&CUT_TOK[prev])continue;
         if(diff===2&&k2==='E')w*=0.8;
+        if(diff===2&&k2==='T')w=0;
         if(diff===1&&k2==='H'&&bp%2===1)w*=0.5;
         if(role==='contrast'&&(k2==='E'||k2==='T'))w*=1.15;
         if(role==='resolution'&&(k2==='H'||k2==='Q'))w*=1.2;
@@ -507,7 +524,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       }
       k=c.length?pickW(rng,c):'Q';
       }
-      toks.push(k);prev=k;
+      toks.push(k);prev2=prev;prev=k;
     }
     if(!motif&&ph.e-ph.s>=3)motif={toks:toks.slice(0,Math.min(6,toks.length)),pi};
     if(recall){ph.recall=true;tag(Math.floor(ph.s/BPB),'모티프 회상(리듬)')}
@@ -517,6 +534,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       const t=(ph.s+j)*6;
       const lastEv=phEv[phEv.length-1];
       if(k==='Q')phEv.push({t,d:6});
+      else if(k==='Qs')phEv.push({t,d:3});
       else if(k==='E'){phEv.push({t,d:3});phEv.push({t:t+3,d:3})}
       else if(k==='Ur'){phEv.push({t:t+3,d:3})}
       else if(k==='Uh'){if(lastEv&&lastEv.t+lastEv.d===t&&!lastEv.trip)lastEv.d+=3;phEv.push({t:t+3,d:3})}
@@ -527,8 +545,12 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     /* 프레이즈 끝음 — 길게(1~2박 더) */
     const le=phEv[phEv.length-1];
     if(!le.trip){
-      const ext=ph.final?Math.max(0,TOT-(le.t+le.d)):(rng()<0.6?6:(rng()<0.5?3:0));
-      le.d+=ext;
+      if(ph.final)le.d+=Math.max(0,TOT-(le.t+le.d));
+      else if(R2){   /* v0.33 실측 끝음 길이(8분 단위): 짧게 끊는 끝이 대부분 */
+        const L=pickW(rng,R2.lastLen.map((w,i)=>({v:i+1,w:i<4?w:w*0.5})));
+        le.d=Math.max(le.d,Math.min(L*3,12));
+        if(le.d<3)le.d=3;
+      }else le.d+=rng()<0.6?6:(rng()<0.5?3:0);
     }
     phEv.forEach((e,k)=>{e.ph=pi;e.strong=e.t%6===0;e.first=k===0;e.last=k===phEv.length-1;e.midi=null;events.push(e)});
     if(phEv[0].t%6!==0)tag(Math.floor(phEv[0].t/TPB),'픽업 진입');

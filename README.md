@@ -5,12 +5,13 @@
 코드 진행을 고르면 **매번 새로운** 연습용 즉흥 솔로 악보를 만들어 주고, 반주와 함께 들려 주는 단일 HTML 웹앱.
 규칙 기반 엔진이 **Weimar Jazz Database 실측 통계**를 확률로 사용해 "사람 같은" 라인을 만든다.
 
-수정 작업 버전 **v0.32.0 "Clu"**. 배포 여부와 검증 결과는 별도로 확인해야 한다. 버전 이력 전체는 [CHANGELOG.md](CHANGELOG.md)에 있다 — 이 README에는 현재 기능 요약만 둔다.
+수정 작업 버전 **v0.33.0 "Clu"**. 배포 여부와 검증 결과는 별도로 확인해야 한다. 버전 이력 전체는 [CHANGELOG.md](CHANGELOG.md)에 있다 — 이 README에는 현재 기능 요약만 둔다.
 
 > 마스터 기획안: [docs/blueprint-v1.0.pdf](docs/blueprint-v1.0.pdf) — 프로젝트 전체 로드맵(v1~v4), ML·RAG 확장 설계, 비용·법무 프레임.
 
 ## 주요 기능
 
+- **v0.33 Clu**: 리듬 v2 — WJD 실제 솔로와 리듬 지표를 비교해 재설계(엇박 시작·짧은 끝음·프레이즈 안 숨쉬기). `python3 tools/rhythm_v2.py tools/data_raw/wjazzd.db tools/data/rhythm_v2.json && python3 tools/inject_rhythm_v2.py`
 - **v0.32 Clu**: 코러스별 마디 고정·음표색 도구, 재생 표시는 상자만
 - **v0.31 Clu**: 재생 위치 표시(노래방식) · 악보 터치 일시정지/이어서 · 마디 고정 모드 버튼 · 음표색/음표 편집 복구
 - **v0.30 Clu**: 마디 고정(마음에 든 마디는 두고 나머지만 새로 생성) · 소절 보관함 · 음원 세트 비교 선택(CC0 피아노·테너 포함)
