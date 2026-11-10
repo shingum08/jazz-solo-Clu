@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>즉흥 악보 생성기 v0.30.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.31.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -332,8 +332,8 @@ function playAllInner(acIn,banksIn,feelIn){
     if(cur.audio!==au)return;
     const el=ac.currentTime-start;
     if(el>=0&&el<nCh*chLen){
-      const cr=Math.floor(el/chLen),bi=Math.floor((el-cr*chLen)/barLen);
-      if(typeof onPlayPos==='function'){try{onPlayPos(cr,bi)}catch(e){}}  /* 화면 갱신 오류가 재생을 멈추지 않게 */
+      const cr=Math.floor(el/chLen),off=el-cr*chLen,bi=Math.floor(off/barLen);
+      if(typeof onPlayPos==='function'){try{onPlayPos(cr,bi,(off-bi*barLen)/barLen)}catch(e){}}  /* 화면 갱신 오류가 재생을 멈추지 않게 */
     }
     if(ac.currentTime>au.endAt+1.2){stopAll();$('#btnPlay').textContent='▶ 재생';return}
     au.raf=requestAnimationFrame(loop);
@@ -498,7 +498,12 @@ function mel(ac,out,when,dur,midi,tone,vel,isEnd){
   });
   f.connect(g);g.connect(out);
 }
+/* v0.31 일시정지·이어서 — AudioContext suspend/resume로 전체(솔로+반주)를 그 자리에서 멈춘다 */
+function pauseAll(){if(cur.audio&&!cur.paused){cur.paused=true;try{cur.audio.ac.suspend()}catch(e){}}}
+function resumeAll(){if(cur.audio&&cur.paused){cur.paused=false;try{cur.audio.ac.resume()}catch(e){}}}
+function togglePause(){if(!cur.audio)return false;if(cur.paused)resumeAll();else pauseAll();return true}
 function stopAll(){
+  cur.paused=false;
   cur._playTok=(cur._playTok||0)+1;
   if(cur.audio){
     if(cur.audio.raf)cancelAnimationFrame(cur.audio.raf);
@@ -506,6 +511,8 @@ function stopAll(){
     try{cur.audio.ac.close()}catch(e){}
     cur.audio=null;
     [...$('#chips').children].forEach(c=>c.classList.remove('lit'));
+    if(typeof clearPlayHl==='function')try{clearPlayHl()}catch(e){}
+    try{document.querySelectorAll('.paper.paused').forEach(p=>p.classList.remove('paused'))}catch(e){}
   }
 }
 
@@ -691,6 +698,13 @@ input[type=range]{width:100%;accent-color:var(--brass);cursor:pointer}
 .chips .bar{cursor:pointer;user-select:none}
 .chips .bar.sel{outline:2px solid var(--brass);outline-offset:1px}
 .chips .bar.lock{background:var(--ink);color:var(--paper)}
+.zbtn.lockmode.on{background:var(--ink);color:var(--paper)}
+svg .playcursor{fill:var(--brass);opacity:.16;pointer-events:none}
+.abcjs-notehead.now{fill:var(--brass)!important;stroke:var(--brass)!important}
+.paper.paused .sheetwrap{opacity:.75}
+#pauseNote{display:none;position:sticky;top:6px;z-index:5;text-align:center}
+.paper.paused #pauseNote{display:block}
+#pauseNote span{background:var(--ink);color:var(--paper);border-radius:999px;padding:6px 14px;font-size:13px}
 .lockbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 0}
 .lockbar .lockhint{font-size:12.5px;opacity:.7;margin-right:4px}
 .btn.sm{padding:7px 12px;font-size:13px}
@@ -897,7 +911,7 @@ body.fslock{overflow:hidden}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.30.0 · Clu</div>
+    <div class="eyebrow">Concept Prototype · v0.31.0 · Clu</div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">리얼북 필수 <b style="color:var(--brass);font-weight:500">366곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
   </div>
@@ -955,6 +969,7 @@ body.fslock{overflow:hidden}
     <div id="drillWrap" style="display:none"></div><div id="chartWrap" style="display:none"><div class="seclab">CHART · 코드톤 차트 (코드 기호 + 뿌리·3·5·7음 음표)</div><div id="chartStaff"></div></div>
     <div id="soloWrap">
       <div class="chnav" id="chNav"></div>
+      <div id="pauseNote"><span>∥ 일시정지 — 악보를 누르면 이어서 재생합니다</span></div>
       <div class="chpages" id="chPages">
         <div class="chpage" data-ch="0"><div class="seclab sololab">SOLO · 1코러스</div><div class="zoombar" id="zoomBar"><button class="zbtn" id="zOut">−</button><span class="zval" id="zVal">100%</span><button class="zbtn" id="zIn">+</button><select class="zbtn zsel" id="zColor"><option value="off">음표색: 끔(검정)</option><option value="role">코드톤·스케일</option><option value="pitch">음이름 12색</option></select></div><div class="sheetwrap"><div id="staff"><div class="empty">위에서 곡을 고르면<br>이 종이 위에 새로운 솔로가 쓰입니다.</div></div></div></div>
       </div>
@@ -3559,7 +3574,7 @@ function renderSheet(){
     c.textContent=(lockedBar?'🔒 ':'')+(i+1)+'마디 '+bar.chords.map(ch=>chordSymbol(ch.root,ch.type)).join(' ');
     if(lockedBar)c.classList.add('lock');
     if(cur.barSel&&cur.barSel.has(i))c.classList.add('sel');
-    if(!cur.solo.drill)c.onclick=()=>{if(!cur.barSel)cur.barSel=new Set();if(cur.barSel.has(i))cur.barSel.delete(i);else cur.barSel.add(i);c.classList.toggle('sel');updLockBar()};
+    if(!cur.solo.drill&&cur.lockMode)c.onclick=()=>{if(!cur.barSel)cur.barSel=new Set();if(cur.barSel.has(i))cur.barSel.delete(i);else cur.barSel.add(i);c.classList.toggle('sel');updLockBar()};
     chips.appendChild(c);
   });
   updLockBar();
@@ -3581,7 +3596,9 @@ function renderSheet(){
 /* ── v0.30 마디 고정 · 소절 보관함 ── */
 function updLockBar(){
   const lb=$('#lockBar');if(!lb)return;
-  if(!cur.solo||cur.solo.drill){lb.style.display='none';return}
+  const btn=$('#btnLockMode');if(btn)btn.classList.toggle('on',!!cur.lockMode);
+  if(btn)btn.style.display=(cur.solo&&cur.solo.drill)?'none':'';
+  if(!cur.solo||cur.solo.drill||!cur.lockMode){lb.style.display='none';return}
   lb.style.display='flex';
   const nSel=cur.barSel?cur.barSel.size:0,nLock=cur.locks?Object.keys(cur.locks).length:0;
   $('#lockHint').textContent=(nSel?'선택 '+nSel+'마디':'마디를 눌러 고르세요')+(nLock?' · 고정 '+nLock+'마디':'');
@@ -3616,7 +3633,24 @@ function renderSnips(){
     d.appendChild(b);d.appendChild(x);el.appendChild(d);
   });
 }
-cur.snips=loadSnips();cur.locks={};cur.barSel=new Set();renderSnips();
+cur.snips=loadSnips();cur.locks={};cur.barSel=new Set();cur.lockMode=false;renderSnips();
+/* 마디 고정 모드 토글 — 켜면 마디 선택과 고정 도구가 나타난다 */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('#btnLockMode');if(!b)return;
+  cur.lockMode=!cur.lockMode;
+  if(!cur.lockMode)cur.barSel=new Set();
+  renderSheet();
+  if(cur.lockMode){const el=$('#chips');if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}
+});
+/* 악보를 누르면 일시정지 ↔ 이어서 (음표를 눌러 편집하는 동작은 그대로) */
+document.addEventListener('click',e=>{
+  const sw=e.target.closest('.sheetwrap');if(!sw)return;
+  if(e.target.closest('.abcjs-notehead')||e.target.closest('[class*="rest"]'))return;
+  if(!cur.audio)return;
+  togglePause();
+  document.querySelectorAll('.paper').forEach(p=>p.classList.toggle('paused',!!cur.paused));
+  $('#btnPlay').textContent=cur.paused?'▶ 이어서':'■ 정지';
+});
 $('#btnLock').onclick=()=>{if(!cur.locks)cur.locks={};cur.lockSong=cur.selProg;selBars().forEach(i=>{cur.locks[i]=barNotesNow(i)});cur.barSel=new Set();renderSheet()};
 $('#btnUnlock').onclick=()=>{const bs=selBars().filter(i=>cur.locks[i]);if(bs.length)bs.forEach(i=>delete cur.locks[i]);else cur.locks={};cur.barSel=new Set();renderSheet()};
 $('#btnRegenRest').onclick=()=>{const was=!!cur.audio;stopIfPlaying();gen(true);if(was){playAll();$('#btnPlay').textContent='■ 정지'}};
@@ -3628,8 +3662,15 @@ $('#btnSnip').onclick=()=>{
 };
 function markNav(){[...$('#chNav').querySelectorAll('button')].forEach((b,i)=>b.classList.toggle('on',i===cur.pageIdx))}
 /* v0.27.1 초심자 음표 색상 — 코드톤=노랑 · 스케일음=파랑 · 코드 밖=빨강 */
-const ZOOMBAR_HTML='<div class="zoombar"><button class="zbtn" data-z="-">−</button><span class="zval">100%</span><button class="zbtn" data-z="+">+</button><select class="zbtn zsel" data-color="1" onchange="window.__setNoteColor&&window.__setNoteColor(this.value)"><option value="off">음표색: 끔(검정)</option><option value="role">코드톤·스케일</option><option value="pitch">음이름 12색</option></select></div>';
+const ZOOMBAR_HTML='<div class="zoombar"><button class="zbtn" data-z="-">−</button><span class="zval">100%</span><button class="zbtn" data-z="+">+</button><button class="zbtn lockmode" id="btnLockMode">🔒 마디 고정 모드</button><select class="zbtn zsel" data-color="1" onchange="window.__setNoteColor&&window.__setNoteColor(this.value)"><option value="off">음표색: 끔(검정)</option><option value="role">코드톤·스케일</option><option value="pitch">음이름 12색</option></select></div>';
 const NOTE_CSS=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+/* 코러스 c의 악보 svg — abcjs는 .sheetwrap 바로 안에 svg를 그린다(#staff 안이 아님) */
+function staffSvg(c){
+  const pg=document.querySelector('#chPages .chpage[data-ch="'+(c||0)+'"]');
+  if(!pg)return null;
+  const svgs=[...pg.querySelectorAll('.sheetwrap svg')];
+  return svgs.find(x=>x.querySelector('.abcjs-notehead'))||svgs[0]||null;
+}
 function colorNotes(solo,svg){
   if(!svg||!solo)return;
   const mode=cur.noteColors||'off';   /* off|role|pitch */
@@ -3651,7 +3692,7 @@ function colorNotes(solo,svg){
     }
   });
 }
-function colorAll(){if(cur.solos)cur.solos.forEach((so,c)=>{const svg=$('#'+(c===0?'staff':'staff'+c)+' svg');colorNotes(so,svg)})}
+function colorAll(){if(cur.solos)cur.solos.forEach((so,c)=>colorNotes(so,staffSvg(c)))}
 /* 확대(페이지 배율) — − / + 10%씩, 80~300%. CSS transform으로 악보를 확대하고 좌우 스크롤 */
 function applyZoom(){
   const z=cur.zoom||1;
@@ -3670,20 +3711,52 @@ window.__setNoteColor=function(v){
   cur.noteColors=v;
   document.querySelectorAll('.zsel').forEach(x=>x.value=v);
   if(!cur.solos)return;
-  cur.solos.forEach((so,c)=>{
-    const box=document.getElementById(c===0?'staff':'staff'+c);
-    const svg=box&&box.querySelector('svg');
-    if(svg)colorNotes(so,svg);
-  });
+  cur.solos.forEach((so,c)=>{const svg=staffSvg(c);if(svg)colorNotes(so,svg)});
 };
 document.addEventListener('change',e=>{const sel=e.target.closest('select[data-color]');if(sel)window.__setNoteColor(sel.value)});
 function goPage(i){const pg=$('#chPages');cur.pageIdx=i;markNav();const x=i*pg.clientWidth;if(typeof pg.scrollTo==='function'){try{pg.scrollTo({left:x,behavior:'smooth'});return}catch(_){}}pg.scrollLeft=x}
 /* 재생 위치 콜백(playback.js) — 마디 칩 강조 + 재생 중 코러스 페이지 자동 이동 */
-function onPlayPos(cr,bi){
+function onPlayPos(cr,bi,frac){
   if(cur._pp===cr+':'+bi)return;cur._pp=cr+':'+bi;
   [...$('#chips').children].forEach((c,i)=>c.classList.toggle('lit',i===bi));
   [...$('#chNav').querySelectorAll('button')].forEach((b,i)=>b.classList.toggle('playing',i===cr));
   if(cur._pc!==cr){cur._pc=cr;if(cur.solos&&cur.solos.length>1)goPage(cr)}
+  highlightBar(cr,bi);
+}
+/* v0.31 노래방식 위치 표시 — 지금 연주 중인 마디를 악보 위에서 칠하고, 화면 밖이면 따라 내려간다 */
+function barHeadMap(svg,solo){
+  if(svg._barMap&&svg._barMapSolo===solo)return svg._barMap;
+  const heads=[...svg.querySelectorAll('.abcjs-notehead:not([class*="rest"])')];
+  const seq=[];solo.bars.forEach((bar,b)=>bar.notes.forEach(n=>{if(n.midi!==null)seq.push(b)}));
+  if(heads.length!==seq.length)return svg._barMap=null;
+  const map={};heads.forEach((el,k)=>{(map[seq[k]]||(map[seq[k]]=[])).push(el)});
+  svg._barMap=map;svg._barMapSolo=solo;return map;
+}
+function highlightBar(cr,bi){
+  const svg=staffSvg(cr);
+  if(cur._hl&&cur._hl.svg!==svg)clearPlayHl();
+  if(!svg||!cur.solos||!cur.solos[cr])return;
+  const map=barHeadMap(svg,cur.solos[cr]);
+  if(cur._hl&&cur._hl.els)cur._hl.els.forEach(el=>el.classList.remove('now'));
+  let rect=cur._hl&&cur._hl.svg===svg?cur._hl.rect:null;
+  const els=map&&map[bi]||[];
+  els.forEach(el=>el.classList.add('now'));
+  if(els.length){
+    try{
+      let x1=1e9,y1=1e9,x2=-1e9,y2=-1e9;
+      els.forEach(el=>{const b=el.getBBox();x1=Math.min(x1,b.x);y1=Math.min(y1,b.y);x2=Math.max(x2,b.x+b.width);y2=Math.max(y2,b.y+b.height)});
+      if(!rect){rect=document.createElementNS('http://www.w3.org/2000/svg','rect');rect.setAttribute('class','playcursor');rect.setAttribute('rx','6');svg.insertBefore(rect,svg.firstChild)}
+      rect.setAttribute('x',x1-6);rect.setAttribute('y',y1-14);rect.setAttribute('width',(x2-x1)+12);rect.setAttribute('height',(y2-y1)+28);
+      const r=els[0].getBoundingClientRect();
+      if(r.top<70||r.bottom>window.innerHeight-60)window.scrollBy({top:r.top-window.innerHeight*0.38,behavior:'smooth'});
+    }catch(e){}
+  }else if(rect)rect.setAttribute('width','0');
+  cur._hl={svg,els,rect};
+}
+function clearPlayHl(){
+  if(!cur._hl)return;
+  try{(cur._hl.els||[]).forEach(el=>el.classList.remove('now'));if(cur._hl.rect)cur._hl.rect.remove()}catch(e){}
+  cur._hl=null;
 }
 
 /* ── 저장 ── */
@@ -3771,7 +3844,7 @@ function noteName(m){return NOTE_NAME[((m%12)+12)%12]+(Math.floor(m/12)-1)}
 function noteSeq(){const seq=[];cur.solo.bars.forEach((bar,b)=>bar.notes.forEach((n,i)=>seq.push({b,i,n})));return seq}
 function clearSel(){(cur.bind||[]).forEach(el=>el.classList.remove('notehead-sel'))}
 function bindNoteClicks(){
-  const svg=$('#staff svg');cur.bind=[];
+  const svg=staffSvg(0);cur.bind=[];
   if(svg&&cur.solo){
     const seq=noteSeq();
     const restSel='[class*="rest"]';
@@ -3847,7 +3920,7 @@ function popAct(act){
 /* ── 피드백: 입력창 → GitHub 이슈(곡·설정 자동 첨부) 또는 내용 복사 ── */
 function fbInfo(){
   const so=songSel.selectedOptions&&songSel.selectedOptions[0]?songSel.selectedOptions[0].textContent:'-';
-  return ['버전: v0.30.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
+  return ['버전: v0.31.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
 }
 $('#btnFeedback').onclick=()=>{$('#fbModal').style.display='flex';$('#fbText').focus();$('#fbMsg').textContent=''};
 $('#fbClose').onclick=()=>{$('#fbModal').style.display='none'};

@@ -316,8 +316,8 @@ function playAllInner(acIn,banksIn,feelIn){
     if(cur.audio!==au)return;
     const el=ac.currentTime-start;
     if(el>=0&&el<nCh*chLen){
-      const cr=Math.floor(el/chLen),bi=Math.floor((el-cr*chLen)/barLen);
-      if(typeof onPlayPos==='function'){try{onPlayPos(cr,bi)}catch(e){}}  /* 화면 갱신 오류가 재생을 멈추지 않게 */
+      const cr=Math.floor(el/chLen),off=el-cr*chLen,bi=Math.floor(off/barLen);
+      if(typeof onPlayPos==='function'){try{onPlayPos(cr,bi,(off-bi*barLen)/barLen)}catch(e){}}  /* 화면 갱신 오류가 재생을 멈추지 않게 */
     }
     if(ac.currentTime>au.endAt+1.2){stopAll();$('#btnPlay').textContent='▶ 재생';return}
     au.raf=requestAnimationFrame(loop);
@@ -482,7 +482,12 @@ function mel(ac,out,when,dur,midi,tone,vel,isEnd){
   });
   f.connect(g);g.connect(out);
 }
+/* v0.31 일시정지·이어서 — AudioContext suspend/resume로 전체(솔로+반주)를 그 자리에서 멈춘다 */
+function pauseAll(){if(cur.audio&&!cur.paused){cur.paused=true;try{cur.audio.ac.suspend()}catch(e){}}}
+function resumeAll(){if(cur.audio&&cur.paused){cur.paused=false;try{cur.audio.ac.resume()}catch(e){}}}
+function togglePause(){if(!cur.audio)return false;if(cur.paused)resumeAll();else pauseAll();return true}
 function stopAll(){
+  cur.paused=false;
   cur._playTok=(cur._playTok||0)+1;
   if(cur.audio){
     if(cur.audio.raf)cancelAnimationFrame(cur.audio.raf);
@@ -490,6 +495,8 @@ function stopAll(){
     try{cur.audio.ac.close()}catch(e){}
     cur.audio=null;
     [...$('#chips').children].forEach(c=>c.classList.remove('lit'));
+    if(typeof clearPlayHl==='function')try{clearPlayHl()}catch(e){}
+    try{document.querySelectorAll('.paper.paused').forEach(p=>p.classList.remove('paused'))}catch(e){}
   }
 }
 
