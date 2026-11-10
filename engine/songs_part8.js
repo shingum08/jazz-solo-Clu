@@ -1,0 +1,42 @@
+/* ── 리얼북 4권 수록 (v0.16) ──
+   Hal Leonard Real Book Vol.4 중 진행을 확실히 아는 곡만 수록.
+   미수록: Children of the Night, Effendi, Inner Space, Twelve Tone Tune 등 모던·obscure 곡. */
+RAW_SONGS.push(
+{id:'christmas-time-is-here',n:'Christmas Time Is Here',c:'모던',k:5,bpm:100,f:['AAB',8],
+ ch:'Fmaj7|Gm7 C7|Fmaj7|Gm7 C7|Fmaj7|Gm7|Am7|D7|Gmaj7|Gmaj7|Am7|D7|Gmaj7|Bm7b5 E7|Am7 D7|Gmaj7'},
+{id:'the-chicken',n:'The Chicken',c:'펑키',k:10,bpm:120,f:['AB',4],
+ ch:'Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
+{id:'days-of-wine-and-roses',n:'Days of Wine and Roses',c:'스윙',k:5,bpm:130,f:['AAB',8],
+ ch:'Fmaj7|A7|Dm7|Am7 D7|Gm7|C7|Fmaj7|Gm7 C7|Fmaj7|Fmaj7|Bm7b5 E7|Am7|D7|D7|Gm7 C7|Fmaj7'},
+{id:'a-foggy-day',n:'A Foggy Day',c:'스윙',k:5,bpm:130,f:['AAB',8],
+ ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Bbmaj7|Bbmaj7|Bm7b5 E7|Am7|D7|D7|Gm7 C7|Fmaj7'},
+{id:'hallelujah-i-love-her-so',n:'Hallelujah I Love Her So',c:'리듬앤블루스',k:0,bpm:130,f:['AAB',4],
+ ch:'C7|F7|C7|C7|F7|F7|C7|C7|G7|F7|C7|G7'},
+{id:'kansas-city',n:'Kansas City',c:'리듬앤블루스',k:0,bpm:130,f:['AAB',4],
+ ch:'C7|F7|C7|C7|F7|F7|C7|C7|G7|F7|C7|G7'},
+{id:'night-and-day',n:'Night and Day',c:'스윙',k:0,bpm:120,f:['AAB',8],
+ ch:'Dm7b5 G7b9|Cmaj7|Dm7b5 G7b9|Cmaj7|Bm7b5 E7b9|Am7|Dm7b5 G7b9|Cmaj7|Fm7 Bb7|Ebmaj7|Gm7 C7|Fmaj7|Dm7b5 G7b9|Cmaj7|D7b9|G7b9'},
+{id:'on-broadway',n:'On Broadway',c:'스윙',k:5,bpm:110,f:['AAB',8],
+ ch:'Gm7|C7|F6|F6|Gm7|C7|F6|F6|Gm7|C7|Bb6|Bb6|Gm7|C7|F6|F6'},
+{id:'parkers-mood',n:"Parker's Mood",c:'블루스',k:8,bpm:90,f:['AAB',4],
+ ch:'Ab7|Db7|Ab7|Ab7|Db7|Db7|Ab7|Ab7|Eb7|Db7|Ab7|Eb7'},
+{id:'peter-gunn',n:'Peter Gunn',c:'모던',k:4,bpm:130,f:['AB',8],
+ ch:'Em7|Em7|F#m7|F#m7|Gm7|Gm7|F#m7|F#m7|Em7|Em7|F#m7|F#m7|Gm7|Gm7|F#m7|Em7'},
+{id:'relaxin-at-the-camarillo',n:"Relaxin' at the Camarillo",c:'비밥',k:10,bpm:180,f:['AAB',4],
+ ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
+{id:'reunion-blues',n:'Reunion Blues',c:'블루스',k:10,bpm:180,f:['AAB',4],
+ ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
+{id:'the-shadow-of-your-smile',n:'The Shadow of Your Smile',c:'스윙',k:5,bpm:110,f:['AAB',8],
+ ch:'Fm7b5 B7|Em7|A7|Dmaj7|Gm7 C7|Fmaj7|Bm7b5 E7b9|Am7|Fm7b5 B7|Em7|A7|Dmaj7|Gm7 C7|Fmaj7|Bm7b5 E7b9|Am7'},
+{id:'sir-duke',n:'Sir Duke',c:'펑키',k:11,bpm:120,f:['AAB',8],
+ ch:'Bmaj7|Dbm7|Ebm7 Gb7|Bmaj7|Bmaj7|Dbm7|Ebm7 Gb7|Bmaj7|Emaj7|Ebm7|Abm7 Db7|F#maj7|Bmaj7|Dbm7|Ebm7 Gb7|Bmaj7'},
+{id:'smile',n:'Smile',c:'발라드',k:0,bpm:100,f:['AAB',8],
+ ch:'Cmaj7|E7b9|Am7|D7|Gmaj7|B7b9|Em7|A7|Dm7|G7|Cmaj7|Cmaj7|Dm7|G7|Cmaj7|C6'},
+{id:'sunny',n:'Sunny',c:'펑키',k:9,bpm:110,f:['AAB',8],
+ ch:'Am7|Am7|Am7|Am7|Dm7|Dm7|Am7|Am7|Gm7 C7|Fmaj7|E7b9|E7b9|Am7|Am7|Fmaj7|Am7'},
+{id:'sway',n:'Sway',c:'라틴',k:2,bpm:110,f:['AAB',8],
+ ch:'Dm6|Dm6|Gm6|A7|Dm6|Dm6|A7|Dm6|Bb6|A7|Dm6|A7|Dm6|Gm6|A7|Dm6'},
+{id:'stuffy',n:'Stuffy',c:'비밥',k:10,bpm:180,f:['AAB',4],
+ ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'}
+);
+RAW_SONGS.forEach(s=>{SONGDB[s.id]={name:s.n,c:s.c,key:s.k,bpm:s.bpm,bpb:s.m||4,form:{phrase:s.f[1],sections:s.f[0]},bars:s.ch.split('|').map(b=>b.trim().split(/\s+/).map(parseCh))}});

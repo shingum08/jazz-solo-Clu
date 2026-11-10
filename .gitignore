@@ -1,0 +1,8 @@
+# 원본 DB — 42MB, 커밋하지 말고 내려받아 사용
+wjazzd.db
+# compare.js용 v0.11 엔진 추출본
+tools/engine_old.js
+# 기타
+node_modules/
+__pycache__/
+.DS_Store

@@ -1,0 +1,28 @@
+name: test
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 빌드
+        run: python3 tools/build.py
+      - name: 전수 테스트
+        run: node tools/test.js
+      - name: v0.27 엔진 회귀 검사
+        run: node tools/test_engine_v027.js
+      - name: 가이드톤 드릴 회귀 검사
+        run: node tools/test_drill_v027.js
+      - name: MusicXML 회귀 검사
+        run: node tools/test_musicxml.js
+      - name: v0.28 모티프·헤드 차용 회귀 검사
+        run: node tools/test_motif_v028.js
+      - name: 모티프 평가(재현율·생존율 임계)
+        run: node tools/eval_motif.js 8
+      - name: 연주자별 특징 평가(순위 상관·분류 임계)
+        run: node tools/eval_players.js 6
+      - name: 커밋된 index.html 일치 확인
+        run: git diff --exit-code -- index.html
