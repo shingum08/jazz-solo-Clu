@@ -33,7 +33,7 @@ for(const id of Object.keys(E.SONGDB)){
     s1.bars.forEach(b=>{
       if(b.notes.reduce((a,n)=>a+n.d,0)!==TPB)v.bar++;
       let t=0;for(const n of b.notes){if(n.t!==t)v.overlap++;t+=n.d;
-        if(n.midi!==null){if(n.midi<59||n.midi>82)v.range++;if(pv!==null&&Math.abs(n.midi-pv)>7)v.leap++;pv=n.midi}}
+        if(n.midi!==null){if(n.midi<59||n.midi>82)v.range++;if(pv!==null&&Math.abs(n.midi-pv)>7&&!(n.disp&&n.midi>pv&&n.midi-pv<=12))v.leap++;pv=n.midi}}
     });
   }
 }

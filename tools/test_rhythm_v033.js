@@ -30,3 +30,30 @@ assert(v2.phStartOff>v1.phStartOff+0.1&&v2.lastMed<v1.lastMed,'rhythmV2:false �
 /* 난이도 1은 v2를 쓰지 않는다(입문: 4분·2분 위주 유지) — 정박 8분 끊음(Qs)이 나오지 않아야 한다 */
 {const s=E.generateSolo('all-of-me',E.SONGDB['all-of-me'].key,1,5,'wind',{});assert(s.bars.every(b=>b.notes.every(n=>n.midi===null||n.d>=6)),'난이도 1에 8분 이하 음')}
 console.log('리듬 v2 검사 통과');
+/* ── v0.34 기법 검사: 8분 라인 · 셋잇단 반복 · 반전 도약 ── */
+{
+  let lines=0,run8=0,trepTags=0,trepOk=0,disp=0,dispBad=0,dispFill=0,solos=0;
+  const ids=Object.keys(E.SONGDB).filter((id,i)=>i%3===0&&(E.SONGDB[id].bpb||4)===4);
+  for(const id of ids)for(let k=0;k<3;k++){
+    const song=E.SONGDB[id],s=E.generateSolo(id,song.key,3,4100+k*13,'wind',{});solos++;
+    const ns=[];let pv=false;
+    s.bars.forEach((b,bi)=>{b.tags.forEach(t=>{if(t==='8분 라인')lines++});
+      b.notes.forEach(n=>{const tie=pv;pv=!!n.tie;if(n.midi===null)return;if(tie&&ns.length){ns[ns.length-1].d+=n.d;return}ns.push(Object.assign({T:bi*24+n.t,bar:bi},n))})});
+    let run=1;for(let i=1;i<ns.length;i++){if(ns[i].T-ns[i-1].T===3)run++;else{if(run>=8)run8++;run=1}}
+    /* 셋잇단 반복: 태그가 붙은 마디에 같은 3음이 연속 두 박 */
+    s.bars.forEach((b,bi)=>{if(!b.tags.includes('셋잇단 반복(6연음 느낌)'))return;trepTags++;
+      const tr=ns.filter(x=>x.trip);
+      for(let i=0;i+5<tr.length;i++){const a=tr.slice(i,i+3),c=tr.slice(i+3,i+6);
+        if(a[0].T%6===0&&c[0].T===a[0].T+6&&(a[0].bar===bi||c[0].bar===bi)&&a.every((x,q)=>x.midi===c[q].midi)){trepOk++;break}}});
+    /* 반전 도약: 위로 8~12반음, 엇박, 다음 음은 내려온다 */
+    for(let i=1;i<ns.length;i++){const n=ns[i];if(!n.disp)continue;disp++;
+      const up=n.midi-ns[i-1].midi;if(!(up>=8&&up<=12)||n.T%6!==3)dispBad++;
+      if(ns[i+1]&&ns[i+1].midi<n.midi)dispFill++}
+  }
+  console.log(JSON.stringify({solos,lines,run8,trepTags,trepOk,disp,dispBad,dispFill}));
+  assert(lines>=solos*0.3&&run8>=lines*0.5,'8분 라인이 거의 없음');
+  assert(trepTags>0&&trepOk>=trepTags*0.9,'셋잇단 반복 태그와 실제 음형이 맞지 않음 '+trepOk+'/'+trepTags);
+  assert(disp>0&&dispBad===0,'반전 도약 규칙 위반 '+dispBad+'/'+disp);
+  assert(dispFill>=disp*0.6,'반전 도약 뒤 내려오는 음이 부족 '+dispFill+'/'+disp);
+  console.log('v0.34 기법 검사 통과');
+}

@@ -481,6 +481,8 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     return o;
   };
   const events=[]; /* {t,d,midi,trip,ph,strong,first,last} */
+  const tripRep=new Set();   /* v0.34 앞 박 셋잇단 음형을 되풀이할 박 */
+  const tripTilt=PF&&STYLE_DATA.profiles.all?Math.min(1.8,Math.max(0.3,PF.stats.trip/STYLE_DATA.profiles.all.stats.trip)):1;   /* 셋잇단을 즐겨 쓰는 연주자일수록 쌍이 잦다 */
   let motif=null;
   phrases.forEach((ph,pi)=>{
     const toks=[];
@@ -493,7 +495,15 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       tpl=fitRhythmTemplate(RHY_TPL[Math.floor(rng()*RHY_TPL.length)],need,diff,FP,rng,densityAt(ph.s));
       tag(Math.floor(ph.s/BPB),'리듬 템플릿');
     }
-    let prev='R',prev2='R';
+    /* v0.34 8분 라인 — 가끔 1~2마디를 8분음표로 쭉 이어 가는 구간(비밥 라인). 마지막 박은 착지용으로 비워 둔다 */
+    let lineS=-1,lineE=-1;
+    const eighthTilt=PF&&STYLE_DATA.profiles.all?Math.min(1.8,Math.max(0.4,Math.pow(PF.stats.eighth/STYLE_DATA.profiles.all.stats.eighth,6))):1;   /* 8분 비율이 높은 연주자일수록 라인이 잦다 */
+    if(R2&&!recall&&need>=6&&rng()<(diff===2?0.13:0.2)*eighthTilt){
+      const len=need>=10&&rng()<0.6?BPB*2:BPB;
+      const s0=ph.s+1;   /* 첫 박은 실측 분포(엇박 진입이 많다)에 맡긴다 */
+      if(s0+len<=ph.e){lineS=s0;lineE=s0+len;tag(Math.floor(s0/BPB),'8분 라인')}
+    }
+    let prev='R',prev2='R',tripNext=false;
     for(let bt=ph.s;bt<=ph.e;bt++){
       const bp=(bt%BPB)+1,isFirst=bt===ph.s,isLast=bt===ph.e;
       if(recall&&bt-ph.s<motif.toks.length){
@@ -501,6 +511,9 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         toks.push(k);prev2=prev;prev=k;continue;
       }
       let k;
+      if(bt>=lineS&&bt<lineE){k='E';toks.push(k);prev2=prev;prev=k;tripNext=false;continue}
+      if(tripNext&&!isLast){k='T';tripNext=false;tripRep.add(bt);toks.push(k);prev2=prev;prev=k;continue}
+      tripNext=false;
       if(tpl){k=tpl[bt-ph.s]||'Q'}
       else{
       const row=R2?transRow2(bp,prev2,prev,isFirst):transRow(bp,prev),al=ALLOWED[diff];
@@ -524,6 +537,8 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       }
       k=c.length?pickW(rng,c):'Q';
       }
+      /* v0.34 셋잇단 쌍 — 셋잇단 뒤에 한 박 더 셋잇단(같은 음형 반복 → 6연음 느낌) */
+      if(k==='T'&&R2&&diff>=3&&bt+1<ph.e&&!(bt+1>=lineS&&bt+1<lineE)&&rng()<0.35*tripTilt)tripNext=true;
       toks.push(k);prev2=prev;prev=k;
     }
     if(!motif&&ph.e-ph.s>=3)motif={toks:toks.slice(0,Math.min(6,toks.length)),pi};
@@ -538,7 +553,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       else if(k==='E'){phEv.push({t,d:3});phEv.push({t:t+3,d:3})}
       else if(k==='Ur'){phEv.push({t:t+3,d:3})}
       else if(k==='Uh'){if(lastEv&&lastEv.t+lastEv.d===t&&!lastEv.trip)lastEv.d+=3;phEv.push({t:t+3,d:3})}
-      else if(k==='T'){phEv.push({t,d:2,trip:1});phEv.push({t:t+2,d:2,trip:1});phEv.push({t:t+4,d:2,trip:1})}
+      else if(k==='T'){const rp=tripRep.has(ph.s+j);phEv.push({t,d:2,trip:1,rep:rp?1:0,repK:0});phEv.push({t:t+2,d:2,trip:1,rep:rp?1:0,repK:1});phEv.push({t:t+4,d:2,trip:1,rep:rp?1:0,repK:2})}
       else if(k==='H'){if(lastEv&&lastEv.t+lastEv.d===t&&!lastEv.trip)lastEv.d+=6}
     });
     if(!phEv.length)return;
@@ -642,7 +657,8 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
 
   const forced=new Map(); /* 이벤트 인덱스 → {m,kind} */
   events.forEach((e,i)=>{if(e.quote)forced.set(i,{m:e.qm,kind:'quote'})});
-  let prevM=null,prev2M=null,lastDir=-1;
+  let prevM=null,prev2M=null,lastDir=-1,gapFill=0;
+  const recentM=[];   /* v0.34 최근 음 {m,ph} — 반전 도약 조건 */
   const contour={};
 
   const arcOffset=t=>{
@@ -685,6 +701,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       if(diff>=2){
         if(heavy&&!ct)w*=FP.heavyCT;          /* 장르별: 강박·긴 음은 코드톤으로 */
         if(heavy&&!ct&&PERSONA)w*=ctLoose;
+        if(gapFill>0&&prevM!==null){const dd=m-prevM;if(dd<0&&dd>=-4)w*=3;else if(dd>=0)w*=0.3}   /* 도약 뒤 반대 방향 순차로 메우기 */
         if(!heavy&&ct)w*=FP.ctW;
         if(!sc&&!ct)w*=FP.chrom*(dev==='chrom'?5:1);
         if(dev==='ct'&&!heavy&&!ct)w*=0.3;
@@ -956,8 +973,29 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       }
     }
     if(tryMotifPending){tryMotifPending=false;if(e.first)tryMotif(i)}
+    /* v0.34 셋잇단 반복: 바로 앞 박 셋잇단 3음을 그대로(새 코드의 스케일·코드톤일 때만) */
+    if(e.rep&&e.repK===0&&rng()<0.8){
+      const src=[events[i-3],events[i-2],events[i-1]],dst=[e,events[i+1],events[i+2]];
+      if(src.every(x=>x&&x.trip&&x.midi!==null)&&dst.every(x=>x&&x.trip&&x.rep)&&dst.every((x,q)=>!forced.has(i+q))){
+        const sg=segs[segAt(e.t)];
+        if(src.every(x=>(inScale(sg,x.midi)||isCT(sg,x.midi))&&allow(x.midi,e.t)&&matOK(sg,x.midi,e.ph))){
+          src.forEach((x,q)=>forced.set(i+q,{m:x.midi,kind:'trep'}));
+          tag(Math.floor(e.t/TPB),'셋잇단 반복(6연음 느낌)');
+        }
+      }
+    }
+    /* v0.34 하행 뒤 반전 도약 — 순차 하행 3음 다음 약박(엇박 8분)에서 6도~옥타브 위 코드톤으로 뛰어오른 뒤 다시 내려온다 */
+    if(diff>=2&&!forced.has(i)&&!e.trip&&!e.first&&!e.last&&!e.quote&&!phDev[e.ph]&&e.t%6===3&&prevM!==null&&recentM.length>=3){
+      const r=recentM.slice(-3);
+      const stepDown=r[0].ph===e.ph&&r[2].ph===e.ph&&r[0].m-r[1].m>=1&&r[0].m-r[1].m<=2&&r[1].m-r[2].m>=1&&r[1].m-r[2].m<=2;
+      if(stepDown&&rng()<(diff===3?0.45:0.25)){
+        const c=[];
+        for(let x=prevM+8;x<=Math.min(HI,prevM+12);x++)if(isCT(seg,x)&&allow(x,e.t)&&matOK(seg,x,e.ph))c.push({v:x,w:isGuide(seg,x)?2:1});
+        if(c.length){forced.set(i,{m:pickW(rng,c),kind:'disp'});e.disp=true}
+      }
+    }
     let m=null,f=forced.get(i);
-    if(f&&(f.kind==='quote'||(okNote(f.m,e.t,prevM)&&matOK(seg,f.m,e.ph))))m=f.m;
+    if(f&&(f.kind==='quote'||(f.kind==='disp'&&allow(f.m,e.t))||(okNote(f.m,e.t,prevM)&&matOK(seg,f.m,e.ph))))m=f.m;
     else{
       if(f)forced.delete(i);
       if(!e.first&&!e.last&&tryCell(i)){const f2=forced.get(i);if(okNote(f2.m,e.t,prevM))m=f2.m}
@@ -991,6 +1029,11 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       else tag(Math.floor(e.t/TPB),'코드톤 착지');
     }
     if(m!==null){if(prevM!==null&&m!==prevM)lastDir=Math.sign(m-prevM);prev2M=prevM;prevM=m}
+    if(m!==null){
+      if(e.disp&&f&&f.kind==='disp'&&m===f.m){gapFill=2;stats.disp=(stats.disp||0)+1;tag(Math.floor(e.t/TPB),'반전 도약')}
+      else{e.disp=false;if(gapFill>0)gapFill--}
+      recentM.push({m,ph:e.ph});if(recentM.length>4)recentM.shift();
+    }
     planApproach(i);
   }
   /* 안전망: 5도 초과 도약(관악기) → 가까운 코드톤으로 교정, 안 되면 쉼표 */
@@ -1006,7 +1049,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         }
         ppv=pv;pv=e.midi;pi=i;continue;
       }
-      if(pv!==null&&Math.abs(e.midi-pv)>MAXLEAP&&!(events[pi]&&events[pi].quote&&false)){
+      if(pv!==null&&Math.abs(e.midi-pv)>MAXLEAP&&!(e.disp&&e.midi-pv>0&&e.midi-pv<=12)&&!(events[pi]&&events[pi].quote&&false)){
         const seg=segs[segAt(e.t)];
         const c=chordToneMidis(seg.root,seg.type,LO,HI).filter(x=>matOK(seg,x,e.ph)&&okNote(x,e.t,pv));
         if(c.length)e.midi=nearest(c,e.midi);else{const mm=[];for(let x=LO;x<=HI;x++)if(isMain(seg,x)&&matOK(seg,x,e.ph)&&Math.abs(x-pv)<=MAXLEAP)mm.push(x);e.midi=mm.length?nearest(mm,e.midi):(phDev[e.ph]==='gt'?null:pv)}
@@ -1086,12 +1129,14 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   }
   if(cursor<TOT)pushRest(cursor,TOT);
   /* 3연음 그룹 보정: 그룹(박 단위)은 반드시 3개 */
+  /* v0.34 후처리로 앞 음이 바뀌어 도약이 7반음 이하가 되면 반전 도약 표시를 지운다 */
+  {let pv=null;for(const e of events){if(e.midi===null)continue;if(e.disp&&(pv===null||e.midi-pv<=7||e.midi-pv>12))e.disp=false;pv=e.midi}}
   const result=bars.map((bar,b)=>({chords:bar,notes:[],tags:tagsAt[b]}));
   for(const p of pieces){
     const b=Math.floor(p.t/TPB);
     const n={t:p.t-b*TPB,d:p.d,midi:p.midi};
     if(p.trip)n.trip=true;if(p.tie)n.tie=true;
-    if(p.ev&&!p.cont){if(p.ev.first)n.phStart=true;if(p.ev.last)n.phEnd=true}
+    if(p.ev&&!p.cont){if(p.ev.first)n.phStart=true;if(p.ev.last)n.phEnd=true;if(p.ev.disp)n.disp=true}
     result[b].notes.push(n);
   }
   result.forEach((bar,b)=>{

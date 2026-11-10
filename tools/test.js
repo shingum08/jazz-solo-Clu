@@ -40,7 +40,7 @@ for(const id of ids){
         if(n.t%6===0){m.strong++;if(ct)m.ctStrong++}
         if(!ct&&!sg.scale.includes(rel))m.chrom++;
         if(T===sg.t0&&T>0){m.chg++;if(sg.guide.includes(rel))m.guide++}
-        if(pv!==null){const a=Math.abs(n.midi-pv);m.ivs++;if(a===0)m.rep++;if(inst!=='free'&&a>7)viol.leap++}
+        if(pv!==null){const a=Math.abs(n.midi-pv);m.ivs++;if(a===0)m.rep++;if(inst!=='free'&&a>7&&!(n.disp&&n.midi>pv&&a<=12))viol.leap++}
         pv=n.midi;
       });
     });

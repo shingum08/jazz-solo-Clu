@@ -26,7 +26,7 @@ function valid(s,inst,diff){
       if(n.trip){tr++;check(diff===3,'금지 3연음')}else{check(tr%3===0,'3연음 그룹');tr=0}
       if(n.midi!==null){
         const [lo,hi]=inst==='free'?[52,86]:[59,82];check(n.midi>=lo&&n.midi<=hi,'음역');
-        if(prev!==null&&!tied)check(Math.abs(n.midi-prev)<=(inst==='free'?12:7),'도약');
+        if(prev!==null&&!tied)check(Math.abs(n.midi-prev)<=(inst==='free'?12:7)||(n.disp&&n.midi>prev&&n.midi-prev<=12),'도약');   /* v0.34 반전 도약은 위로 옥타브까지 허용 */
         prev=n.midi;
       }
       tied=!!n.tie;
