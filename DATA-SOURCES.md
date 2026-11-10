@@ -53,3 +53,17 @@ python3 tools/export.py           # → tools/data/wjd_export.json (블렌딩 �
 - **제공**: midi-js-soundfonts — Benjamin Gleitzman, https://github.com/gleitz/midi-js-soundfonts
 - **라이선스**: FluidR3_GM — Creative Commons Attribution 3.0 / MusyngKite — Creative Commons Attribution-ShareAlike 3.0
 - **사용 악기**: FluidR3_GM(acoustic_grand_piano, electric_piano_1, acoustic_guitar_nylon, acoustic_bass, electric_bass_finger, flute, vibraphone), MusyngKite(tenor_sax, alto_sax, trumpet)
+
+## 악기 샘플 — 음원 세트 선택 (v0.30~)
+
+세부 설정의 「음원 세트」에서 바꿔 들을 수 있다. 유료 출시 전 라이선스 부담이 가장 작은 세트로 확정할 것.
+
+| 세트 | 내용 | 라이선스 | 위치 |
+|---|---|---|---|
+| A (기본) | MusyngKite 전 악기 | CC BY-SA 3.0 | 재생 시 gleitz.github.io에서 받음 |
+| B | FluidR3_GM 전 악기 | CC BY 3.0 | 위와 같음 |
+| C | 피아노(Steinway B)·테너 색소폰은 VCSL, 나머지는 FluidR3_GM | CC0 1.0 + CC BY 3.0 | VCSL은 `samples/cc0/`에 mp3로 포함 |
+| D | 내장 신스 | 해당 없음 | 코드로 합성 |
+
+- **VCSL**: Versilian Community Sample Library — https://github.com/sgossner/VCSL (CC0 1.0). 원본 wav에서 앞 무음 제거·길이 자르기·음량 정규화 후 mp3 96kbps로 변환했다. 테너는 `BrettTenor_NV_Main_*_vl3`, 피아노는 `JHPiano_NoSus_Close_*_vl3`. 테너 파일 이름의 옥타브는 C3=가온다(60) 기준임을 배음 분석으로 확인했다.
+- VCSL에는 트럼펫·알토 색소폰·클라리넷·콘트라베이스가 없어 세트 C에서도 이 악기들은 FluidR3_GM을 쓴다.

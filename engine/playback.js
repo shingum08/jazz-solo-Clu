@@ -29,15 +29,29 @@ const SAMPLE_SETS={
   vibes:{font:'MusyngKite',inst:'vibraphone',lo:52,hi:88},
   clarinet:{font:'MusyngKite',inst:'clarinet',lo:48,hi:86}
 };
+/* v0.30 음원 세트 비교 — cur.soundSet: 'musyng'(기본) · 'ccby'(전부 FluidR3, 출처 표시만) · 'cc0'(피아노·테너는 VCSL CC0, 나머지 FluidR3) · 'synth'(샘플 없음)
+   VCSL(Versilian Community Sample Library, CC0 1.0)에서 변환한 mp3는 저장소 samples/cc0/ 에 직접 둔다(외부 서버 의존 없음). */
+(function(){
+  for(const k of Object.keys(SAMPLE_SETS))SAMPLE_SETS[k+'@ccby']=Object.assign({},SAMPLE_SETS[k],{font:'FluidR3_GM'});
+  SAMPLE_SETS['piano@cc0']={local:'samples/cc0/piano/',notes:[36,40,44,48,52,56,60,64,68,72,76,80,84]};
+  SAMPLE_SETS['tenor@cc0']={local:'samples/cc0/tenor/',notes:[44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,86,88]};
+})();
+function soundKey(name){
+  const st=(typeof cur!=='undefined'&&cur.soundSet)||'musyng';
+  if(st==='cc0')return SAMPLE_SETS[name+'@cc0']?name+'@cc0':name+'@ccby';
+  if(st==='ccby')return name+'@ccby';
+  return name;
+}
 const SAMPLE_NAMES=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
 const SAMPLE_CACHE={};   /* key → Promise<{midi:AudioBuffer-raw ArrayBuffer}> */
 const SAMPLE_BUF=new WeakMap();
-function sampleNotes(set){const o=[];for(let m=set.lo;m<=set.hi;m+=4)o.push(m);return o}
+function sampleNotes(set){if(set.notes)return set.notes.slice();const o=[];for(let m=set.lo;m<=set.hi;m+=4)o.push(m);return o}
 function fetchSampleSet(name){
+  name=soundKey(name);
   if(SAMPLE_CACHE[name])return SAMPLE_CACHE[name];
   const set=SAMPLE_SETS[name];
   SAMPLE_CACHE[name]=Promise.all(sampleNotes(set).map(m=>{
-    const url=SAMPLE_BASE+set.font+'/'+set.inst+'-mp3/'+SAMPLE_NAMES[m%12]+(Math.floor(m/12)-1)+'.mp3';
+    const url=set.local?set.local+m+'.mp3':SAMPLE_BASE+set.font+'/'+set.inst+'-mp3/'+SAMPLE_NAMES[m%12]+(Math.floor(m/12)-1)+'.mp3';
     return fetch(url).then(r=>{if(!r.ok)throw new Error(r.status+' '+url);return r.arrayBuffer()}).then(b=>[m,b]);
   })).then(arr=>{const o={};arr.forEach(([m,b])=>o[m]=b);return o}).catch(e=>{delete SAMPLE_CACHE[name];throw e});
   return SAMPLE_CACHE[name];
@@ -48,6 +62,7 @@ function prefetchSamples(feel,tone){
 async function decodeSet(ac,name){
   const raw=await fetchSampleSet(name);
   let per=SAMPLE_BUF.get(ac);if(!per){per={};SAMPLE_BUF.set(ac,per)}
+  name=soundKey(name);
   if(per[name])return per[name];
   const out={};
   await Promise.all(Object.keys(raw).map(async m=>{out[m]=await ac.decodeAudioData(raw[m].slice(0))}));
@@ -174,7 +189,7 @@ function voicingFor(ch,prevV){
 async function playAllInnerAsync(){
   const feel=(typeof currentFeel==='function')?currentFeel():'swing';
   const snd=FEEL_SOUND[feel]||FEEL_SOUND.swing;
-  const useSamples=typeof fetch==='function';   /* v0.22: 항상 실제 악기 샘플(실패 시에만 신스 대체) */
+  const useSamples=typeof fetch==='function'&&cur.soundSet!=='synth';   /* v0.22: 항상 실제 악기 샘플(실패 시에만 신스 대체) */
   const ac=new (window.AudioContext||window.webkitAudioContext)();
   if(ac.resume)ac.resume();
   const banks={};
