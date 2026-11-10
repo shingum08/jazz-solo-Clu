@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>즉흥 악보 생성기 v0.31.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.32.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -457,8 +457,7 @@ input[type=range]{width:100%;accent-color:var(--brass);cursor:pointer}
 .chips .bar.sel{outline:2px solid var(--brass);outline-offset:1px}
 .chips .bar.lock{background:var(--ink);color:var(--paper)}
 .zbtn.lockmode.on{background:var(--ink);color:var(--paper)}
-svg .playcursor{fill:var(--brass);opacity:.16;pointer-events:none}
-.abcjs-notehead.now{fill:var(--brass)!important;stroke:var(--brass)!important}
+svg .playcursor{fill:var(--brass);opacity:.22;pointer-events:none}
 .paper.paused .sheetwrap{opacity:.75}
 #pauseNote{display:none;position:sticky;top:6px;z-index:5;text-align:center}
 .paper.paused #pauseNote{display:block}
@@ -669,7 +668,7 @@ body.fslock{overflow:hidden}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.31.0 · Clu</div>
+    <div class="eyebrow">Concept Prototype · v0.32.0 · Clu</div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">리얼북 필수 <b style="color:var(--brass);font-weight:500">366곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
   </div>
@@ -1669,7 +1668,8 @@ function gen(newSeed){
   else{
     /* v0.30 고정 마디: 새 솔로에 고정한 마디를 끼워 넣고, 이음매 도약이 가장 작은 시드를 고른다 */
     if(cur.lockSong!==cur.selProg){cur.locks={};cur.barSel=new Set();cur.lockSong=cur.selProg}
-    const lk=cur.locks&&Object.keys(cur.locks).length?cur.locks:null;
+    const lkAll=cur.locks||{},hasLk=c=>lkAll[c]&&Object.keys(lkAll[c]).length;
+    const lk=hasLk(0)?lkAll[0]:null;
     const mkBase=sd=>{const so=generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,mk(0));if(lk)spliceLockedBars(so,lk);return so};
     if(lk&&newSeed){
       let best=null;
@@ -1677,7 +1677,11 @@ function gen(newSeed){
       cur.seed=best.sd;cur.soloBase=best.so;
     }else cur.soloBase=mkBase(cur.seed);
     cur.soloBases=[cur.soloBase];}
-  for(let c=1;c<nCh&&cur.view!=='drill';c++)cur.soloBases.push(generateSolo(cur.selProg,keyPc,cur.selDiff,(cur.seed+c*7919)%1000003,cur.selInst,mk(c)));
+  for(let c=1;c<nCh&&cur.view!=='drill';c++){
+    const so=generateSolo(cur.selProg,keyPc,cur.selDiff,(cur.seed+c*7919)%1000003,cur.selInst,mk(c));
+    if(cur.locks&&cur.locks[c]&&Object.keys(cur.locks[c]).length)spliceLockedBars(so,cur.locks[c]);
+    cur.soloBases.push(so);
+  }
   cur.shift=undefined;
   applyView();$('#btnPlay').disabled=false;$('#btnSave').disabled=false;$('#btnExport').disabled=false;$('#btnShare').disabled=false;$('#btnXml').disabled=false;
 }
@@ -1779,7 +1783,7 @@ function renderSheet(){
   pages.innerHTML='';nav.innerHTML='';
   cur.solos.forEach((so,c)=>{
     const pg=document.createElement('div');pg.className='chpage';pg.dataset.ch=c;
-    pg.innerHTML='<div class="seclab sololab">'+(so.drill?'DRILL · 연습 — '+DRILL_WHAT[so.topic]+' · 상·하행 무작위(새로 만들기로 바뀜)':'SOLO · '+(c+1)+'코러스'+(N>1?' / '+N:'')+(c===0?' · 음을 눌러 편집':''))+'</div>'+(c===0?ZOOMBAR_HTML:'')+'<div class="sheetwrap"><div id="'+(c===0?'staff':'staff'+c)+'"></div></div>';
+    pg.innerHTML='<div class="seclab sololab">'+(so.drill?'DRILL · 연습 — '+DRILL_WHAT[so.topic]+' · 상·하행 무작위(새로 만들기로 바뀜)':'SOLO · '+(c+1)+'코러스'+(N>1?' / '+N:'')+(c===0?' · 음을 눌러 편집':''))+'</div>'+ZOOMBAR_HTML+'<div class="sheetwrap"><div id="'+(c===0?'staff':'staff'+c)+'"></div></div>';
     pages.appendChild(pg);
     const box=pg.lastChild;
     if(typeof ABCJS!=='undefined'){ABCJS.renderAbc(box,cur.abcs[c],{responsive:'resize',paddingtop:0,paddingbottom:0,paddingleft:0,paddingright:0});colorNotes(so,box.querySelector('svg'))}
@@ -1788,20 +1792,10 @@ function renderSheet(){
     if(N>1){const b=document.createElement('button');b.textContent=(c+1)+'코러스';b.onclick=()=>goPage(c);nav.appendChild(b)}
   });
   if(N>1){const h=document.createElement('span');h.className='chhint';h.textContent='← 좌우로 스크롤해 다음 코러스 →';nav.appendChild(h)}
-  pages.onscroll=()=>{const i=Math.round(pages.scrollLeft/Math.max(1,pages.clientWidth));if(i!==cur.pageIdx){cur.pageIdx=i;markNav()}};
+  pages.onscroll=()=>{const i=Math.round(pages.scrollLeft/Math.max(1,pages.clientWidth));if(i!==cur.pageIdx){cur.pageIdx=i;markNav();cur.barSel=new Set();renderChips()}};
   cur.pageIdx=Math.min(keepIdx,N-1);markNav();
   pages.style.scrollBehavior='auto';pages.scrollLeft=cur.pageIdx*pages.clientWidth;pages.style.scrollBehavior='';
-  const chips=$('#chips');chips.innerHTML='';
-  cur.solo.bars.forEach((bar,i)=>{
-    const c=document.createElement('span');c.className='bar';
-    const lockedBar=!cur.solo.drill&&cur.locks&&cur.locks[i];
-    c.textContent=(lockedBar?'🔒 ':'')+(i+1)+'마디 '+bar.chords.map(ch=>chordSymbol(ch.root,ch.type)).join(' ');
-    if(lockedBar)c.classList.add('lock');
-    if(cur.barSel&&cur.barSel.has(i))c.classList.add('sel');
-    if(!cur.solo.drill&&cur.lockMode)c.onclick=()=>{if(!cur.barSel)cur.barSel=new Set();if(cur.barSel.has(i))cur.barSel.delete(i);else cur.barSel.add(i);c.classList.toggle('sel');updLockBar()};
-    chips.appendChild(c);
-  });
-  updLockBar();
+  renderChips();
   const cnt={};cur.solo.bars.forEach(b=>b.tags.forEach(t=>cnt[t]=(cnt[t]||0)+1));
   const tags=['형식 '+cur.solo.form.sections.join('·')+' · 프레이즈 '+cur.solo.form.phrases+'개',...Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]).map(t=>t+(cnt[t]>1?' ×'+cnt[t]:''))];
   const st=cur.solo.stats;
@@ -1818,19 +1812,35 @@ function renderSheet(){
 }
 
 /* ── v0.30 마디 고정 · 소절 보관함 ── */
+function curChorus(){return Math.min(cur.pageIdx||0,(cur.solos?cur.solos.length:1)-1)}
+function renderChips(){
+  const chips=$('#chips');if(!chips||!cur.solo)return;chips.innerHTML='';
+  const ch=curChorus(),lkc=!cur.solo.drill&&cur.locks&&cur.locks[ch]||{};
+  cur.solo.bars.forEach((bar,i)=>{
+    const c=document.createElement('span');c.className='bar';
+    const lockedBar=lkc[i];
+    c.textContent=(lockedBar?'🔒 ':'')+(i+1)+'마디 '+bar.chords.map(x=>chordSymbol(x.root,x.type)).join(' ');
+    if(lockedBar)c.classList.add('lock');
+    if(cur.barSel&&cur.barSel.has(i))c.classList.add('sel');
+    if(!cur.solo.drill&&cur.lockMode)c.onclick=()=>{if(!cur.barSel)cur.barSel=new Set();if(cur.barSel.has(i))cur.barSel.delete(i);else cur.barSel.add(i);c.classList.toggle('sel');updLockBar()};
+    chips.appendChild(c);
+  });
+  updLockBar();
+}
 function updLockBar(){
   const lb=$('#lockBar');if(!lb)return;
-  const btn=$('#btnLockMode');if(btn)btn.classList.toggle('on',!!cur.lockMode);
-  if(btn)btn.style.display=(cur.solo&&cur.solo.drill)?'none':'';
+  document.querySelectorAll('.lockmode').forEach(b=>{b.classList.toggle('on',!!cur.lockMode);b.style.display=(cur.solo&&cur.solo.drill)?'none':''});
   if(!cur.solo||cur.solo.drill||!cur.lockMode){lb.style.display='none';return}
   lb.style.display='flex';
-  const nSel=cur.barSel?cur.barSel.size:0,nLock=cur.locks?Object.keys(cur.locks).length:0;
-  $('#lockHint').textContent=(nSel?'선택 '+nSel+'마디':'마디를 눌러 고르세요')+(nLock?' · 고정 '+nLock+'마디':'');
+  const ch=curChorus(),nSel=cur.barSel?cur.barSel.size:0;
+  let nLock=0;Object.values(cur.locks||{}).forEach(m=>nLock+=Object.keys(m).length);
+  const pfx=(cur.solos&&cur.solos.length>1)?(ch+1)+'코러스 · ':'';
+  $('#lockHint').textContent=pfx+(nSel?'선택 '+nSel+'마디':'마디를 눌러 고르세요')+(nLock?' · 고정 '+nLock+'마디':'');
   $('#btnLock').disabled=!nSel;$('#btnSnip').disabled=!nSel;$('#btnUnlock').disabled=!nLock;$('#btnRegenRest').disabled=!nLock;
 }
-function barNotesNow(i){   /* 편집이 반영된 원조(실음) 마디 */
-  const ed=applyEdits(JSON.parse(JSON.stringify(cur.soloBase)),cur.edits);
-  return JSON.parse(JSON.stringify(ed.bars[i].notes));
+function barNotesNow(ch,i){   /* 편집이 반영된 원조(실음) 마디 — 편집은 1코러스에만 있다 */
+  const base=ch===0?applyEdits(JSON.parse(JSON.stringify(cur.soloBase)),cur.edits):cur.soloBases[ch];
+  return JSON.parse(JSON.stringify(base.bars[i].notes));
 }
 function selBars(){return [...(cur.barSel||[])].sort((a,b)=>a-b)}
 const SNIP_KEY='clu.snips.v1';
@@ -1849,7 +1859,7 @@ function renderSnips(){
       if(!SONGDB[sn.song])return;
       if(cur.selProg!==sn.song){cur.selProg=sn.song;cur.trUser=0;songSel.value=sn.song;updTr();const s=SONGDB[sn.song];$('#bpm').value=s.bpm;$('#bpmVal').textContent=s.bpm+' BPM'}
       if(cur.view==='drill'){cur.view='solo';$('#viewSel').value='solo'}
-      const same=cur.lockSong===sn.song;cur.lockSong=sn.song;cur.locks=Object.assign({},same&&cur.locks||{},JSON.parse(JSON.stringify(sn.notes)));cur.barSel=new Set();
+      const same=cur.lockSong===sn.song;cur.lockSong=sn.song;if(!same||!cur.locks)cur.locks={};cur.locks[0]=Object.assign({},cur.locks[0]||{},JSON.parse(JSON.stringify(sn.notes)));cur.barSel=new Set();
       stopIfPlaying();gen(true);window.scrollTo({top:0,behavior:'smooth'});
     };
     const x=document.createElement('button');x.textContent='삭제';
@@ -1860,7 +1870,7 @@ function renderSnips(){
 cur.snips=loadSnips();cur.locks={};cur.barSel=new Set();cur.lockMode=false;renderSnips();
 /* 마디 고정 모드 토글 — 켜면 마디 선택과 고정 도구가 나타난다 */
 document.addEventListener('click',e=>{
-  const b=e.target.closest('#btnLockMode');if(!b)return;
+  const b=e.target.closest('.lockmode');if(!b)return;
   cur.lockMode=!cur.lockMode;
   if(!cur.lockMode)cur.barSel=new Set();
   renderSheet();
@@ -1875,18 +1885,19 @@ document.addEventListener('click',e=>{
   document.querySelectorAll('.paper').forEach(p=>p.classList.toggle('paused',!!cur.paused));
   $('#btnPlay').textContent=cur.paused?'▶ 이어서':'■ 정지';
 });
-$('#btnLock').onclick=()=>{if(!cur.locks)cur.locks={};cur.lockSong=cur.selProg;selBars().forEach(i=>{cur.locks[i]=barNotesNow(i)});cur.barSel=new Set();renderSheet()};
-$('#btnUnlock').onclick=()=>{const bs=selBars().filter(i=>cur.locks[i]);if(bs.length)bs.forEach(i=>delete cur.locks[i]);else cur.locks={};cur.barSel=new Set();renderSheet()};
+$('#btnLock').onclick=()=>{if(!cur.locks)cur.locks={};cur.lockSong=cur.selProg;const ch=curChorus(),m=cur.locks[ch]||(cur.locks[ch]={});selBars().forEach(i=>{m[i]=barNotesNow(ch,i)});cur.barSel=new Set();renderChips()};
+$('#btnUnlock').onclick=()=>{const ch=curChorus(),m=cur.locks[ch]||{};const bs=selBars().filter(i=>m[i]);if(bs.length)bs.forEach(i=>delete m[i]);else cur.locks[ch]={};cur.barSel=new Set();renderChips()};
 $('#btnRegenRest').onclick=()=>{const was=!!cur.audio;stopIfPlaying();gen(true);if(was){playAll();$('#btnPlay').textContent='■ 정지'}};
 $('#btnSnip').onclick=()=>{
   const bs=selBars();if(!bs.length)return;
-  const sg=SONGDB[cur.selProg],notes={};bs.forEach(i=>{notes[i]=barNotesNow(i)});
+  const ch=curChorus();
+  const sg=SONGDB[cur.selProg],notes={};bs.forEach(i=>{notes[i]=barNotesNow(ch,i)});
   cur.snips.unshift({id:Date.now(),song:cur.selProg,bars:bs,notes,name:sg.name+' · '+barRangeLabel(bs)+'마디'});
   storeSnips();renderSnips();cur.barSel=new Set();renderSheet();
 };
 function markNav(){[...$('#chNav').querySelectorAll('button')].forEach((b,i)=>b.classList.toggle('on',i===cur.pageIdx))}
 /* v0.27.1 초심자 음표 색상 — 코드톤=노랑 · 스케일음=파랑 · 코드 밖=빨강 */
-const ZOOMBAR_HTML='<div class="zoombar"><button class="zbtn" data-z="-">−</button><span class="zval">100%</span><button class="zbtn" data-z="+">+</button><button class="zbtn lockmode" id="btnLockMode">🔒 마디 고정 모드</button><select class="zbtn zsel" data-color="1" onchange="window.__setNoteColor&&window.__setNoteColor(this.value)"><option value="off">음표색: 끔(검정)</option><option value="role">코드톤·스케일</option><option value="pitch">음이름 12색</option></select></div>';
+const ZOOMBAR_HTML='<div class="zoombar"><button class="zbtn" data-z="-">−</button><span class="zval">100%</span><button class="zbtn" data-z="+">+</button><button class="zbtn lockmode">🔒 마디 고정 모드</button><select class="zbtn zsel" data-color="1" onchange="window.__setNoteColor&&window.__setNoteColor(this.value)"><option value="off">음표색: 끔(검정)</option><option value="role">코드톤·스케일</option><option value="pitch">음이름 12색</option></select></div>';
 const NOTE_CSS=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
 /* 코러스 c의 악보 svg — abcjs는 .sheetwrap 바로 안에 svg를 그린다(#staff 안이 아님) */
 function staffSvg(c){
@@ -1938,7 +1949,7 @@ window.__setNoteColor=function(v){
   cur.solos.forEach((so,c)=>{const svg=staffSvg(c);if(svg)colorNotes(so,svg)});
 };
 document.addEventListener('change',e=>{const sel=e.target.closest('select[data-color]');if(sel)window.__setNoteColor(sel.value)});
-function goPage(i){const pg=$('#chPages');cur.pageIdx=i;markNav();const x=i*pg.clientWidth;if(typeof pg.scrollTo==='function'){try{pg.scrollTo({left:x,behavior:'smooth'});return}catch(_){}}pg.scrollLeft=x}
+function goPage(i){const pg=$('#chPages');const chg=i!==cur.pageIdx;cur.pageIdx=i;markNav();if(chg){cur.barSel=new Set();renderChips()}const x=i*pg.clientWidth;if(typeof pg.scrollTo==='function'){try{pg.scrollTo({left:x,behavior:'smooth'});return}catch(_){}}pg.scrollLeft=x}
 /* 재생 위치 콜백(playback.js) — 마디 칩 강조 + 재생 중 코러스 페이지 자동 이동 */
 function onPlayPos(cr,bi,frac){
   if(cur._pp===cr+':'+bi)return;cur._pp=cr+':'+bi;
@@ -1961,10 +1972,8 @@ function highlightBar(cr,bi){
   if(cur._hl&&cur._hl.svg!==svg)clearPlayHl();
   if(!svg||!cur.solos||!cur.solos[cr])return;
   const map=barHeadMap(svg,cur.solos[cr]);
-  if(cur._hl&&cur._hl.els)cur._hl.els.forEach(el=>el.classList.remove('now'));
   let rect=cur._hl&&cur._hl.svg===svg?cur._hl.rect:null;
   const els=map&&map[bi]||[];
-  els.forEach(el=>el.classList.add('now'));
   if(els.length){
     try{
       let x1=1e9,y1=1e9,x2=-1e9,y2=-1e9;
@@ -1979,7 +1988,7 @@ function highlightBar(cr,bi){
 }
 function clearPlayHl(){
   if(!cur._hl)return;
-  try{(cur._hl.els||[]).forEach(el=>el.classList.remove('now'));if(cur._hl.rect)cur._hl.rect.remove()}catch(e){}
+  try{if(cur._hl.rect)cur._hl.rect.remove()}catch(e){}
   cur._hl=null;
 }
 
@@ -2144,7 +2153,7 @@ function popAct(act){
 /* ── 피드백: 입력창 → GitHub 이슈(곡·설정 자동 첨부) 또는 내용 복사 ── */
 function fbInfo(){
   const so=songSel.selectedOptions&&songSel.selectedOptions[0]?songSel.selectedOptions[0].textContent:'-';
-  return ['버전: v0.31.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
+  return ['버전: v0.32.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
 }
 $('#btnFeedback').onclick=()=>{$('#fbModal').style.display='flex';$('#fbText').focus();$('#fbMsg').textContent=''};
 $('#fbClose').onclick=()=>{$('#fbModal').style.display='none'};
