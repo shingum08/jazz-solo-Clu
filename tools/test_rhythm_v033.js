@@ -57,3 +57,30 @@ console.log('리듬 v2 검사 통과');
   assert(dispFill>=disp*0.6,'반전 도약 뒤 내려오는 음이 부족 '+dispFill+'/'+disp);
   console.log('v0.34 기법 검사 통과');
 }
+/* ── v0.35 검사: 하이라이트 장치 음형 · 크로매틱 해결 ── */
+{
+  const mod=x=>((x%12)+12)%12;
+  const cnt={perc:[0,0],pivot:[0,0],hemiola:[0,0]};let outN=0,outBad=0,solos=0;
+  const ids=Object.keys(E.SONGDB).filter((id,i)=>i%3===0&&(E.SONGDB[id].bpb||4)===4);
+  for(const id of ids)for(const d of [2,3])for(let k=0;k<2;k++){
+    const song=E.SONGDB[id],s=E.generateSolo(id,song.key,d,5200+k*17+d,'wind',{});solos++;
+    const harm=E.analyzeHarmony(E.barChords(song,s.keyPc),s.keyPc,4);
+    const segAt=t=>{for(let i=harm.length-1;i>=0;i--)if(harm[i].t0<=t)return harm[i];return harm[0]};
+    const ns=[];let pv=false;
+    s.bars.forEach((b,bi)=>b.notes.forEach(n=>{const tie=pv;pv=!!n.tie;if(tie&&ns.length&&n.midi!==null){ns[ns.length-1].d+=n.d;return}ns.push({T:bi*24+n.t,d:n.d,m:n.midi,bar:bi})}));
+    const snd=ns.filter(x=>x.m!==null);
+    /* 크로매틱: 스케일 밖 음은 바로 이어지는 음으로 반음 해결 */
+    for(let i=0;i<ns.length;i++){const x=ns[i];if(x.m===null)continue;const sg=segAt(x.T),r=mod(x.m-sg.root);if(sg.ct.includes(r)||sg.scale.includes(r))continue;outN++;
+      const nx=ns[i+1];const ok=nx&&nx.m!==null&&nx.T===x.T+x.d&&Math.abs(nx.m-x.m)===1;if(!ok&&!s.bars[x.bar].tags.includes('3음 시퀀스(헤미올라)'))outBad++}
+    s.bars.forEach((b,bi)=>{
+      const inBar=snd.filter(x=>x.bar===bi||x.bar===bi+1);
+      if(b.tags.includes('리듬 반복(한 음)')){cnt.perc[1]++;let run=1,best=1;for(let i=1;i<inBar.length;i++){run=inBar[i].m===inBar[i-1].m?run+1:1;best=Math.max(best,run)}if(best>=4)cnt.perc[0]++}
+      if(b.tags.includes('피벗 패턴')){cnt.pivot[1]++;let ok=false;for(let i=0;i+5<inBar.length;i++){const a=inBar.slice(i,i+6);if(a.every((x,q)=>q===0||x.T-a[q-1].T===3)&&a[0].m===a[3].m&&a[3].m===a[5].m&&a[1].m!==a[0].m){ok=true;break}}if(ok)cnt.pivot[0]++}
+      if(b.tags.includes('3음 시퀀스(헤미올라)')){cnt.hemiola[1]++;let ok=false;for(let i=0;i+5<inBar.length;i++){const a=inBar.slice(i,i+6);if(!a.every((x,q)=>q===0||x.T-a[q-1].T===3))continue;const d1=Math.sign(a[1].m-a[0].m),mono=c=>Math.sign(a[c+1].m-a[c].m)===d1&&Math.sign(a[c+2].m-a[c+1].m)===d1;if(d1!==0&&mono(0)&&mono(3)&&Math.sign(a[3].m-a[0].m)===d1){ok=true;break}}if(ok)cnt.hemiola[0]++}
+    });
+  }
+  console.log(JSON.stringify({solos,devices:cnt,outOfScale:outN,unresolved:outBad}));
+  for(const k in cnt){assert(cnt[k][1]>0,k+' 장치가 한 번도 안 나옴');assert(cnt[k][0]>=cnt[k][1]*0.8,k+' 태그와 음형 불일치 '+cnt[k])}
+  assert(outBad<=outN*0.03,'해결되지 않는 크로매틱 '+outBad+'/'+outN);
+  console.log('v0.35 장치·크로매틱 검사 통과');
+}
