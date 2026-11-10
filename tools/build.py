@@ -13,6 +13,7 @@ tpl=open(os.path.join(root,'app','template.html'),encoding='utf-8').read()
 eng=open(os.path.join(root,'engine','engine_core.js'),encoding='utf-8').read()
 data=open(os.path.join(root,'engine','style_data.js'),encoding='utf-8').read()
 head=open(os.path.join(root,'engine','headabc.js'),encoding='utf-8').read()
+head+='\n'+open(os.path.join(root,'engine','drill.js'),encoding='utf-8').read()
 songs=''
 for fp in sorted(glob.glob(os.path.join(root,'engine','songs_part*.js'))):
     songs+=open(fp,encoding='utf-8').read()

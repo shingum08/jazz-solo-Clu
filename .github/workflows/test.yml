@@ -15,7 +15,7 @@ jobs:
       - name: v0.27 엔진 회귀 검사
         run: node tools/test_engine_v027.js
       - name: 가이드톤 드릴 회귀 검사
-        run: node tools/test_drill_v027.js
+        run: node tools/test_drill_v029.js
       - name: MusicXML 회귀 검사
         run: node tools/test_musicxml.js
       - name: v0.28 모티프·헤드 차용 회귀 검사

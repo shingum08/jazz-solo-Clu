@@ -17,16 +17,16 @@ function midiFreq(m){return 440*Math.pow(2,(m-69)/12)}
    네트워크가 안 되면(오프라인·차단) 자동으로 내장 신스로 재생한다. */
 const SAMPLE_BASE='https://gleitz.github.io/midi-js-soundfonts/';
 const SAMPLE_SETS={
-  piano:{font:'FluidR3_GM',inst:'acoustic_grand_piano',lo:45,hi:81},
-  epiano:{font:'FluidR3_GM',inst:'electric_piano_1',lo:45,hi:81},
-  nylon:{font:'FluidR3_GM',inst:'acoustic_guitar_nylon',lo:45,hi:77},
-  bass:{font:'FluidR3_GM',inst:'acoustic_bass',lo:28,hi:60},
-  ebass:{font:'FluidR3_GM',inst:'electric_bass_finger',lo:28,hi:60},
+  piano:{font:'MusyngKite',inst:'acoustic_grand_piano',lo:45,hi:81},
+  epiano:{font:'MusyngKite',inst:'electric_piano_1',lo:45,hi:81},
+  nylon:{font:'MusyngKite',inst:'acoustic_guitar_nylon',lo:45,hi:77},
+  bass:{font:'MusyngKite',inst:'acoustic_bass',lo:28,hi:60},
+  ebass:{font:'MusyngKite',inst:'electric_bass_finger',lo:28,hi:60},
   tenor:{font:'MusyngKite',inst:'tenor_sax',lo:46,hi:82},
   alto:{font:'MusyngKite',inst:'alto_sax',lo:52,hi:88},
   trumpet:{font:'MusyngKite',inst:'trumpet',lo:52,hi:88},
-  flute:{font:'FluidR3_GM',inst:'flute',lo:58,hi:96},
-  vibes:{font:'FluidR3_GM',inst:'vibraphone',lo:52,hi:88},
+  flute:{font:'MusyngKite',inst:'flute',lo:58,hi:96},
+  vibes:{font:'MusyngKite',inst:'vibraphone',lo:52,hi:88},
   clarinet:{font:'MusyngKite',inst:'clarinet',lo:48,hi:86}
 };
 const SAMPLE_NAMES=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
@@ -213,14 +213,27 @@ function playAllInner(acIn,banksIn,feelIn){
   const post=ac.createGain();post.gain.value=Object.keys(banks).length?4.0:1.6;   /* v0.25: 여전히 작다는 피드백 → 샘플 4배·신스 1.6배. 리미터가 클리핑 방지 */
   const lim=ac.createDynamicsCompressor();try{lim.threshold.value=-1;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=0.002;lim.release.value=0.1}catch(e){}
   master.connect(comp);comp.connect(post);post.connect(lim);lim.connect(ac.destination);
+  /* v0.29 믹스: 솔로 버스(lead)와 반주 버스(rb)를 나누고, 솔로를 앞으로. 공간감은 생성한 임펄스 응답 리버브로(외부 파일 없음) */
+  const lead=ac.createGain();
+  const lvRaw=$('#leadvol')?+$('#leadvol').value:100;
+  lead.gain.value=Math.max(0,(Number.isFinite(lvRaw)?lvRaw:100)/100)*LEAD_GAIN;
+  lead.connect(master);
+  let wet=null;
+  try{
+    const cv=ac.createConvolver();cv.buffer=roomIR(ac,1.5,2.6);
+    wet=ac.createGain();wet.gain.value=1;cv.connect(wet);wet.connect(master);
+    const ls=ac.createGain();ls.gain.value=0.2;lead.connect(ls);ls.connect(cv);
+    ac._revIn=cv;
+  }catch(e){}
   const rb=ac.createGain();
   const bvRaw=+$('#backvol').value;const bv=Number.isFinite(bvRaw)?bvRaw:90;   /* 0%도 0%로 — ||90 함정 제거 */
-  rb.gain.value=Math.max(0,bv/100)*2.6*(Object.keys(banks).length?1.15:1);
+  rb.gain.value=Math.max(0,bv/100)*BACK_GAIN*(Object.keys(banks).length?1.15:1);
+  if(ac._revIn){try{const bs=ac.createGain();bs.gain.value=0.1;rb.connect(bs);bs.connect(ac._revIn)}catch(e){}}
   master.gain.value*=feel==='ballad'?1.3:1;   /* 발라드는 성긴 편성이라 전체 레벨 보정 */
   rb.connect(master);
   const spb=60/bpm,t0=ac.currentTime+(useSamples?0.6:0.15),start=t0+4*spb;  /* 샘플은 카운트인 동안 로드 */
   const nb=sols[0].bars.length,barLen=bpb*spb,chLen=nb*barLen,nCh=sols.length;
-  cur.audio={ac,master,rb,raf:null,timer:null,start,chLen,barLen,nCh,nb,endAt:start+nCh*chLen};
+  cur.audio={ac,master,rb,lead,raf:null,timer:null,start,chLen,barLen,nCh,nb,endAt:start+nCh*chLen};
   const jobs=[];
   const clickG=ac.createGain();clickG.gain.value=0.08;clickG.connect(post);   /* v0.25: 카운트인 클릭은 음악과 별도 게인 — 음악에 맞춰 볼륨을 올려도 클릭이 덜 커진다 */
   for(let i=0;i<4;i++){const tt=t0+i*spb;jobs.push({t:tt,f:()=>click(ac,clickG,tt,i===0?1400:1000,i===0?0.5:0.3)})}
@@ -271,7 +284,7 @@ function playAllInner(acIn,banksIn,feelIn){
     });
     if(cur.playSolo!==false)buildAudioEvents(so,bpm,sw).forEach(e=>{
       const tt=start+cr*chLen+e.start;
-      jobs.push({t:tt-0.02,f:()=>{const lb=banks[LEAD_SOUND[cur.tone]];if(lb)leadSample(ac,master,lb,tt,e.dur,e.midi,e.vel,e.end);else mel(ac,master,tt,e.dur,e.midi,LEAD_SOUND[cur.tone]?'flugel':(cur.tone||'flugel'),e.vel,e.end)}});
+      jobs.push({t:tt-0.02,f:()=>{const lb=banks[LEAD_SOUND[cur.tone]];if(lb)leadSample(ac,lead,lb,tt,e.dur,e.midi,e.vel,e.end);else mel(ac,lead,tt,e.dur,e.midi,LEAD_SOUND[cur.tone]?'flugel':(cur.tone||'flugel'),e.vel,e.end)}});
     });
   });
   jobs.sort((x,y)=>x.t-y.t);
@@ -322,8 +335,17 @@ function drumsFor(feel,ac,out,bs,spb,bpb,sw,rng){
 }
 /* 리드 샘플: 프레이즈 끝 긴 음은 여운을 길게 */
 function leadSample(ac,out,bank,when,dur,midi,vel,isEnd){
-  if(!ac._leadLP){ac._leadLP=ac.createBiquadFilter();ac._leadLP.type='lowpass';ac._leadLP.frequency.value=5200;ac._leadLP.Q.value=0.5;ac._leadLP.connect(out)}
-  playSample(ac,ac._leadLP,bank,when,dur,midi,0.3*(vel||0.85),isEnd?0.35:0.07);
+  if(!ac._leadLP){ac._leadLP=ac.createBiquadFilter();ac._leadLP.type='lowpass';ac._leadLP.frequency.value=6400;ac._leadLP.Q.value=0.4;ac._leadLP.connect(out)}
+  playSample(ac,ac._leadLP,bank,when,dur,midi,0.3*(vel||0.85),isEnd?0.4:0.09);
+}
+/* v0.29 믹스 상수 — 솔로가 반주보다 앞에 나오도록(이전: 솔로 1.0 · 반주 2.6) */
+const LEAD_GAIN=1.9,BACK_GAIN=2.1;
+/* 작은 방 리버브용 임펄스 응답(감쇠 잡음) — 재생용 난수라 악보 재현성과 무관 */
+function roomIR(ac,sec,decay){
+  const n=Math.floor(ac.sampleRate*sec),b=ac.createBuffer(2,n,ac.sampleRate);
+  for(let c=0;c<2;c++){const d=b.getChannelData(c);let lp=0;
+    for(let i=0;i<n;i++){const x=(Math.random()*2-1)*Math.pow(1-i/n,decay);lp+=(x-lp)*0.35;d[i]=lp*(i<ac.sampleRate*0.004?i/(ac.sampleRate*0.004):1)}}
+  return b;
 }
 function click(ac,out,when,freq,vol){
   const o=ac.createOscillator(),g=ac.createGain();

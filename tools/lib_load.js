@@ -2,12 +2,12 @@
 const fs=require('fs'),vm=require('vm'),path=require('path');
 const root=path.resolve(__dirname,'..');
 function loadEngine(coreFile){
-  const files=[coreFile||'engine/engine_core.js','engine/style_data.js','engine/headabc.js',
+  const files=[coreFile||'engine/engine_core.js','engine/style_data.js','engine/headabc.js','engine/drill.js',
     ...fs.readdirSync(root+'/engine').filter(f=>/^songs_part\d+\.js$/.test(f)).sort().map(f=>'engine/'+f)]
     .filter(f=>fs.existsSync(path.join(root,f)));
   const code=files.map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n')
     +'\nthis.E={RAW_SONGS,generateSolo,SONGDB,STYLE_DATA,barChords,analyzeHarmony,classifySong'+
-    (files.includes('engine/headabc.js')?',parseHeadAbc,headFragments':'')+'};';
+    (files.includes('engine/headabc.js')?',parseHeadAbc,headFragments':'')+(files.includes('engine/drill.js')?',generateDrill,toAbc,CHORD_TYPES,TYPE_CLS,transposeSolo':'')+'};';
   const ctx={};vm.createContext(ctx);vm.runInContext(code,ctx);return ctx.E;
 }
 module.exports={loadEngine,root};

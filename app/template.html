@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>즉흥 악보 생성기 v0.28.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.29.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -655,7 +655,7 @@ body.fslock{overflow:hidden}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.28.0 · Clu</div>
+    <div class="eyebrow">Concept Prototype · v0.29.0 · Clu</div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">리얼북 필수 <b style="color:var(--brass);font-weight:500">366곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
   </div>
@@ -683,7 +683,8 @@ body.fslock{overflow:hidden}
       <div class="field"><label>반주 스타일</label><select id="feelSel" class="advsel"><option value="auto" selected>자동 (곡에 맞춤)</option><option value="swing">스윙</option><option value="ballad">발라드 (브러시)</option><option value="bossa">보사노바</option><option value="latin">라틴</option><option value="shuffle">블루스 셔플</option><option value="funk">펑크 · R&amp;B</option></select><span class="advnote" id="feelNote"></span></div>
       <div class="field"><label>솔로 악기 소리</label><select id="toneSel" class="advsel"><option value="tenor">테너 색소폰</option><option value="alto">알토 색소폰</option><option value="trumpet">트럼펫</option><option value="flute">플루트</option><option value="vibes">비브라폰</option><option value="clarinet" selected>클라리넷</option></select><span class="advnote" id="soundNote">실제 악기 녹음 샘플 (처음 재생 때 2~5초 로드)</span></div>
       <div class="field"><label>악기 분류 (음역)</label><div class="seg" id="segInst"></div></div>
-      <div class="field"><label>반주 음량 <span class="bpmval" id="bvVal">90%</span></label><input type="range" id="backvol" min="0" max="150" value="90" step="5"></div>
+      <div class="field"><label>솔로 음량 <span class="bpmval" id="lvVal">100%</span></label><input type="range" id="leadvol" min="0" max="150" value="100" step="5"></div>
+      <div class="field"><label>반주 음량 <span class="bpmval" id="bvVal">80%</span></label><input type="range" id="backvol" min="0" max="150" value="80" step="5"></div>
     </div>
     <div class="quotebox">
       <div class="qhead"><label><input type="checkbox" id="motifOn" checked> 모티프 발전(기본 켬) — 앞 프레이즈의 첫머리 3~4음을 시퀀스·반진행·반복으로 되풀이</label><span class="advnote">연주자가 "말 걸고 받아치듯" 같은 동기를 변형해 다시 꺼내는 흐름을 만듭니다. 악보 태그에 「모티프 발전: 시퀀스↑」처럼 표시됩니다. 끄면 이전과 같은 생성.</span></div>
@@ -1536,7 +1537,7 @@ $('#btnTrUp').onclick=()=>shiftKey(1);
 $('#btnTrDn').onclick=()=>shiftKey(-1);
 
 /* ── 표시 · 재생 모드 ── */
-$('#viewSel').onchange=e=>{cur.view=e.target.value;if(cur.solo)renderSheet()};
+$('#viewSel').onchange=e=>{cur.view=e.target.value;if(cur.view==='drill'&&drillTopic()!==cur.topic){cur.topic='ct';$('#topicSel').value='ct'}if(cur.solo){const was=!!cur.audio;stopIfPlaying();gen(false);if(was){playAll();$('#btnPlay').textContent='■ 정지'}}};
 $('#chorusSel').onchange=e=>{cur.chorus=Math.max(1,Math.min(12,+e.target.value||1));const was=!!cur.audio;stopIfPlaying();if(cur.soloBase)gen(false);if(was){playAll();$('#btnPlay').textContent='■ 정지'}};
 $('#playSel').onchange=e=>{cur.playSolo=e.target.value==='1';if(cur.audio){stopAll();playAll();$('#btnPlay').textContent='■ 정지'}};
 
@@ -1618,7 +1619,11 @@ $('#bpm').addEventListener('input',e=>{$('#bpmVal').textContent=e.target.value+'
 $('#bpm').addEventListener('change',()=>{if(cur.audio){stopAll();playAll();$('#btnPlay').textContent='■ 정지'}});
 $('#backvol').addEventListener('input',e=>{
   $('#bvVal').textContent=e.target.value+' %';
-  if(cur.audio&&cur.audio.rb){try{cur.audio.rb.gain.value=Math.max(0,+e.target.value/100)*2.6*(cur.audioBanks&&cur.audioBanks.length?1.15:1)}catch(_){}}
+  if(cur.audio&&cur.audio.rb){try{cur.audio.rb.gain.value=Math.max(0,+e.target.value/100)*BACK_GAIN*(cur.audioBanks&&cur.audioBanks.length?1.15:1)}catch(_){}}
+});
+$('#leadvol').addEventListener('input',e=>{
+  $('#lvVal').textContent=e.target.value+' %';
+  if(cur.audio&&cur.audio.lead){try{cur.audio.lead.gain.value=Math.max(0,+e.target.value/100)*LEAD_GAIN}catch(_){}}
 });
 
 /* ── 생성 ── */
@@ -1626,16 +1631,17 @@ function origKey(){return SONGDB[cur.selProg].key}
 function songKeyPc(){return mod12(origKey()+cur.trUser)}
 function gen(newSeed){
   const keyPc=origKey();
-  const sig=[cur.selProg,cur.selDiff,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length].join('|');
+  const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length].join('|');
   if(newSeed||cur.seed===undefined||cur.sig===undefined){cur.seed=Math.floor(Math.random()*1e6);cur.edits={};cur.sel=null}
   else if(sig!==cur.sig){cur.edits={};cur.sel=null}
   cur.sig=sig;
   const nCh=Math.max(1,Math.min(12,+$('#chorusSel').value||1));cur.chorus=nCh;
   const op={useLicks:cur.useLicks!==false,style:cur.style,groups:cur.useGroups,feel:currentFeel(),topic:cur.topic,motif:cur.motifOn!==false,headMotifs:cur.headFrags||[]};
   const mk=i=>Object.assign({},op,{quote:themeQuoteFor(i,nCh),arc:{i,n:nCh}});   /* v0.27 코러스 곡선 */
-  cur.soloBase=generateSolo(cur.selProg,keyPc,cur.selDiff,cur.seed,cur.selInst,mk(0));
-  cur.soloBases=[cur.soloBase];
-  for(let c=1;c<nCh;c++)cur.soloBases.push(generateSolo(cur.selProg,keyPc,cur.selDiff,(cur.seed+c*7919)%1000003,cur.selInst,mk(c)));
+  if(cur.view==='drill'){cur.soloBase=null;cur.soloBases=[]}   /* 연습 악보는 applyView에서 사용자 조·기보에 맞춰 만든다 */
+  else{cur.soloBase=generateSolo(cur.selProg,keyPc,cur.selDiff,cur.seed,cur.selInst,mk(0));
+  cur.soloBases=[cur.soloBase];}
+  for(let c=1;c<nCh&&cur.view!=='drill';c++)cur.soloBases.push(generateSolo(cur.selProg,keyPc,cur.selDiff,(cur.seed+c*7919)%1000003,cur.selInst,mk(c)));
   cur.shift=undefined;
   applyView();$('#btnPlay').disabled=false;$('#btnSave').disabled=false;$('#btnExport').disabled=false;$('#btnShare').disabled=false;$('#btnXml').disabled=false;
 }
@@ -1643,10 +1649,17 @@ function gen(newSeed){
 function applyView(){
   const prog=SONGDB[cur.selProg],tr=cur.trUser,wt=cur.selTrans||0;
   setSpelling(prog,songKeyPc(),tr);
+  if(cur.view==='drill'){
+    /* 연습: 사용자 조에서 바로 생성 — 기보 음(이조 포함) 기준 B♭5 상한·상하행 무작위 */
+    cur.soloBase=generateDrill(cur.selProg,songKeyPc(),drillTopic(),cur.seed,{wt,feel:currentFeel()});
+    cur.soloBases=[cur.soloBase];cur.shift=0;
+    cur.solo=JSON.parse(JSON.stringify(cur.soloBase));cur.solos=[cur.solo];
+  }else{
   if(cur.shift===undefined)cur.shift=transposeSolo(cur.soloBase,tr,cur.selInst).shift;
   const edited=applyEdits(JSON.parse(JSON.stringify(cur.soloBase)),cur.edits);
   cur.solo=transposeSolo(edited,tr,cur.selInst,cur.shift);
   cur.solos=[cur.solo].concat((cur.soloBases||[]).slice(1).map(b=>transposeSolo(JSON.parse(JSON.stringify(b)),tr,cur.selInst,cur.shift)));
+  }
   {const _sg=SONGDB[cur.selProg]||{};cur.sheetTitle=_sg.name||_sg.t||_sg.title||'Solo';}
   setSpelling(prog,mod12(songKeyPc()+wt),tr+wt);
   /* 기보 옥타브: 이조 후 기보 음이 오선 위로 과하게 뜨면(E♭ +9 등) 한 옥타브 내려 표기 — 소리(재생)는 그대로 */
@@ -1658,113 +1671,10 @@ function applyView(){
   setSpelling(prog,songKeyPc(),tr);
   renderSheet();
 }
-/* v0.27.1 연습 보기 — 「연습 주제」(코드톤·펜타토닉·기본·활용 스케일)에 따라
-   각 마디가 그 코드의 연습 음형(8분음표 라인)으로 채워지는 전곡 연습시트. 무작위 솔로 대신 */
-const D_PENTA={maj:[0,2,4,7,9],min:[0,3,5,7,10],dom:[0,2,4,7,10],domalt:[0,2,4,7,10],hdim:[0,3,5,10],dim:[0,2,3,5,6,8,9,11]};
-const D_VAR={maj:[[0,2,4,5,7,9,11],[0,2,4,6,7,9,11]],min:[[0,2,3,5,7,9,10],[0,2,3,5,6,7,9,10],[0,2,3,5,7,9,11]],dom:[[0,2,4,5,7,9,10],[0,2,4,6,7,9,10],[0,1,4,5,7,8,10],[0,1,4,5,7,10]],domalt:[[0,1,4,5,7,8,10],[0,2,4,6,7,9,10],[0,1,4,5,7,10]],hdim:[[0,1,3,5,6,8,10],[0,2,3,5,6,8,10]],dim:[[0,2,3,5,6,8,9,11]]};
+/* v0.29 연습 보기 — 솔로 대신 주제별 연습 악보(engine/drill.js)를 같은 악보·재생 경로로 보여 준다 */
 function drillTopic(){const t=cur.topic||'auto';return (t==='ct'||t==='penta'||t==='scale'||t==='dom'||t==='gt')?t:'ct'}
-function drillDegs(type,ph,topic){
-  const T=CHORD_TYPES[type],cls=TYPE_CLS[type]||'dom';
-  if(topic==='ct')return T.iv.slice();
-  if(topic==='penta')return (D_PENTA[cls]||D_PENTA.dom).slice();
-  if(topic==='scale')return T.scale.slice();
-  const L=D_VAR[cls]||D_VAR.dom;return L[Math.min(ph,L.length-1)].slice();
-}
-function updDrill(){
-  const dw=$('#drillWrap');if(!dw)return;
-  if(cur.view!=='drill'||!cur.soloBase){dw.style.display='none';return}
-  dw.style.display='block';
-  const tr=cur.selTrans||0,tp=drillTopic();
-  const prog=SONGDB[cur.selProg];
-  const bars=barChords(prog,mod12(prog.key+(cur.trUser||0)));
-  const what=tp==='ct'?'코드톤(뿌리·3·5·7음)':tp==='penta'?'펜타토닉 5음':tp==='scale'?'기본 스케일':tp==='gt'?'가이드톤(3음·7음) 연결 라인 — 7→3 반음 해결':'활용 스케일(4마디마다 변형)';
-  dw.innerHTML='<div class="seclab">DRILL · 연습시트 — 주제 '+TOPIC_L[tp]+'</div>'
-    +'<p class="hint">무작위 솔로 대신, 각 마디가 그 코드의 '+what+(tp==='gt'?' 중심으로 이어집니다. 기본은 2분음표이며 홀수 박자·코드 구간 끝은 짧게 나눕니다. 가능한 하행 5도 전환에서 7→3 반음 해결을 우선합니다.':' 8분음표 라인으로 이어집니다.')+' 「연습 주제」를 바꾸고 악보 생성을 누르면 시트도 함께 바뀝니다.</p>'
-    +'<div id="drillSheet" class="drillsheet"></div>';
-  if(typeof ABCJS!=='undefined')try{ABCJS.renderAbc($('#drillSheet'),drillSheetAbc(bars,tr,tp,prog.bpb||4),{responsive:'resize',paddingtop:4,paddingbottom:4,paddingleft:2,paddingright:0})}catch(e){console.error(e)}
-}
-/* 가이드톤은 코드마다 도수 이름을 따로 기록한다. 음정 숫자끼리 비교하지 않는다. */
-function guideDrillEvents(bars,tr,bpb){
-  const GM={maj7:[4,11],'6':[4,9],m7:[3,10],m9:[3,10],m6:[3,9],'7':[4,10],'9':[4,10],'7b9':[4,10],'7#9':[4,10],m7b5:[3,10],dim7:[3,9]};
-  const slots=[];
-  bars.forEach((bar,b)=>{
-    const lens=bar.length===1?[bpb]:[Math.ceil(bpb/2),Math.floor(bpb/2)];
-    let t=0;
-    bar.forEach((c,ci)=>{
-      let rem=lens[ci]*6;
-      while(rem>0){const d=Math.min(12,rem);slots.push({b,t,d,c,root:mod12(c.root+tr),gs:GM[c.type]||[4,10],first:t===0||rem===lens[ci]*6});t+=d;rem-=d}
-    });
-  });
-  /* 후보 전체의 최단 경로: 작은 도약과 실제 반음 7→3 해결을 우선한다. */
-  let states=[];
-  slots.forEach((s,i)=>{
-    const next=[];
-    s.gs.forEach((g,j)=>{for(let m=55;m<=81;m++)if(mod12(m-s.root)===g){
-      const degree=j===0?3:7;
-      let cost=i===0?Math.abs(m-67)*0.15+(degree===7?0:0.2):Infinity,from=-1;
-      states.forEach((p,k)=>{
-        const leap=Math.abs(m-p.m),prev=slots[i-1];
-        if(leap>7)return;
-        let v=p.cost+leap+(leap>4?(leap-4)*3:0);
-        if(s.first&&mod12(s.root-prev.root)===5&&p.degree===7&&degree===3&&leap===1)v-=40;
-        if(s.c===prev.c&&p.degree===degree)v+=0.8;
-        if(v<cost){cost=v;from=k}
-      });
-      next.push({m,degree,cost,from});
-    }});
-    s.states=next;states=next;
-  });
-  if(!slots.length)return [];
-  let k=states.reduce((best,p,i)=>p.cost<states[best].cost?i:best,0);
-  for(let i=slots.length-1;i>=0;i--){const p=slots[i].states[k];slots[i].midi=p.m;slots[i].degree=p.degree;k=p.from;delete slots[i].states}
-  return slots;
-}
-function drillSheetAbc(bars,tr,topic,bpb){
-  let s='X:1\nM:'+bpb+'/4\nL:1/8\nQ:1/4=140\nK:C\n';
-  const rows=[];let prev=null;
-  const guide=topic==='gt'?guideDrillEvents(bars,tr,bpb):null;
-  for(let i=0;i<bars.length;i+=4){
-    const chunk=bars.slice(i,i+4).map((bar,j)=>{
-      const lengths=bar.length===1?[bpb*2]:[Math.ceil(bpb/2)*2,Math.floor(bpb/2)*2];
-      const segs=bar.map((c,k)=>({c,len:lengths[k]}));
-      let out='';const exact={},letter={};   /* 마디 안 임시표 지속 */
-      if(topic==='gt'){
-        guide.filter(n=>n.b===i+j).forEach(n=>{
-          if(n.first)out+='"'+chordSymbol(n.root,n.c.type)+'" ';
-          const p=spellParts(n.midi,n.root,CHORD_TYPES[n.c.type].scale),want=p.acc;
-          const c1=exact[p.name]!==undefined?exact[p.name]:'',c2=letter[p.letter]!==undefined?letter[p.letter]:'';
-          if(want!==c1||want!==c2)out+=want===''?'=':want;
-          exact[p.name]=want;letter[p.letter]=want;
-          out+=p.name+abcDur(n.d,false)+' ';
-        });
-        return out;
-      }
-      segs.forEach(sg=>{
-        const c=sg.c,rootT=mod12(c.root+tr);
-        const b=rootT>6?53+rootT:65+rootT;
-        const degs=drillDegs(c.type,Math.floor(i/4),topic);
-        const mid=[];for(let o=0;o<3;o++)for(const r of degs){const m2=b+r+12*o;if(m2>=55&&m2<=81)mid.push(m2)}
-        mid.sort((x,y)=>x-y);
-        let st=0;
-        if(prev!==null){const f=mid.findIndex(m2=>m2>prev);if(f>=0)st=f}
-        out+='"'+chordSymbol(rootT,c.type)+'" ';
-        for(let k=0;k<sg.len;k++){
-          const m2=mid[st+k]!==undefined?mid[st+k]:mid[(st+k)%mid.length]+12*Math.floor((st+k)/mid.length);
-          prev=m2;
-          const p=spellParts(m2,rootT,CHORD_TYPES[c.type].scale),want=p.acc;
-          const c1=exact[p.name]!==undefined?exact[p.name]:'',c2=letter[p.letter]!==undefined?letter[p.letter]:'';
-          if(want!==c1||want!==c2)out+=want===''?'=':want;
-          exact[p.name]=want;letter[p.letter]=want;
-          out+=p.name+(k%2===1?' ':' ');   /* 2개씩 빔 */
-        }
-      });
-      return out;
-    }).join('|')+'|';
-    rows.push(chunk);
-  }
-  rows[rows.length-1]=rows[rows.length-1].replace(/\|$/,'|]');
-  return s+rows.join('\n');
-}
+const DRILL_WHAT={ct:'코드톤(1·3·5·7음) · 4분음표',penta:'펜타토닉 · 8분음표',scale:'기본 스케일 · 8분음표',dom:'활용 스케일(4마디마다 변형) · 8분음표',gt:'가이드톤(3·7음) 연결 라인 · 2분음표'};
+function updDrill(){const dw=$('#drillWrap');if(dw)dw.style.display='none'}
 /* 헤드(리드시트) — 형식 표시 + 코드톤 음표 차트(뿌리·3·5·7음), 사용자 조로 이동 */
 function chordTone4(rootPc,type){const b=rootPc>6?48+rootPc:60+rootPc;return CHORD_TYPES[type].iv.map(r=>b+r)}
 function abcKey(prog,tr){
@@ -1833,7 +1743,7 @@ function renderSheet(){
   pages.innerHTML='';nav.innerHTML='';
   cur.solos.forEach((so,c)=>{
     const pg=document.createElement('div');pg.className='chpage';pg.dataset.ch=c;
-    pg.innerHTML='<div class="seclab sololab">SOLO · '+(c+1)+'코러스'+(N>1?' / '+N:'')+(c===0?' · 음을 눌러 편집':'')+'</div>'+(c===0?ZOOMBAR_HTML:'')+'<div class="sheetwrap"><div id="'+(c===0?'staff':'staff'+c)+'"></div></div>';
+    pg.innerHTML='<div class="seclab sololab">'+(so.drill?'DRILL · 연습 — '+DRILL_WHAT[so.topic]+' · 상·하행 무작위(새로 만들기로 바뀜)':'SOLO · '+(c+1)+'코러스'+(N>1?' / '+N:'')+(c===0?' · 음을 눌러 편집':''))+'</div>'+(c===0?ZOOMBAR_HTML:'')+'<div class="sheetwrap"><div id="'+(c===0?'staff':'staff'+c)+'"></div></div>';
     pages.appendChild(pg);
     const box=pg.lastChild;
     if(typeof ABCJS!=='undefined'){ABCJS.renderAbc(box,cur.abcs[c],{responsive:'resize',paddingtop:0,paddingbottom:0,paddingleft:0,paddingright:0});colorNotes(so,box.querySelector('svg'))}
@@ -1854,16 +1764,16 @@ function renderSheet(){
   const cnt={};cur.solo.bars.forEach(b=>b.tags.forEach(t=>cnt[t]=(cnt[t]||0)+1));
   const tags=['형식 '+cur.solo.form.sections.join('·')+' · 프레이즈 '+cur.solo.form.phrases+'개',...Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]).map(t=>t+(cnt[t]>1?' ×'+cnt[t]:''))];
   const st=cur.solo.stats;
-  $('#analysisBox').style.display='block';
+  $('#analysisBox').style.display=cur.solo.drill?'none':'block';
   $('#tagRow').innerHTML='<div class="statrow" style="width:100%">'
     +'<div class="stat"><div class="v">'+st.targets+'</div><div class="k">코드 전환 타깃음</div></div>'
     +'<div class="stat"><div class="v">'+st.guideHits+'</div><div class="k">가이드톤 착지</div></div>'
     +'<div class="stat"><div class="v">'+st.appr+' / '+st.enc+'</div><div class="k">어프로치 / 인클로저</div></div>'
     +'<div class="stat"><div class="v">'+st.cells+'</div><div class="k">어휘 셀</div></div></div>'
     +tags.map(t=>'<span class="tag"><b>✦</b>'+t+'</span>').join('');
-  $('#harmBox').style.display='block';
+  $('#harmBox').style.display=cur.solo.drill?'none':'block';
   $('#harmList').innerHTML=cur.solo.harm.map(h=>{const p=h.label.split(' · ');return '<div class="harm"><b>'+(h.bar+1)+'마디</b>'+p[0]+' <span>· '+p.slice(1).join(' · ')+'</span></div>'}).join('');
-  bindNoteClicks();
+  if(!cur.solo.drill)bindNoteClicks();
 }
 
 function markNav(){[...$('#chNav').querySelectorAll('button')].forEach((b,i)=>b.classList.toggle('on',i===cur.pageIdx))}
@@ -2087,7 +1997,7 @@ function popAct(act){
 /* ── 피드백: 입력창 → GitHub 이슈(곡·설정 자동 첨부) 또는 내용 복사 ── */
 function fbInfo(){
   const so=songSel.selectedOptions&&songSel.selectedOptions[0]?songSel.selectedOptions[0].textContent:'-';
-  return ['버전: v0.28.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
+  return ['버전: v0.29.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
 }
 $('#btnFeedback').onclick=()=>{$('#fbModal').style.display='flex';$('#fbText').focus();$('#fbMsg').textContent=''};
 $('#fbClose').onclick=()=>{$('#fbModal').style.display='none'};

@@ -608,6 +608,10 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   const isCT=(seg,m)=>seg.ct.includes(mod12(m-seg.root));
   const isTens=(seg,m)=>seg.tens.includes(mod12(m-seg.root));
   const isGuide=(seg,m)=>seg.guide.includes(mod12(m-seg.root));
+  /* v0.29 안정음(뿌리·3음·5음) — 프레이즈 첫 음과 마디 첫 박 착지에 우선. 실제 연주 악보에서 마디 첫 음은 3·1·5음이 대부분 */
+  const isStable=(seg,m)=>{const r=mod12(m-seg.root);return seg.ct.includes(r)&&(r===0||r===3||r===4||r===6||r===7||r===8)};
+  const STABLE=opts.stableStart!==false;
+  let firstStrict=true;
   const isMain=(seg,m)=>{const r=mod12(m-seg.root);return seg.ct.includes(r)||(PENTA_REL[seg.cls]||[]).includes(r)};
   const PERSONA=opts.persona!==false&&!!PF&&styleId!=='all';   /* v0.28 연주자 개성 강조: 프로필 편차를 한 단계 증폭 */
   const chromF=PF?(PERSONA?Math.min(2.4,Math.max(0.35,Math.pow(PF.stats.chrom/0.2,1.6))):Math.min(1.6,Math.max(0.6,PF.stats.chrom/0.2))):1;
@@ -636,6 +640,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       const ct=isCT(seg,m),sc=inScale(seg,m),tn=isTens(seg,m);
       const dev=phDev[e.ph];
       if(!matOK(seg,m,e.ph))continue;
+      if(STABLE&&firstStrict&&e.first&&!dev&&!isStable(seg,m))continue;   /* 프레이즈 첫 음: 7음·어프로치로 시작하지 않는다 */
       if(dev==='alt'&&seg.cls==='dom'&&!ct&&!ALT_SCALE.includes(rel))continue;
       let w;
       const mn=isMain(seg,m);
@@ -701,6 +706,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       if(Math.abs(d)>Math.min(MAXLEAP,diff===1?5:6))continue;
       let w=pcW(seg,mod12(m-seg.root),true)*groupFit(m,t);
       if(isGuide(seg,m))w*=3.2;
+      if(STABLE&&!phDev[ph]&&t%TPB===0&&isCT(seg,m)){const r3=mod12(m-seg.root);if(!isStable(seg,m))w*=0.4;else if(r3===3||r3===4)w*=2.4}   /* 마디 첫 박 착지는 7음보다 3음(·1·5음) */
       if(Math.abs(d)===1)w*=2.6;else if(Math.abs(d)===2)w*=1.8;else if(d===0)w*=diff===1?0.35:0.15;
       if(phDev[ph]==='gt'&&resolvesGuide(seg,m,ref,from))w*=12;
       const g=pitchGoal(t);w*=Math.exp(-((m-g)*(m-g))/72);
@@ -865,7 +871,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     const seg0=segAtT(t0);
     const startC=[];
     for(let m=LO;m<=HI;m++){
-      if(!allow(m,t0)||!isCT(seg0,m)||Math.abs(m-baseStart)>4)continue;
+      if(!allow(m,t0)||!isCT(seg0,m)||(STABLE&&!isStable(seg0,m))||Math.abs(m-baseStart)>4)continue;
       if(prevM!==null&&Math.abs(m-prevM)>MAXLEAP)continue;
       startC.push({v:m,w:Math.exp(-Math.abs(m-baseStart)/1.5)*(isGuide(seg0,m)?1.6:1)});
     }
@@ -937,6 +943,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         const mode=(e.last||(e.first&&e.d>=6))?'end':null;
         let c=pitchCands(i,e,seg,mode);
         if(!c.length)c=pitchCands(i,e,seg,null);
+        if(!c.length&&e.first){firstStrict=false;c=pitchCands(i,e,seg,null);firstStrict=true}
         if(!c.length){
           const ref=prevM===null?centerAt(e.t):prevM;
           let ct=chordToneMidis(seg.root,seg.type,LO,HI).filter(x=>matOK(seg,x,e.ph)&&okNote(x,e.t,prevM));
@@ -1117,13 +1124,16 @@ function toAbc(solo,tempo,transpose,octShift){
   const rows=[];
   for(let b=0;b<solo.bars.length;b+=4){
     const chunk=solo.bars.slice(b,b+4).map(bar=>{
-      let s=bar.chords.map(ch=>'"'+chordSymbol(ch.root+transpose,ch.type)+'"').join(' ')+' ';
-      let tripPos=0;
+      const split=bar.notes.some(n=>n.ci!==undefined);   /* v0.29 연습 악보: 코드 기호를 그 코드가 시작하는 음 위에 */
+      let s=split?'':bar.chords.map(ch=>'"'+chordSymbol(ch.root+transpose,ch.type)+'"').join(' ')+' ';
+      let tripPos=0,cc=0;
       const exact={},letter={};   /* 마디 안 임시표 지속(ABC·기보 공통 규칙) */
       bar.notes.forEach((n,k)=>{
-        const ch=bar.chords[(n.t>=Math.ceil((solo.bpb||4)/2)*6&&bar.chords.length>1)?1:0];
+        if(n.ci!==undefined)cc=n.ci;
+        const ch=split?bar.chords[cc]:bar.chords[(n.t>=Math.ceil((solo.bpb||4)/2)*6&&bar.chords.length>1)?1:0];
         const scale=CHORD_TYPES[ch.type].scale;
         if(n.t%6===0&&k>0&&!n.trip&&!(bar.notes[k-1]&&bar.notes[k-1].trip))s+=' ';
+        if(split&&n.ci!==undefined)s+='"'+chordSymbol(ch.root+transpose,ch.type)+'"';
         if(n.trip&&tripPos%3===0)s+='(3';
         if(n.midi===null)s+='z'+abcDur(n.d,!!n.trip);
         else{
