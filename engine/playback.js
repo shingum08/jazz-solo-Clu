@@ -189,13 +189,53 @@ function voicingFor(ch,prevV){
   }
   return best?best.v:[r+52,r+56,r+59,r+62];
 }
+/* ── v0.39.2 iOS 소리 보강 ─────────────────────────────────────────
+   아이폰에서 소리가 안 난다는 피드백이 대부분이었다. 원인 후보 셋을 함께 막는다.
+   ① 무음(벨소리) 스위치 — iOS의 Web Audio는 기본이 '주변음'이라 무음 모드에서 꺼진다.
+      Safari 16.4+ navigator.audioSession.type='playback'으로 미디어 재생으로 바꾸고,
+      그보다 옛 iOS를 위해 재생 중에는 소리 없는 <audio>를 함께 틀어 세션을 '재생'으로 붙잡는다.
+   ② 재생마다 새 AudioContext — 사용자 터치 밖에서 만들어지면 iOS가 잠근 채로 둔다.
+      → 컨텍스트 하나를 첫 터치에서 열어(빈 버퍼 1개 재생) 계속 재사용. 디코딩한 샘플도 재사용돼 다시 재생이 빨라진다.
+   ③ 전화·백그라운드 뒤 'interrupted' 상태 — 재생 시작과 화면 복귀 때 resume. */
+const IS_IOS=typeof navigator!=='undefined'&&(/iPad|iPhone|iPod/.test(navigator.userAgent||'')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1));
+let SHARED_AC=null,SILENT_EL=null;
+function setPlaybackSession(){try{if(navigator.audioSession&&navigator.audioSession.type!=='playback')navigator.audioSession.type='playback'}catch(e){}}
+function getAC(){
+  setPlaybackSession();
+  if(!SHARED_AC||SHARED_AC.state==='closed')SHARED_AC=new (window.AudioContext||window.webkitAudioContext)();
+  if(SHARED_AC.state!=='running'){try{const p=SHARED_AC.resume();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+  return SHARED_AC;
+}
+function silentWavUrl(){   /* 0.5초 무음 WAV(8kHz·8비트) — 파일 없이 만든다 */
+  const n=4000,b=new ArrayBuffer(44+n),v=new DataView(b),w=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+n,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,8000,true);v.setUint32(28,8000,true);v.setUint16(32,1,true);v.setUint16(34,8,true);w(36,'data');v.setUint32(40,n,true);
+  for(let i=0;i<n;i++)v.setUint8(44+i,128);
+  return URL.createObjectURL(new Blob([b],{type:'audio/wav'}));
+}
+function silentKeepAlive(on){
+  if(!IS_IOS||typeof document==='undefined')return;
+  try{
+    if(on){
+      if(!SILENT_EL){SILENT_EL=document.createElement('audio');SILENT_EL.src=silentWavUrl();SILENT_EL.loop=true;SILENT_EL.setAttribute('playsinline','');SILENT_EL.setAttribute('x-webkit-airplay','deny');SILENT_EL.preload='auto'}
+      const p=SILENT_EL.play();if(p&&p.catch)p.catch(()=>{});
+    }else if(SILENT_EL)SILENT_EL.pause();
+  }catch(e){}
+}
+function unlockAudio(){   /* 사용자 터치 안에서 부른다 — 빈 버퍼 하나를 재생해 iOS 잠금을 푼다 */
+  try{const ac=getAC(),b=ac.createBuffer(1,1,22050),src=ac.createBufferSource();src.buffer=b;src.connect(ac.destination);src.start(0)}catch(e){}
+}
+if(typeof document!=='undefined'){
+  const once=()=>{unlockAudio();['touchend','pointerup','click','keydown'].forEach(t=>document.removeEventListener(t,once,true))};
+  ['touchend','pointerup','click','keydown'].forEach(t=>document.addEventListener(t,once,true));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&SHARED_AC&&SHARED_AC.state==='interrupted'&&!(typeof cur!=='undefined'&&cur.paused)){try{SHARED_AC.resume()}catch(e){}}});
+}
 /* v0.21 재생 진입: 샘플 음원이면 먼저 받아서 디코딩(최대 8초) 후 시작 — 첫 마디부터 같은 음색 */
 async function playAllInnerAsync(){
   const feel=(typeof currentFeel==='function')?currentFeel():'swing';
   const snd=FEEL_SOUND[feel]||FEEL_SOUND.swing;
   const useSamples=typeof fetch==='function'&&cur.soundSet!=='synth';   /* v0.22: 항상 실제 악기 샘플(실패 시에만 신스 대체) */
-  const ac=new (window.AudioContext||window.webkitAudioContext)();
-  if(ac.resume)ac.resume();
+  const ac=getAC();unlockAudio();silentKeepAlive(true);
   const banks={};
   if(useSamples){
     const want=[snd.comp,snd.bass];const lead=LEAD_SOUND[cur.tone];if(lead)want.push(lead);
@@ -203,7 +243,7 @@ async function playAllInnerAsync(){
     if(typeof onSampleStatus==='function')onSampleStatus('loading');
     const timeout=new Promise(r=>setTimeout(()=>r('timeout'),8000));
     const res=await Promise.race([Promise.allSettled(want.map(n=>decodeSet(ac,n).then(b=>{banks[n]=b}))),timeout]);
-    if(cur._playTok!==tok){try{ac.close()}catch(e){}return}   /* 로드 중 정지·재시작 */
+    if(cur._playTok!==tok)return;   /* 로드 중 정지·재시작 — 공용 컨텍스트라 닫지 않는다 */
     const missing=want.filter(n=>!banks[n]);
     if(typeof onSampleStatus==='function')onSampleStatus(missing.length?'fail':'ok',missing);
     if(missing.length)console.warn('샘플 로드 실패 — 신스로 재생:',missing.join(','),res==='timeout'?'(시간 초과)':'');
@@ -213,18 +253,18 @@ async function playAllInnerAsync(){
 function playAllInner(acIn,banksIn,feelIn){
   /* v0.18 — 룩어헤드 스케줄러: 모든 음을 한 번에 만들지 않고 1초 앞까지만 예약(브라우저 부하·무음 방지)
      코러스마다 서로 다른 솔로(cur.solos[c])를 이어서 재생 */
-  stopAll();
+  stopAll();silentKeepAlive(true);   /* v0.39.2 stopAll이 끈 무음 세션 유지를 다시 켠다 */
   const sols=(cur.solos&&cur.solos.length)?cur.solos:[cur.solo];
   const bpm=+$('#bpm').value;
   const bpb=sols[0].bpb||4;
   const feel=feelIn||((typeof currentFeel==='function')?currentFeel():'swing');
   const sw=feelSwing(feel,bpm,cur.style);
-  const ac=acIn||new (window.AudioContext||window.webkitAudioContext)();
+  const ac=acIn||getAC();
   const snd=FEEL_SOUND[feel]||FEEL_SOUND.swing;
   const banks=banksIn||{};   /* 디코딩 끝난 악기만 — 없으면 신스로 재생 */
   const useSamples=false;
   cur.audioFeel=feel;cur.audioBanks=Object.keys(banks);
-  if(ac.resume)ac.resume();  /* 자동재생 정책: suspended 해제 */
+  if(ac.state!=='running'){try{const p=ac.resume();if(p&&p.catch)p.catch(()=>{})}catch(e){}}  /* 자동재생 정책·iOS interrupted 해제 */
   /* v0.21 출력 단: 헤드룸(0.5) → 컴프레서(빠른 어택·높은 비율, 리미터 역할) → 출력. 포화 왜곡 없이 0dBFS 아래 유지 */
   const master=ac.createGain();master.gain.value=1.0;
   const comp=ac.createDynamicsCompressor();
@@ -256,7 +296,7 @@ function playAllInner(acIn,banksIn,feelIn){
   const totalBars=nCh*nb,PR=cur.playRange||null;
   const A0=PR?Math.max(0,Math.min(totalBars-1,PR.a0)):0,A1=PR?Math.max(A0,Math.min(totalBars-1,PR.a1)):totalBars-1;
   const LOOP=!!(PR&&PR.loop),rangeLen=(A1-A0+1)*barLen;
-  cur.audio={ac,master,rb,lead,raf:null,timer:null,start,chLen,barLen,nCh,nb,endAt:start+rangeLen,a0:A0,a1:A1,loop:LOOP};
+  cur.audio={ac,master,rb,lead,out:lim,raf:null,timer:null,start,chLen,barLen,nCh,nb,endAt:start+rangeLen,a0:A0,a1:A1,loop:LOOP};
   let jobs=[];
   const clickG=ac.createGain();clickG.gain.value=0.08;clickG.connect(post);   /* v0.25: 카운트인 클릭은 음악과 별도 게인 — 음악에 맞춰 볼륨을 올려도 클릭이 덜 커진다 */
   for(let i=0;i<4;i++){const tt=t0+i*spb;jobs.push({t:tt,f:()=>click(ac,clickG,tt,i===0?1400:1000,i===0?0.5:0.3)})}
@@ -515,8 +555,10 @@ function stopAll(){
   if(cur.audio){
     if(cur.audio.raf)cancelAnimationFrame(cur.audio.raf);
     if(cur.audio.timer)clearInterval(cur.audio.timer);
-    try{cur.audio.ac.close()}catch(e){}
-    cur.audio=null;
+    /* v0.39.2 공용 컨텍스트는 닫지 않고 출력만 끊는다(남은 예약음은 1초 안에 끝남) */
+    if(cur.audio.ac===SHARED_AC){try{cur.audio.out&&cur.audio.out.disconnect()}catch(e){}if(SHARED_AC.state==='suspended'){try{SHARED_AC.resume()}catch(e){}}}
+    else{try{cur.audio.ac.close()}catch(e){}}
+    cur.audio=null;silentKeepAlive(false);
     [...$('#chips').children].forEach(c=>c.classList.remove('lit'));
     if(typeof clearPlayHl==='function')try{clearPlayHl()}catch(e){}
     try{document.querySelectorAll('.paper.paused').forEach(p=>p.classList.remove('paused'))}catch(e){}
