@@ -4,7 +4,7 @@
 const {loadEngine}=require('./lib_load.js'),{soloFeatures,median}=require('./lib_metrics.js');
 const E=loadEngine();
 const SEEDS=+(process.argv.find(a=>/^\d+$/.test(a))||12),JSONOUT=process.argv.includes('--json');
-const SONGS=['autumn-leaves','all-of-me','blue-monk','oleo','giant-steps','blue-bossa','four','soul-eyes','crazy-rhythm','scrapple-from-the-apple','blues12','so-what'].filter(id=>E.SONGDB[id]);
+const SONGS=['autumn-leaves','all-of-me','blue-monk','oleo','giant-steps','blue-bossa','stella-by-starlight','solar','take-the-a-train','lady-bird','blues12','so-what'].filter(id=>E.SONGDB[id]);
 const PL=Object.keys(E.STYLE_DATA.profiles).filter(k=>k!=='all');
 const FEAT=['eighth','trip','ctOn','chrom','phraseMed','restRatio','meanInt','step','leap5','meanPitch'];
 const TARGET=['eighth','trip','ctOn','chrom','phraseMed'];
@@ -66,6 +66,8 @@ else{
 }
 /* 판정: 프로필 순서 재현(상관)과 분류가 우연 수준에 머물면 실패 */
 if(!JSONOUT){const bad=[];
-  for(const f of ['trip','ctOn','chrom'])if(rho[f]<0.5)bad.push(f+' 상관 '+rho[f]+' < 0.5');
+  /* v0.37: 코드톤 정렬을 모든 솔로에 적용해(정박 코드톤 ~97%) 연주자 간 ctOn 차이는 의도적으로 줄었다 — ctOn은 0.3 이상만 요구 */
+  for(const f of ['trip','chrom'])if(rho[f]<0.5)bad.push(f+' 상관 '+rho[f]+' < 0.5');
+  if(rho.ctOn<0.3)bad.push('ctOn 상관 '+rho.ctOn+' < 0.3');
   if(acc<0.25)bad.push('단일 솔로 분류 '+(acc*100).toFixed(1)+'% < 25%');
   if(bad.length){console.error('\n임계 미달: '+bad.join(' · '));process.exitCode=1}else console.log('\n판정: 통과 (상관≥0.5 · 분류≥25%)')}

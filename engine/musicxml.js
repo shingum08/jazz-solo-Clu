@@ -42,7 +42,7 @@ function soloMusicXml({solos,title='Solo',bpb,bpm=120,writtenTranspose=0,octaveS
     durationCache.set(cacheKey,dp[units]);
     return dp[units];
   }
-  const kinds={maj7:'major-seventh','6':'major-sixth',m7:'minor-seventh',m9:'minor-ninth',m6:'minor-sixth','7':'dominant','9':'dominant-ninth','7b9':'dominant-ninth','7#9':'dominant-ninth',m7b5:'half-diminished',dim7:'diminished-seventh'};
+  const kinds={maj7:'major-seventh','6':'major-sixth',m7:'minor-seventh',m9:'minor-ninth',m6:'minor-sixth','7':'dominant','9':'dominant-ninth','7b9':'dominant-ninth','7#9':'dominant-ninth',m7b5:'half-diminished',dim7:'diminished-seventh','7sus4':'suspended-fourth',mmaj7:'major-minor','7#11':'dominant','maj7#11':'major-seventh'};
   let out='<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1"><work><work-title>'+esc(title)+'</work-title></work><identification><creator type="composer">Jazz Solo Generator</creator></identification><part-list><score-part id="P1"><part-name>Solo</part-name></score-part></part-list><part id="P1">\n';
   const size=bpb*24,shift=writtenTranspose+octaveShift;
   let measure=0;
@@ -89,6 +89,9 @@ function soloMusicXml({solos,title='Solo',bpb,bpm=120,writtenTranspose=0,octaveS
         const offset=i?(bpb===5?72:48):0;
         if(offset>=size)throw new Error('Harmony outside measure');
         out+='<harmony><root><root-step>'+p.step+'</root-step>'+(p.alter?'<root-alter>'+p.alter+'</root-alter>':'')+'</root><kind>'+kind+'</kind>';
+        const deg=(v,a,t)=>'<degree><degree-value>'+v+'</degree-value><degree-alter>'+a+'</degree-alter><degree-type>'+t+'</degree-type></degree>';
+        if(ch.type==='7sus4')out+=deg(7,-1,'add');
+        if(ch.type==='7#11'||ch.type==='maj7#11')out+=deg(11,1,'add');
         if(ch.type==='7b9'||ch.type==='7#9')out+='<degree><degree-value>9</degree-value><degree-alter>'+(ch.type==='7b9'?-1:1)+'</degree-alter><degree-type>alter</degree-type></degree>';
         out+='<offset sound="yes">'+offset+'</offset></harmony>\n';
       });

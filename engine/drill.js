@@ -66,7 +66,7 @@ function generateDrill(progId,keyPc,topic,seed,opts){
 }
 /* 가이드톤(3·7음) 연결 라인 — 2분음표 기본, 7→3 반음 해결을 우선하는 최단 경로. 기보 음으로 계산 */
 function drillGuideLine(bars,bpb,wt,ceil,floor){
-  const GM={maj7:[4,11],'6':[4,9],m7:[3,10],m9:[3,10],m6:[3,9],'7':[4,10],'9':[4,10],'7b9':[4,10],'7#9':[4,10],m7b5:[3,10],dim7:[3,9]};
+  const GM={maj7:[4,11],'6':[4,9],m7:[3,10],m9:[3,10],m6:[3,9],'7':[4,10],'9':[4,10],'7b9':[4,10],'7#9':[4,10],m7b5:[3,10],dim7:[3,9],'7sus4':[5,10],mmaj7:[3,11],'7#11':[4,10],'maj7#11':[4,11]};
   const slots=[];
   bars.forEach((bar,b)=>{
     const lens=bar.length===1?[bpb]:[Math.ceil(bpb/2),Math.floor(bpb/2)];

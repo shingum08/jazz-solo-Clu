@@ -1,11 +1,11 @@
-/* v0.36 곡 데이터 점검 — 자동 검사 + 사람 판정(tools/data/song_review_v036.json)을 합쳐 engine/song_status.js를 만든다.
+/* v0.36 곡 데이터 점검 — 자동 검사 + 사람 판정(tools/data/song_review_v037.json, v0.37에서 곡 정리 후 갱신)을 합쳐 engine/song_status.js를 만든다.
    node tools/song_audit.js            → engine/song_status.js 갱신 + 요약 출력
    node tools/song_audit.js --csv out  → 검증 시트용 CSV
    곡 데이터 자체는 고치지 않는다(출처 없이 고치면 또 틀린 데이터를 만들 수 있으므로). */
 const fs=require('fs'),path=require('path'),{loadEngine,root}=require('./lib_load.js');
 const E=loadEngine();
 const N=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
-const review=JSON.parse(fs.readFileSync(path.join(root,'tools/data/song_review_v036.json'),'utf8'));
+const review=JSON.parse(fs.readFileSync(path.join(root,'tools/data/song_review_v037.json'),'utf8'));
 const PRACTICE=['p251','blues12','m25'];
 const rel=(s,b)=>b.map(c=>((c.root-s.key+12)%12)+c.type).join(' ');
 const sig=(s,n)=>s.bars.slice(0,n||s.bars.length).map(b=>rel(s,b)).join('|');
@@ -30,8 +30,8 @@ for(const r of E.RAW_SONGS.concat(PRACTICE.map(id=>({id,n:E.SONGDB[id].name,k:E.
   out[id]={s:rv[0],n:rv[1]||'',a:auto};
   rows.push({id,name:s.name,key:N[s.key],meter:(s.bpb||4)+'/4',form:s.form.sections+'·'+s.form.phrase,bars:s.bars.length,status:rv[0],note:rv[1]||'',auto:auto.join(' / '),chords:s.bars.map(b=>b.map(c=>N[c.root]+c.type).join(' ')).join(' | ')});
 }
-const js='/* v0.36 곡 데이터 검증 상태 — tools/song_audit.js 산출물(손으로 고치지 말 것. 판정 변경은 tools/data/song_review_v036.json)\n'+
- '   s: ok(아는 진행과 일치) · form(공통 형식으로는 맞음) · partial(일부 다름) · wrong(원곡과 다름) · unknown(판단 보류) · practice(앱 연습용)\n'+
+const js='/* v0.36 곡 데이터 검증 상태 — tools/song_audit.js 산출물(손으로 고치지 말 것. 판정 변경은 tools/data/song_review_v037.json)\n'+
+ '   s: ok(아는 진행과 일치) · form(공통 형식으로는 맞음) · rb(v0.37 새로 작성, 연주자 확인 전) · rbq(새로 작성, 일부 마디 확인 필요) · practice(앱 연습용)\n'+
  '   n: 메모 · a: 자동 검사 경고 · v: 연주자 확인(검증 시트 반영 시) */\nconst SONG_STATUS='+JSON.stringify(out)+';\n';
 fs.writeFileSync(path.join(root,'engine/song_status.js'),js);
 const cnt={};rows.forEach(r=>cnt[r.status]=(cnt[r.status]||0)+1);

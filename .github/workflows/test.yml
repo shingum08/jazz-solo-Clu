@@ -23,7 +23,7 @@ jobs:
       - name: 모티프 평가(재현율·생존율 임계)
         run: node tools/eval_motif.js 8
       - name: 연주자별 특징 평가(순위 상관·분류 임계)
-        run: node tools/eval_players.js 6
+        run: node tools/eval_players.js 10
       - name: v0.30 마디 고정 검사
         run: node tools/test_locks_v030.js
       - name: v0.33 리듬 v2 검사

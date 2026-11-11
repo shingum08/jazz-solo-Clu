@@ -85,7 +85,7 @@ for(const [id,p] of Object.entries(E.SONGDB)){
 }
 function guideMetric(engine){
   let notes=0,bad=0,possible=0,resolved=0;
-  for(const id of ['p251','oleo','giant-steps','blues12','take-five','my-favorite-things'])for(const diff of [1,2,3])for(const inst of ['wind','brass','free'])for(let seed=1;seed<=6;seed++){
+  for(const id of ['p251','oleo','giant-steps','blues12','take-five','my-favorite-things','so-what','stella-by-starlight'].filter(x=>engine.SONGDB[x]))for(const diff of [1,2,3])for(const inst of ['wind','brass','free'])for(let seed=1;seed<=6;seed++){
     const p=engine.SONGDB[id],s=engine.generateSolo(id,p.key,diff,seed*7919,inst,{topic:'gt',style:'parker'});
     const segs=engine.analyzeHarmony(engine.barChords(p,p.key),p.key,p.bpb);
     const at=t=>{for(let j=segs.length-1;j>=0;j--)if(segs[j].t0<=t)return segs[j]};

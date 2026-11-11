@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>즉흥 악보 생성기 v0.36.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.37.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -189,6 +189,10 @@ function voicingFor(ch,prevV){
     domalt:[[4,8,10,13],[10,13,16,20]],hdim:[[3,6,10,12],[10,12,15,18]],dim:[[3,6,9,12],[9,12,15,18]]};
   if(t==='6')sets.maj=[[4,7,9,14],[9,14,16,19]];
   if(t==='m6')sets.min=[[3,7,9,14],[9,14,15,19]];
+  if(t==='7sus4')sets.dom=[[5,7,10,14],[10,14,17,19]];      /* v0.37 3음 없이 */
+  if(t==='mmaj7')sets.min=[[3,7,11,14],[11,14,15,19]];
+  if(t==='7#11')sets.dom=[[4,6,10,14],[10,14,16,18]];
+  if(t==='maj7#11')sets.maj=[[4,6,11,14],[11,14,16,18]];
   let best=null;
   for(const form of sets[cls]||sets.maj){
     for(let base=48;base<=62;base++){
@@ -724,7 +728,8 @@ svg .playcursor{fill:var(--brass);opacity:.22;pointer-events:none}
 #pauseNote span{background:var(--ink);color:var(--paper);border-radius:999px;padding:6px 14px;font-size:13px}
 .onlyok{display:inline-flex;align-items:center;gap:4px;font-weight:400;margin-left:8px;text-transform:none;letter-spacing:0;font-size:12px}
 .songstatus{margin:8px 0 0;padding:8px 12px;border-radius:9px;font-size:13px;line-height:1.5;background:var(--panel-2);border:1px solid var(--line)}
-.songstatus.st-ok,.songstatus.st-form,.songstatus.st-practice{border-color:#3d8b5a}
+.songstatus.st-ok,.songstatus.st-form,.songstatus.st-practice,.songstatus.st-rb{border-color:#3d8b5a}
+.songstatus.st-rbq{border-color:#c8963e}
 .songstatus.st-partial{border-color:#c8963e}
 .songstatus.st-wrong{border-color:#c0504d}
 .songstatus .auto{opacity:.75}
@@ -940,7 +945,7 @@ body.fslock{overflow:hidden}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.36.0 · Clu</div>
+    <div class="eyebrow">Concept Prototype · v0.37.0 · Clu</div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">리얼북 필수 <b style="color:var(--brass);font-weight:500">366곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
   </div>
@@ -948,7 +953,7 @@ body.fslock{overflow:hidden}
 
 <main class="wrap">
   <div class="toolbar">
-    <div class="tb grow"><label>곡 검색 <label class="onlyok"><input type="checkbox" id="onlyOk"> 확인된 곡만</label></label><input type="search" id="songSearch" placeholder="예: night, bossa, moon, 별"></div>
+    <div class="tb grow"><label>곡 검색 <label class="onlyok"><input type="checkbox" id="onlyOk"> 확인 필요 곡 숨기기</label></label><input type="search" id="songSearch" placeholder="예: night, bossa, moon, 별"></div>
     <div class="tb grow"><label>곡 <span class="cnt" id="searchCount"></span></label><select id="songSel"></select></div>
     <div class="tb grow"><label>아티스트 스타일</label><select id="styleSel"></select></div>
     <div class="tb"><label>조 변환 (반음)</label><div class="trbox"><button id="btnTrDn" class="trbtn">−</button><span id="trVal">—</span><button id="btnTrUp" class="trbtn">＋</button></div></div>
@@ -1099,7 +1104,12 @@ const CHORD_TYPES = {
   '9':    {iv:[0,4,7,10],   scale:[0,2,4,5,7,9,10],   sname:'믹솔리디안'},
   '7b9':  {iv:[0,4,7,10],   scale:[0,1,4,5,7,8,10],   sname:'하모닉 마이너 5모드(♭9·♭13)'},
   '7#9':  {iv:[0,4,7,10],   scale:[0,1,3,4,6,8,10],   sname:'얼터드(♭9·♯9·♭13)'},
-  'm9':   {iv:[0,3,7,10,14],scale:[0,2,3,5,7,9,10],   sname:'도리안'}
+  'm9':   {iv:[0,3,7,10,14],scale:[0,2,3,5,7,9,10],   sname:'도리안'},
+  /* v0.37 리얼북 코드집용 */
+  '7sus4':  {iv:[0,5,7,10],  scale:[0,2,5,7,9,10],     sname:'믹솔리디안 sus4(3음 없음)'},
+  'mmaj7':  {iv:[0,3,7,11],  scale:[0,2,3,5,7,9,11],   sname:'멜로딕 마이너'},
+  '7#11':   {iv:[0,4,7,10],  scale:[0,2,4,6,7,9,10],   sname:'리디안 ♭7'},
+  'maj7#11':{iv:[0,4,7,11],  scale:[0,2,4,6,7,9,11],   sname:'리디안(♯11)'}
 };
 /* v0.21 반주 스타일(feel) — 곡 분류·템포로 자동 판별. 반주 리듬과 솔로 성격(코드톤 비중·리듬 밀도)에 함께 쓰인다 */
 const LATIN_IDS=['spain','a-night-in-tunisia','caravan','st-thomas','afro-blue','at-the-mambo-inn','oye-como-va','sway','tequila'];
@@ -1180,7 +1190,7 @@ const FEEL_PROFILE={
 };
 /* v0.20 마디의 '메인 음' — 코드톤 + 코드에 맞는 펜타토닉(강박·긴 음은 여기서 고른다) */
 const PENTA_REL={maj:[0,2,4,7,9],min:[0,2,3,5,7,10],dom:[0,2,4,7,9,10],domalt:[0,4,7,10],hdim:[0,3,5,6,10],dim:[0,3,6,9]};
-const TYPE_CLS={'maj7':'maj','6':'maj','m7':'min','m9':'min','m6':'min','7':'dom','9':'dom','7b9':'domalt','7#9':'domalt','m7b5':'hdim','dim7':'dim'};
+const TYPE_CLS={'maj7':'maj','6':'maj','m7':'min','m9':'min','m6':'min','7':'dom','9':'dom','7b9':'domalt','7#9':'domalt','m7b5':'hdim','dim7':'dim','7sus4':'dom','mmaj7':'min','7#11':'dom','maj7#11':'maj'};
 
 /* 진행: o = 조의 으뜸음에서 반음 거리, t = 코드 종류. 한 마디에 코드 1~2개. (v0.11과 동일) */
 const PROGS = {
@@ -1270,7 +1280,7 @@ function chordToneMidis(rootPc,type,lo,hi){
 /* ── ① 화성 분석 ───────────────────────────────────────────────
    마디 → 코드 구간(segment). 각 구간에 기능·스케일·코드톤·가이드톤·텐션을 배정한다. */
 const CHORD_NAME=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
-const SUF={maj7:'maj7',m7:'m7',m9:'m9','7':'7',m7b5:'m7♭5',dim7:'dim7','6':'6',m6:'m6','9':'9','7b9':'7♭9','7#9':'7♯9'};
+const SUF={maj7:'maj7',m7:'m7',m9:'m9','7':'7',m7b5:'m7♭5',dim7:'dim7','6':'6',m6:'m6','9':'9','7b9':'7♭9','7#9':'7♯9','7sus4':'7sus4',mmaj7:'m(maj7)','7#11':'7♯11','maj7#11':'maj7♯11'};
 const CHORD_NAME_S=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
 let SPELL_SHARP=false;
 /* 곡이 단조로 끝나는지(마지막 코드가 으뜸음 마이너) */
@@ -1325,7 +1335,9 @@ function analyzeHarmony(bars,keyPc,bpb){
     const cls0=TYPE_CLS[s.type];
     const toNext=mod12(nx.root-s.root);
     let cls=cls0,scale=CHORD_TYPES[s.type].scale.slice(),fn='',tens=[],sname=CHORD_TYPES[s.type].sname;
-    if(cls0==='dom'){
+    if(s.type==='7sus4'){fn=toNext===5?'Ⅴsus4':'sus4 도미넌트';tens=[2,9]}   /* v0.37 고유 스케일 유지 */
+    else if(s.type==='7#11'){fn=toNext===11?'트라이톤 대리(♭Ⅱ7)':'리디안 도미넌트';tens=[2,6,9]}
+    else if(cls0==='dom'){
       if(toNext===5&&(TYPE_CLS[nx.type]==='min'||TYPE_CLS[nx.type]==='hdim')){
         cls='domalt';scale=[0,1,4,5,7,8,10];tens=[1,8];fn='Ⅴ→단조';sname='하모닉 마이너 5모드(♭9·♭13)';
       }else if(toNext===5){
@@ -1343,14 +1355,15 @@ function analyzeHarmony(bars,keyPc,bpb){
         scale=[0,2,4,6,7,9,11];fn='Ⅳ(리디안)';sname='리디안(♯11)';tens=[2,6,9];
       }else{fn=resolved?'Ⅰ(해결)':'장조 토닉';tens=[2,9];}
     }else if(cls0==='min'){
-      if(toNext===5&&TYPE_CLS[nx.type]&&TYPE_CLS[nx.type].startsWith('dom')){fn='Ⅱ';scale=[0,2,3,5,7,9,10];sname='도리안';tens=[2,5]}
+      if(s.type==='mmaj7'){fn='ⅰ(마이너 메이저7)';tens=[2,9]}
+      else if(toNext===5&&TYPE_CLS[nx.type]&&TYPE_CLS[nx.type].startsWith('dom')){fn='Ⅱ';scale=[0,2,3,5,7,9,10];sname='도리안';tens=[2,5]}
       else if(s.type==='m6'||mod12(s.root-keyPc)===0){fn='ⅰ(토닉 마이너)';scale=[0,2,3,5,7,9,11];sname='멜로딕 마이너';tens=[2,9]}
       else{fn='마이너';tens=[2,5]}
     }else if(cls0==='hdim'){fn=toNext===5?'ⅱø(단조 Ⅱ)':'하프디미니시';tens=[5]}
     else if(cls0==='dim'){fn='경과 디미니시';tens=[2,5,8,11]}
     s.cls=cls;s.scale=scale;s.fn=fn;s.tens=tens;s.sname=sname;
     s.ct=CHORD_TYPES[s.type].iv.slice();
-    s.guide=s.ct.filter(iv=>iv===3||iv===4||iv===10||iv===11||(s.type==='6'&&iv===9)||(s.type==='m6'&&iv===9));
+    s.guide=s.ct.filter(iv=>iv===3||iv===4||iv===10||iv===11||(s.type==='6'&&iv===9)||(s.type==='m6'&&iv===9)||(s.type==='7sus4'&&iv===5));
     s.label=chordSymbol(s.root,s.type)+(fn?' · '+fn:'')+' · '+sname;
   });
   return merged;
@@ -2159,7 +2172,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       for(let m=tgt-1;m<=tgt+1;m++){
         if(m<LO||m>HI||!allow(m,times[k])||!matOK(sg,m,e0.ph))continue;
         if(Math.abs(m-ms[k-1])>MAXLEAP)continue;
-        const okp=heavy?isMain(sg,m):(inScale(sg,m)||isCT(sg,m));
+        const okp=heavy?(opts.ctAlign!==false?isCT(sg,m):isMain(sg,m)):(inScale(sg,m)||isCT(sg,m));   /* v0.37 정박은 코드톤 */
         if(!okp)continue;
         const sc=Math.abs(m-tgt)*2+(isCT(sg,m)?-0.5:0);
         if(!best||sc<best.sc)best={m,sc};
@@ -2220,7 +2233,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       if(src.every(x=>x&&x.trip&&x.midi!==null)&&dst.every(x=>x&&x.trip&&x.rep)&&dst.every((x,q)=>!forced.has(i+q))){
         const sg=segs[segAt(e.t)],sgS=segs[segAt(src[0].t)];
         if(Math.abs(src[2].midi-src[0].midi)<=MAXLEAP&&src.every(x=>(inScale(sg,x.midi)||isCT(sg,x.midi))&&(inScale(sgS,x.midi)||isCT(sgS,x.midi))&&allow(x.midi,e.t)&&matOK(sg,x.midi,e.ph))){
-          src.forEach((x,q)=>{forced.set(i+q,{m:x.midi,kind:'trep'});motifLock.add(i+q)});
+          src.forEach((x,q)=>{forced.set(i+q,{m:x.midi,kind:'trep'});motifLock.add(i+q);x.trepSrc=true});
           tag(Math.floor(e.t/TPB),'셋잇단 반복(6연음 느낌)');
         }
       }
@@ -2353,6 +2366,81 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         c.push(x);
       }
       if(c.length){e.midi=nearest(c,e.midi);stats.chromFix=(stats.chromFix||0)+1}
+    }
+  }
+  /* v0.37 코드톤 정렬 — 코드톤 라인 원칙을 모든 솔로에 적용(두호 님 피드백).
+     프레이즈마다 원래 음에서 크게 벗어나지 않는 범위(±5반음)에서 동적 계획법으로 다시 맞춘다:
+     · 정박(박 머리·긴 음·코드 경계를 넘는 음) = 코드톤 · 약박 = 스케일/코드톤
+     · 반음 경과음은 바로 다음 음으로 반음 해결될 때만 · 코드가 바뀌는 정박은 3·7음 우선
+     인용(헤드)·하이라이트 장치·셋잇단 반복(원본 포함)·반전 도약·코드톤 라인·모티프 음은 고정(모티프는 생성 때 정박 코드톤으로 맞춘다). */
+  if(opts.ctAlign!==false&&topic!=='gt'){
+    const PIN=new Set(['quote','dev','trep','disp','ctl','motif']);
+    const snd=[];events.forEach((e,i)=>{if(e.midi!==null)snd.push(i)});
+    let lastFixed=null,q0=0;
+    while(q0<snd.length){
+      let q1=q0;while(q1+1<snd.length&&events[snd[q1+1]].ph===events[snd[q0]].ph)q1++;
+      const idx=snd.slice(q0,q1+1),n=idx.length;
+      const info=idx.map((i,q)=>{
+        const e=events[i],f=forced.get(i),sg=segs[segAt(e.t)];
+        const s2=segs[segAt(Math.min(TOT-1,e.t+e.d-1))],cross=s2!==sg?s2:null;
+        const strong=e.t%6===0||e.d>=6||!!cross;
+        const pe=q>0?events[idx[q-1]]:null;
+        const change=strong&&(q===0?sg.t0===e.t:segAt(pe.t)!==segAt(e.t));
+        const nx=q+1<n?events[idx[q+1]]:null;
+        const pin=e.quote||e.hlx||e.trepSrc||(f&&PIN.has(f.kind)&&f.m===e.midi);
+        const motif=f&&f.kind==='motif';
+        const cands=[];
+        if(pin)cands.push(e.midi);
+        else for(let x=Math.max(LO,e.midi-5);x<=Math.min(HI,e.midi+5);x++)if(allow(x,e.t))cands.push(x);
+        return {e,sg,cross,strong,change,contig:!!nx&&nx.t===e.t+e.d,pin,motif,cands,last:q===n-1,gap:pe?e.t-(pe.t+pe.d):99};
+      });
+      const ok=(I,m)=>{
+        if(I.pin)return true;
+        if(I.strong||I.last){if(!isCT(I.sg,m))return false;if(I.cross&&!isCT(I.cross,m))return false;return true}
+        if(inScale(I.sg,m)||isCT(I.sg,m))return true;
+        return I.contig&&I.e.d<=3;
+      };
+      const chromQ=(I,m)=>!I.pin&&!inScale(I.sg,m)&&!isCT(I.sg,m);
+      const leapOK=(Ia,a,Ib,b)=>{const d=Math.abs(b-a);if(d<=MAXLEAP)return true;if(Ia.pin&&Ib.pin)return true;return !!Ib.e.disp&&b-a>0&&b-a<=12&&Ib.pin};
+      const INF=1e9;
+      let cost=info[0].cands.map(m=>{
+        const I=info[0];if(!ok(I,m))return INF;
+        if(lastFixed!==null&&!I.pin&&Math.abs(m-lastFixed)>MAXLEAP)return INF;
+        let c=Math.abs(m-I.e.midi)*(I.motif?2.5:1);
+        if(I.change&&!isGuide(I.sg,m))c+=4;
+        return c;
+      });
+      const back=[];
+      for(let q=1;q<n;q++){
+        const I=info[q],P=info[q-1],nc=[],bk=[];
+        I.cands.forEach((m,b)=>{
+          let best=INF,arg=-1;
+          if(ok(I,m)){
+            const base=Math.abs(m-I.e.midi)*(I.motif?2.5:1)+(I.change&&!isGuide(I.sg,m)?4:0);
+            P.cands.forEach((pm,a)=>{
+              const pc=cost[a];if(pc>=INF)return;
+              if(!leapOK(P,pm,I,m))return;
+              const ab=Math.abs(m-pm);
+              if(chromQ(P,pm)&&(ab!==1||I.gap>0))return;   /* 반음 경과음은 바로 반음으로 해결 */
+              let t=0;if(ab===0&&I.gap<6&&!(I.pin&&P.pin))t+=2;
+              const v=pc+base+t;if(v<best){best=v;arg=a}
+            });
+          }
+          nc.push(best);bk.push(arg);
+        });
+        cost=nc;back.push(bk);
+      }
+      if(q1+1<snd.length){
+        const ne=events[snd[q1+1]];
+        const L=info[n-1];if(!L.pin)cost=cost.map((c,b)=>Math.abs(L.cands[b]-ne.midi)>MAXLEAP?INF:c);   /* 다음 프레이즈 첫 음(원래 음)까지 도약 한도 — 다음 프레이즈가 늘 풀 수 있게 */
+      }
+      let bi=-1,bc=INF;cost.forEach((c,b)=>{if(c<bc){bc=c;bi=b}});
+      if(bi>=0){
+        const ms=new Array(n);
+        for(let q=n-1;q>=0;q--){ms[q]=info[q].cands[bi];if(q>0)bi=back[q-1][bi]}
+        ms.forEach((m,q)=>{const e=info[q].e;if(e.midi!==m){e.midi=m;stats.ctAlign=(stats.ctAlign||0)+1}});
+      }else stats.ctAlignFail=(stats.ctAlignFail||0)+1;
+      lastFixed=events[idx[n-1]].midi;q0=q1+1;
     }
   }
   /* ── ⑦ 마디 분할 · 붙임줄 · 표기용 길이 정리 ── */
@@ -2694,7 +2782,7 @@ function generateDrill(progId,keyPc,topic,seed,opts){
 }
 /* 가이드톤(3·7음) 연결 라인 — 2분음표 기본, 7→3 반음 해결을 우선하는 최단 경로. 기보 음으로 계산 */
 function drillGuideLine(bars,bpb,wt,ceil,floor){
-  const GM={maj7:[4,11],'6':[4,9],m7:[3,10],m9:[3,10],m6:[3,9],'7':[4,10],'9':[4,10],'7b9':[4,10],'7#9':[4,10],m7b5:[3,10],dim7:[3,9]};
+  const GM={maj7:[4,11],'6':[4,9],m7:[3,10],m9:[3,10],m6:[3,9],'7':[4,10],'9':[4,10],'7b9':[4,10],'7#9':[4,10],m7b5:[3,10],dim7:[3,9],'7sus4':[5,10],mmaj7:[3,11],'7#11':[4,10],'maj7#11':[4,11]};
   const slots=[];
   bars.forEach((bar,b)=>{
     const lens=bar.length===1?[bpb]:[Math.ceil(bpb/2),Math.floor(bpb/2)];
@@ -2761,236 +2849,152 @@ function lockSeamCost(solo){
   return cost;
 }
 
-/* v0.36 곡 데이터 검증 상태 — tools/song_audit.js 산출물(손으로 고치지 말 것. 판정 변경은 tools/data/song_review_v036.json)
-   s: ok(아는 진행과 일치) · form(공통 형식으로는 맞음) · partial(일부 다름) · wrong(원곡과 다름) · unknown(판단 보류) · practice(앱 연습용)
+/* v0.36 곡 데이터 검증 상태 — tools/song_audit.js 산출물(손으로 고치지 말 것. 판정 변경은 tools/data/song_review_v037.json)
+   s: ok(아는 진행과 일치) · form(공통 형식으로는 맞음) · rb(v0.37 새로 작성, 연주자 확인 전) · rbq(새로 작성, 일부 마디 확인 필요) · practice(앱 연습용)
    n: 메모 · a: 자동 검사 경고 · v: 연주자 확인(검증 시트 반영 시) */
-const SONG_STATUS={"autumn-leaves":{"s":"partial","n":"마지막 8마디가 일반 리얼북 진행(Am7b5 D7 Gm7 Gb7 Fm7 E7 Eb D7)과 다름. 형식은 AABC","a":[]},"all-of-me":{"s":"ok","n":"","a":[]},"all-the-things-you-are":{"s":"wrong","n":"첫 5마디만 맞음. 두 번째 A(E♭ 쪽 이동)·브리지(G·E 장조)·마지막 A가 다르고, 원곡은 36마디","a":[]},"take-the-a-train":{"s":"partial","n":"3~4마디는 D7(♭5). 브리지 후반(D7 D7 → Dm7 G7) 세부 다름","a":[]},"satin-doll":{"s":"wrong","n":"3~4마디는 Em7 A7이어야 함(저장: E♭m7 A♭7·F♯m7♭5 B7). 브리지 다름","a":["조 표기(C)와 첫·끝 화음이 맞지 않음"]},"there-will-never-be-another-you":{"s":"wrong","n":"화성 리듬이 두 배로 압축됨, 10마디 D♭7 자리가 D7","a":[]},"fly-me-to-the-moon":{"s":"partial","n":"8마디 단위 순서가 섞임(형식 AABA로 잘못 구성)","a":["조 표기(C)와 첫·끝 화음이 맞지 않음"]},"stella-by-starlight":{"s":"wrong","n":"","a":["조 표기(B♭)와 첫·끝 화음이 맞지 않음"]},"it-could-happen-to-you":{"s":"wrong","n":"","a":[]},"just-friends":{"s":"wrong","n":"조 표기와 진행 모두 다름(으뜸조 F, IV에서 시작)","a":[]},"on-green-dolphin-street":{"s":"wrong","n":"","a":[]},"alone-together":{"s":"wrong","n":"원곡은 D단조(Em7♭5 A7 Dm6로 시작)","a":[]},"beautiful-love":{"s":"wrong","n":"원곡은 D단조(Em7♭5 A7 Dm7로 시작)","a":[]},"what-is-this-thing-called-love":{"s":"wrong","n":"","a":["조 표기(C)와 첫·끝 화음이 맞지 않음"]},"ill-remember-april":{"s":"wrong","n":"","a":[]},"youd-be-so-nice-to-come-home-to":{"s":"wrong","n":"원곡은 단조(Em7♭5 A7 Dm로 시작)","a":["조 표기(F)와 첫·끝 화음이 맞지 않음"]},"but-not-for-me":{"s":"wrong","n":"","a":[]},"if-i-were-a-bell":{"s":"wrong","n":"","a":[]},"love-for-sale":{"s":"wrong","n":"원곡은 단조 시작","a":[]},"lullaby-of-birdland":{"s":"wrong","n":"원곡은 단조","a":["첫 8마디가 다른 1곡과 같음"]},"softly-as-in-a-morning-sunrise":{"s":"wrong","n":"원곡 A는 Cm7 Dm7♭5 G7 반복","a":[]},"have-you-met-miss-jones":{"s":"wrong","n":"브리지(B♭ A♭m7 D♭7 G♭ …)가 다름","a":[]},"mack-the-knife":{"s":"wrong","n":"","a":[]},"like-someone-in-love":{"s":"unknown","n":"","a":[]},"gone-with-the-wind":{"s":"unknown","n":"","a":[]},"out-of-nowhere":{"s":"wrong","n":"3마디는 B♭m7 E♭7 계열","a":[]},"cherokee":{"s":"wrong","n":"","a":[]},"sweet-georgia-brown":{"s":"wrong","n":"원곡은 VI7(4마디)부터 시작하는 순환 진행","a":[]},"cheek-to-cheek":{"s":"wrong","n":"다른 곡들과 같은 템플릿 진행","a":["첫 8마디가 다른 8곡과 같음"]},"bye-bye-blackbird":{"s":"wrong","n":"","a":[]},"blue-monk":{"s":"form","n":"일반 B♭ 블루스. 원곡 고유 경과 화음 없음","a":["진행 전체가 다른 15곡과 같음"]},"billies-bounce":{"s":"form","n":"","a":["진행 전체가 다른 3곡과 같음"]},"straight-no-chaser":{"s":"form","n":"","a":["진행 전체가 다른 15곡과 같음"]},"nows-the-time":{"s":"wrong","n":"원곡은 F조 블루스(저장: B♭)","a":["진행 전체가 다른 15곡과 같음"]},"au-privave":{"s":"form","n":"","a":["진행 전체가 다른 3곡과 같음"]},"blues-for-alice":{"s":"partial","n":"버드 블루스이나 마디별 화음이 원곡과 다름","a":[]},"bags-groove":{"s":"form","n":"","a":["진행 전체가 다른 3곡과 같음"]},"tenor-madness":{"s":"form","n":"","a":["진행 전체가 다른 15곡과 같음"]},"mr-pc":{"s":"ok","n":"","a":["첫 8마디가 다른 8곡과 같음"]},"footprints":{"s":"wrong","n":"9~10마디 원곡 화음(F♯m7♭5 B7 / E7♯9 A7♯9) 아님","a":[]},"oleo":{"s":"form","n":"리듬 체인지 변형","a":["진행 전체가 다른 1곡과 같음"]},"i-got-rhythm":{"s":"form","n":"리듬 체인지 변형","a":["진행 전체가 다른 1곡과 같음"]},"anthropology":{"s":"partial","n":"A섹션 5마디가 F7로 이상","a":[]},"scrapple-from-the-apple":{"s":"wrong","n":"A는 허니서클 로즈 진행(Gm7 C7)이어야 함, 브리지도 다름","a":[]},"blue-bossa":{"s":"ok","n":"","a":[]},"girl-from-ipanema":{"s":"wrong","n":"","a":[]},"black-orpheus":{"s":"wrong","n":"","a":[]},"how-insensitive":{"s":"wrong","n":"원곡은 D단조","a":[]},"corcovado":{"s":"wrong","n":"","a":[]},"desafinado":{"s":"wrong","n":"","a":[]},"wave":{"s":"wrong","n":"원곡은 D장조(Dmaj7 B♭dim7)","a":[]},"triste":{"s":"wrong","n":"","a":[]},"meditation":{"s":"wrong","n":"","a":[]},"once-i-loved":{"s":"wrong","n":"원곡은 Gmaj7 Gm6로 시작","a":["조 표기(G)와 첫·끝 화음이 맞지 않음"]},"recorda-me":{"s":"wrong","n":"","a":[]},"spain":{"s":"wrong","n":"","a":[]},"a-night-in-tunisia":{"s":"wrong","n":"원곡 A는 E♭7 Dm 교대","a":[]},"caravan":{"s":"wrong","n":"원곡은 F단조, C7 12마디로 시작","a":[]},"st-thomas":{"s":"partial","n":"","a":[]},"afro-blue":{"s":"wrong","n":"조 표기(B)와 화음(B♭m) 불일치, 원곡은 F단조","a":["조 표기(B)와 첫·끝 화음이 맞지 않음"]},"my-funny-valentine":{"s":"wrong","n":"","a":[]},"misty":{"s":"wrong","n":"3~4마디는 A♭maj7 A♭m7 D♭7","a":[]},"body-and-soul":{"s":"wrong","n":"원곡은 E♭m7로 시작","a":[]},"in-a-sentimental-mood":{"s":"wrong","n":"원곡은 D단조 시작","a":[]},"round-midnight":{"s":"wrong","n":"","a":[]},"my-foolish-heart":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"blue-in-green":{"s":"wrong","n":"","a":[]},"easy-living":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 1곡과 같음"]},"the-nearness-of-you":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 8곡과 같음"]},"polka-dots-and-moonbeams":{"s":"unknown","n":"","a":[]},"angel-eyes":{"s":"wrong","n":"원곡은 D단조","a":[]},"i-fall-in-love-too-easily":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"you-dont-know-what-love-is":{"s":"wrong","n":"원곡은 F단조","a":[]},"darn-that-dream":{"s":"unknown","n":"","a":[]},"good-morning-heartache":{"s":"unknown","n":"","a":[]},"so-what":{"s":"partial","n":"원곡은 32마디 AABA(D도리안 16 · E♭ 8 · D 8). 저장은 24마디","a":["조 표기(C)와 첫·끝 화음이 맞지 않음"]},"cantaloupe-island":{"s":"wrong","n":"원곡은 Fm7 · D♭7 · Dm7 · Fm7 각 4마디","a":[]},"moanin":{"s":"wrong","n":"마이너 블루스로 저장됨(원곡은 AABA)","a":["진행 전체가 다른 2곡과 같음"]},"take-five":{"s":"wrong","n":"원곡은 E♭단조(저장: E단조)","a":["첫 8마디가 다른 1곡과 같음"]},"giant-steps":{"s":"wrong","n":"원곡은 16마디, 마디 순서 다름","a":[]},"equinox":{"s":"partial","n":"마이너 블루스 형식은 맞으나 원곡은 C♯단조","a":["첫 8마디가 다른 8곡과 같음"]},"the-sidewinder":{"s":"wrong","n":"원곡은 E♭ 24마디 블루스","a":["진행 전체가 다른 3곡과 같음"]},"watermelon-man":{"s":"partial","n":"","a":[]},"song-for-my-father":{"s":"partial","n":"","a":[]},"four":{"s":"wrong","n":"","a":[]},"nardis":{"s":"wrong","n":"원곡은 E단조 계열","a":[]},"soul-eyes":{"s":"unknown","n":"","a":[]},"blue-train":{"s":"wrong","n":"원곡은 E♭ 12마디 블루스","a":["첫 8마디가 다른 1곡과 같음"]},"confirmation":{"s":"wrong","n":"","a":[]},"someday-my-prince-will-come":{"s":"wrong","n":"","a":[]},"alice-in-wonderland":{"s":"wrong","n":"원곡은 C장조(Dm7 G7로 시작)","a":["첫 8마디가 다른 1곡과 같음"]},"summertime":{"s":"partial","n":"","a":[]},"bluesette":{"s":"wrong","n":"","a":[]},"waltz-for-debby":{"s":"unknown","n":"","a":[]},"yardbird-suite":{"s":"wrong","n":"","a":[]},"ornithology":{"s":"wrong","n":"원곡 A는 Gmaj7 Gm7 C7 Fmaj7 Fm7 B♭7 …","a":[]},"there-is-no-greater-love":{"s":"wrong","n":"원곡은 B♭조","a":[]},"stardust":{"s":"wrong","n":"후렴은 IV(Fmaj7)에서 시작","a":[]},"sweet-lorraine":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 8곡과 같음"]},"afternoon-in-paris":{"s":"wrong","n":"원곡은 Cmaj7 Cm7 F7 B♭maj7 …로 반음씩 내려감","a":[]},"airegin":{"s":"wrong","n":"원곡은 F단조","a":[]},"alfie":{"s":"unknown","n":"","a":[]},"all-blues":{"s":"wrong","n":"원곡은 12마디(6/8)","a":["첫 8마디가 다른 1곡과 같음"]},"all-by-myself":{"s":"unknown","n":"","a":[]},"all-of-you":{"s":"wrong","n":"원곡은 IVm(A♭m6)에서 시작","a":["첫 8마디가 다른 3곡과 같음"]},"alright-okay-you-win":{"s":"unknown","n":"","a":["형식 AB×8=16마디인데 32마디"]},"always":{"s":"unknown","n":"","a":[]},"apple-honey":{"s":"unknown","n":"","a":["형식 AB×8=16마디인데 32마디"]},"april-in-paris":{"s":"unknown","n":"","a":[]},"autumn-in-new-york":{"s":"unknown","n":"","a":[]},"bessies-blues":{"s":"wrong","n":"원곡은 E♭ 블루스","a":["형식 AB×8=16마디인데 24마디"]},"bewitched":{"s":"unknown","n":"","a":[]},"black-coffee":{"s":"unknown","n":"","a":["형식 AB×8=16마디인데 32마디"]},"blue-room":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 6곡과 같음"]},"boplicity":{"s":"unknown","n":"","a":[]},"broadway":{"s":"unknown","n":"","a":[]},"but-beautiful":{"s":"unknown","n":"","a":[]},"cest-si-bon":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 3곡과 같음"]},"call-me":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 3곡과 같음"]},"call-me-irresponsible":{"s":"unknown","n":"","a":[]},"cant-help-lovin-dat-man":{"s":"unknown","n":"","a":[]},"central-park-west":{"s":"unknown","n":"","a":[]},"chega-de-saudade":{"s":"wrong","n":"원곡은 D단조로 시작","a":[]},"a-child-is-born":{"s":"unknown","n":"","a":[]},"chitlins-con-carne":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음","형식 AB×8=16마디인데 26마디"]},"cotton-tail":{"s":"partial","n":"리듬 체인지 변형이나 A·브리지 화음 배치가 이상","a":["진행 전체가 다른 2곡과 같음"]},"d-natural-blues":{"s":"wrong","n":"제목대로 D 블루스(저장: G)","a":["형식 AB×8=16마디인데 24마디"]},"daahoud":{"s":"unknown","n":"","a":[]},"dancing-on-the-ceiling":{"s":"unknown","n":"","a":[]},"dear-old-stockholm":{"s":"unknown","n":"","a":[]},"dearly-beloved":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 3곡과 같음"]},"dexterity":{"s":"wrong","n":"리듬 체인지 곡(저장: 24마디 블루스형)","a":["형식 AB×8=16마디인데 24마디"]},"dont-blame-me":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 11곡과 같음"]},"dont-get-around-much-anymore":{"s":"wrong","n":"","a":[]},"donna-lee":{"s":"partial","n":"인디애나 진행이나 화성 리듬이 압축됨","a":[]},"dream-a-little-dream-of-me":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"easter-parade":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 3곡과 같음"]},"easy-to-love":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"falling-in-love-with-love":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 2곡과 같음"]},"a-fine-romance":{"s":"unknown","n":"","a":[]},"for-all-we-know":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"for-heavens-sake":{"s":"unknown","n":"","a":[]},"i-love-you-for-sentimental-reasons":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 1곡과 같음"]},"four-on-six":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"freddie-freeloader":{"s":"partial","n":"원곡은 12마디(B♭7·E♭7·F7 E♭7·A♭7 B♭7)","a":["첫 8마디가 다른 8곡과 같음","형식 AB×8=16마디인데 24마디"]},"gee-baby-aint-i-good-to-you":{"s":"unknown","n":"","a":["형식 AB×8=16마디인데 32마디"]},"god-bless-the-child":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"groovin-high":{"s":"wrong","n":"","a":[]},"half-nelson":{"s":"wrong","n":"레이디 버드 진행 계열이어야 함","a":[]},"hello-young-lovers":{"s":"unknown","n":"","a":[]},"heres-that-rainy-day":{"s":"wrong","n":"원곡은 G조","a":[]},"how-high-the-moon":{"s":"partial","n":"화성 리듬 압축","a":[]},"i-cant-get-started":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 11곡과 같음"]},"i-cant-give-you-anything-but-love":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 11곡과 같음"]},"i-could-write-a-book":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 3곡과 같음"]},"i-got-it-bad-and-that-aint-good":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 11곡과 같음"]},"i-let-a-song-go-out-of-my-heart":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 2곡과 같음"]},"i-love-paris":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 1곡과 같음"]},"i-love-you":{"s":"wrong","n":"다른 곡과 같은 템플릿 진행, 원곡 시작 화음 다름","a":["진행 전체가 다른 2곡과 같음"]},"i-remember-clifford":{"s":"unknown","n":"","a":[]},"i-should-care":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"im-beginning-to-see-the-light":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 3곡과 같음"]},"ill-never-smile-again":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 1곡과 같음"]},"its-easy-to-remember":{"s":"unknown","n":"","a":[]},"impressions":{"s":"partial","n":"원곡은 32마디 AABA. 저장은 16마디","a":["첫 8마디가 다른 2곡과 같음"]},"in-a-mellow-tone":{"s":"unknown","n":"원곡 조는 A♭로 알고 있음 — 보유 악보로 대조 필요","a":[]},"in-the-wee-small-hours-of-the-morning":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 8곡과 같음"]},"invitation":{"s":"unknown","n":"","a":[]},"isnt-it-romantic":{"s":"unknown","n":"","a":[]},"isotope":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 1곡과 같음","형식 AB×8=16마디인데 24마디"]},"jordu":{"s":"unknown","n":"","a":[]},"joy-spring":{"s":"wrong","n":"","a":[]},"jump-monk":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 1곡과 같음","형식 AB×8=16마디인데 24마디"]},"lady-bird":{"s":"wrong","n":"원곡은 Cmaj7 2마디 · Fm7 B♭7 · …","a":[]},"lazy-bird":{"s":"unknown","n":"","a":[]},"long-ago-and-far-away":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 3곡과 같음"]},"lush-life":{"s":"wrong","n":"다른 곡과 같은 템플릿 진행(원곡은 고유한 진행)","a":["진행 전체가 다른 1곡과 같음"]},"maiden-voyage":{"s":"partial","n":"원곡은 sus 화음(D7sus4·F7sus4 …)","a":[]},"mood-indigo":{"s":"unknown","n":"","a":[]},"my-favorite-things":{"s":"partial","n":"","a":[]},"my-one-and-only-love":{"s":"unknown","n":"","a":[]},"my-romance":{"s":"wrong","n":"원곡은 B♭조, 진행도 다름","a":[]},"my-shining-hour":{"s":"unknown","n":"","a":["형식 ABAC×8=32마디인데 28마디"]},"naima":{"s":"unknown","n":"","a":[]},"night-has-a-thousand-eyes":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 3곡과 같음"]},"night-train":{"s":"unknown","n":"","a":["형식 AB×8=16마디인데 22마디"]},"nobody-knows-you-when-youre-down-and-out":{"s":"unknown","n":"","a":["형식 AB×8=16마디인데 24마디"]},"one-note-samba":{"s":"wrong","n":"","a":[]},"peace":{"s":"unknown","n":"","a":[]},"pent-up-house":{"s":"unknown","n":"","a":["형식 AB×8=16마디인데 17마디"]},"red-clay":{"s":"unknown","n":"","a":["첫 8마디가 다른 2곡과 같음"]},"seven-steps-to-heaven":{"s":"wrong","n":"원곡은 4/4","a":[]},"solar":{"s":"wrong","n":"원곡은 12마디(CmMaj7 Gm7 C7 Fmaj7 …)","a":[]},"solitude":{"s":"unknown","n":"","a":[]},"sophisticated-lady":{"s":"unknown","n":"","a":["형식 AB×8=16마디인데 24마디"]},"stolen-moments":{"s":"unknown","n":"","a":[]},"stompin-at-the-savoy":{"s":"unknown","n":"","a":[]},"the-song-is-you":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 11곡과 같음"]},"thou-swell":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 2곡과 같음"]},"time-remembered":{"s":"unknown","n":"","a":[]},"tune-up":{"s":"partial","n":"화성 리듬이 압축됨(각 ii-V는 2마디)","a":[]},"up-jumped-spring":{"s":"unknown","n":"","a":["형식 AABA×8=32마디인데 30마디"]},"when-i-fall-in-love":{"s":"unknown","n":"","a":[]},"when-sunny-gets-blue":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 3곡과 같음"]},"when-you-wish-upon-a-star":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 8곡과 같음"]},"wives-and-lovers":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 8곡과 같음"]},"woodyn-you":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"yesterdays":{"s":"wrong","n":"원곡은 D단조","a":[]},"you-are-too-beautiful":{"s":"unknown","n":"","a":[]},"ablution":{"s":"unknown","n":"","a":[]},"birks-works":{"s":"unknown","n":"","a":[]},"c-jam-blues":{"s":"partial","n":"C 블루스이나 24마디로 저장","a":["첫 8마디가 다른 1곡과 같음","형식 AB×8=16마디인데 24마디"]},"candy":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행 — 보유 악보로 대조 필요","a":["진행 전체가 다른 2곡과 같음"]},"chameleon":{"s":"partial","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"close-your-eyes":{"s":"unknown","n":"","a":[]},"dindi":{"s":"unknown","n":"","a":[]},"doxy":{"s":"unknown","n":"","a":[]},"early-autumn":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 11곡과 같음"]},"fever":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음","형식 AB×8=16마디인데 12마디"]},"georgia-on-my-mind":{"s":"partial","n":"","a":[]},"honeysuckle-rose":{"s":"wrong","n":"원곡 A는 Gm7 C7 반복으로 시작","a":["첫 8마디가 다른 1곡과 같음"]},"i-remember-you":{"s":"unknown","n":"","a":[]},"i-will-wait-for-you":{"s":"unknown","n":"","a":[]},"indiana":{"s":"wrong","n":"원곡은 F조(F · D7 · G7 · C7 …)","a":["진행 전체가 다른 2곡과 같음"]},"its-only-a-paper-moon":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 2곡과 같음"]},"jitterbug-waltz":{"s":"unknown","n":"","a":[]},"killer-joe":{"s":"wrong","n":"원곡은 C7 B♭7 뱀프","a":["첫 8마디가 다른 8곡과 같음","형식 AB×8=16마디인데 24마디"]},"little-sunflower":{"s":"partial","n":"","a":["첫 8마디가 다른 2곡과 같음"]},"lover-man":{"s":"unknown","n":"","a":[]},"moon-river":{"s":"unknown","n":"","a":[]},"moose-the-mooche":{"s":"partial","n":"리듬 체인지 곡이나 배치 이상(다른 곡과 같은 템플릿)","a":["진행 전체가 다른 2곡과 같음"]},"nature-boy":{"s":"unknown","n":"","a":[]},"pennies-from-heaven":{"s":"wrong","n":"원곡은 장조","a":[]},"route-66":{"s":"unknown","n":"","a":["형식 AB×8=16마디인데 24마디"]},"speak-low":{"s":"unknown","n":"","a":[]},"tenderly":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"these-foolish-things":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"the-way-you-look-tonight":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 3곡과 같음"]},"whats-new":{"s":"unknown","n":"","a":[]},"willow-weep-for-me":{"s":"unknown","n":"","a":["형식 AB×8=16마디인데 32마디"]},"east-of-the-sun":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 8곡과 같음"]},"indian-summer":{"s":"unknown","n":"","a":[]},"on-the-sunny-side-of-the-street":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행 — 보유 악보로 대조 필요","a":["진행 전체가 다른 3곡과 같음"]},"ill-be-seeing-you":{"s":"unknown","n":"","a":[]},"the-lady-is-a-tramp":{"s":"unknown","n":"","a":[]},"moonlight-in-vermont":{"s":"unknown","n":"","a":[]},"a-nightingale-sang-in-berkeley-square":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 1곡과 같음"]},"witchcraft":{"s":"unknown","n":"","a":[]},"the-very-thought-of-you":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 1곡과 같음"]},"it-never-entered-my-mind":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 3곡과 같음"]},"love-me-or-leave-me":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"everything-happens-to-me":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 11곡과 같음"]},"on-the-street-where-you-live":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 3곡과 같음"]},"youve-changed":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 1곡과 같음"]},"this-cant-be-love":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["진행 전체가 다른 1곡과 같음"]},"bernies-tune":{"s":"unknown","n":"","a":[]},"as-time-goes-by":{"s":"wrong","n":"원곡은 장조","a":[]},"you-stepped-out-of-a-dream":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"affirmation":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"air-mail-special":{"s":"unknown","n":"","a":["진행 전체가 다른 4곡과 같음","형식 AABA×8=32마디인데 28마디"]},"at-the-mambo-inn":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"avalon":{"s":"unknown","n":"","a":[]},"bloomdido":{"s":"form","n":"","a":[]},"blue-skies":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"blues-in-the-closet":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 15곡과 같음"]},"blues-march":{"s":"unknown","n":"","a":["첫 8마디가 다른 2곡과 같음"]},"cold-duck-time":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"come-rain-or-come-shine":{"s":"unknown","n":"","a":[]},"comin-home-baby":{"s":"unknown","n":"","a":[]},"estate":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"five-spot-after-dark":{"s":"unknown","n":"","a":["첫 8마디가 다른 8곡과 같음"]},"52nd-street-theme":{"s":"wrong","n":"원곡은 C조 리듬 체인지","a":["진행 전체가 다른 4곡과 같음","형식 AABA×8=32마디인데 28마디"]},"hucklebuck":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 15곡과 같음"]},"in-walked-bud":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"jump-jive-an-wail":{"s":"unknown","n":"","a":[]},"jumpin-with-symphony-sid":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 15곡과 같음"]},"just-the-way-you-are":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"mercy-mercy-mercy":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"moonglow":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"oye-como-va":{"s":"form","n":"Am7 D7 뱀프","a":["첫 8마디가 다른 1곡과 같음"]},"perdido":{"s":"wrong","n":"","a":["첫 8마디가 다른 1곡과 같음","형식 AABA×8=32마디인데 31마디"]},"pursuance":{"s":"unknown","n":"","a":["진행 전체가 다른 1곡과 같음"]},"rhythm-a-ning":{"s":"partial","n":"리듬 체인지 곡이나 28마디로 저장","a":["진행 전체가 다른 4곡과 같음","형식 AABA×8=32마디인데 28마디"]},"saint-james-infirmary":{"s":"unknown","n":"","a":[]},"st-louis-blues":{"s":"partial","n":"","a":["첫 8마디가 다른 1곡과 같음","형식 AAB×4=12마디인데 28마디"]},"salt-peanuts":{"s":"wrong","n":"원곡은 F조 리듬 체인지","a":["진행 전체가 다른 4곡과 같음","형식 AABA×8=32마디인데 28마디"]},"sandu":{"s":"form","n":"","a":[]},"smoke-gets-in-your-eyes":{"s":"unknown","n":"","a":[]},"take-the-coltrane":{"s":"unknown","n":"","a":["진행 전체가 다른 1곡과 같음"]},"till-there-was-you":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"watch-what-happens":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"without-a-song":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"work-song":{"s":"wrong","n":"원곡은 16마디(마이너 블루스로 저장됨)","a":["진행 전체가 다른 2곡과 같음"]},"ac-cent-tchu-ate-the-positive":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 8곡과 같음"]},"after-youve-gone":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"aint-misbehavin":{"s":"unknown","n":"","a":[]},"besame-mucho":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"between-the-devil-and-the-deep-blue-sea":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"caldonia":{"s":"unknown","n":"","a":[]},"cry-me-a-river":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"dark-eyes":{"s":"unknown","n":"","a":[]},"deed-i-do":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"dig":{"s":"wrong","n":"스위트 조지아 브라운 진행 곡(저장: 리듬 체인지)","a":["진행 전체가 다른 4곡과 같음","형식 AABA×8=32마디인데 28마디"]},"dont-know-why":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"every-time-we-say-goodbye":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"feel-like-makin-love":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"fine-and-mellow":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 15곡과 같음"]},"harlem-nocturne":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"i-left-my-heart-in-san-francisco":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"ive-got-you-under-my-skin":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"ive-never-been-in-love-before":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"jersey-bounce":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"l-o-v-e":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행 — 보유 악보로 대조 필요","a":["첫 8마디가 다른 6곡과 같음","형식 AAB×8=24마디인데 16마디"]},"love-letters":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"milestones":{"s":"wrong","n":"원곡은 G 도리안·A 에올리안, 40마디","a":["형식 AAB×8=24마디인데 16마디"]},"people":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"rose-room":{"s":"unknown","n":"","a":[]},"teach-me-tonight":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"things-aint-what-they-used-to-be":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 15곡과 같음"]},"the-thrill-is-gone":{"s":"form","n":"B단조 마이너 블루스","a":["첫 8마디가 다른 8곡과 같음"]},"unforgettable":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"what-a-difference-a-day-made":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"what-a-wonderful-world":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"why-dont-you-do-right":{"s":"unknown","n":"","a":["진행 전체가 다른 2곡과 같음"]},"christmas-time-is-here":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"the-chicken":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음","형식 AB×4=8마디인데 16마디"]},"days-of-wine-and-roses":{"s":"wrong","n":"원곡은 Fmaj7 E♭7 Am7 D7 …","a":["형식 AAB×8=24마디인데 16마디"]},"a-foggy-day":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행","a":["첫 8마디가 다른 8곡과 같음","형식 AAB×8=24마디인데 16마디"]},"hallelujah-i-love-her-so":{"s":"wrong","n":"12마디 블루스가 아님","a":["진행 전체가 다른 15곡과 같음"]},"kansas-city":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 15곡과 같음"]},"night-and-day":{"s":"wrong","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"on-broadway":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"parkers-mood":{"s":"unknown","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 15곡과 같음"]},"peter-gunn":{"s":"unknown","n":"","a":[]},"relaxin-at-the-camarillo":{"s":"wrong","n":"원곡은 C조 블루스","a":["진행 전체가 다른 15곡과 같음"]},"reunion-blues":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 15곡과 같음"]},"the-shadow-of-your-smile":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"sir-duke":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"smile":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"sunny":{"s":"unknown","n":"","a":["첫 8마디가 다른 8곡과 같음","형식 AAB×8=24마디인데 16마디"]},"sway":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"stuffy":{"s":"unknown","n":"","a":["진행 전체가 다른 15곡과 같음"]},"almost-like-being-in-love":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"crazy-rhythm":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"every-breath-you-take":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"goodbye-pork-pie-hat":{"s":"wrong","n":"마이너 블루스로 저장됨(원곡은 고유 진행)","a":["첫 8마디가 다른 8곡과 같음","형식 AB×4=8마디인데 16마디"]},"i-get-a-kick-out-of-you":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"im-in-the-mood-for-love":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"in-your-own-sweet-way":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"love-is-here-to-stay":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"moondance":{"s":"partial","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"oh-lady-be-good":{"s":"unknown","n":"","a":["형식 AAB×8=24마디인데 16마디"]},"one-oclock-jump":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 15곡과 같음"]},"tequila":{"s":"wrong","n":"12마디 블루스가 아님","a":["첫 8마디가 다른 8곡과 같음"]},"it-had-to-be-you":{"s":"wrong","n":"조 표기(F)와 화음(G) 불일치","a":["조 표기(F)와 첫·끝 화음이 맞지 않음","형식 AABA×8=32마디인데 16마디"]},"as-long-as-i-live":{"s":"wrong","n":"조 표기(A)와 화음(Gm) 불일치","a":["형식 AABA×8=32마디인데 16마디"]},"i-ve-heard-that-song-before":{"s":"unknown","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"slow-cookin":{"s":"unknown","n":"","a":["첫 8마디가 다른 16곡과 같음","형식 AAB×4=12마디인데 16마디"]},"no-moon-at-all":{"s":"wrong","n":"조 표기(D)와 화음(Cm) 불일치","a":[]},"vem-vet":{"s":"unknown","n":"","a":[]},"midnight-dejavu":{"s":"unknown","n":"조 표기(D)와 화음(C) 불일치","a":[]},"my-baby-just-cares-for-me":{"s":"unknown","n":"다른 곡과 같은 템플릿 진행 — 보유 악보로 대조 필요","a":["첫 8마디가 다른 6곡과 같음"]},"i-m-gonna-sit-right-down-and-write-myself-a-letter":{"s":"wrong","n":"조 표기(D)와 화음(F) 불일치","a":["조 표기(D)와 첫·끝 화음이 맞지 않음"]},"p251":{"s":"practice","n":"앱 연습용 진행","a":[]},"blues12":{"s":"practice","n":"앱 연습용 진행","a":[]},"m25":{"s":"practice","n":"앱 연습용 진행","a":[]}};
+const SONG_STATUS={"a-night-in-tunisia":{"s":"rb","n":"헤드 형식 32마디(인터루드·브레이크 생략)","a":[]},"all-blues":{"s":"rb","n":"원곡은 6/8박 — 앱은 3/4박으로 재생","a":[]},"all-of-me":{"s":"ok","n":"","a":[]},"all-the-things-you-are":{"s":"rb","n":"36마디(마지막 A 12마디). 6·14마디는 판본에 따라 G7 / D7 한 코드, 24마디 C7은 C7(♯5)로 적기도 함","a":["조 표기(A♭)와 첫·끝 화음이 맞지 않음","형식 AABA×8=32마디인데 36마디"]},"au-privave":{"s":"form","n":"","a":["진행 전체가 다른 2곡과 같음"]},"autumn-leaves":{"s":"rb","n":"G단조 판. 27~28마디 반음 하행(Gm7 G♭7 | Fm7 E7)은 리얼북식 표기","a":[]},"bags-groove":{"s":"form","n":"","a":["진행 전체가 다른 2곡과 같음"]},"billies-bounce":{"s":"form","n":"","a":["진행 전체가 다른 2곡과 같음"]},"bloomdido":{"s":"form","n":"","a":[]},"blue-bossa":{"s":"ok","n":"","a":[]},"blue-in-green":{"s":"rb","n":"10마디. 7마디는 판본에 따라 Dm6","a":[]},"blue-monk":{"s":"form","n":"일반 B♭ 블루스. 원곡 고유 경과 화음 없음","a":["진행 전체가 다른 11곡과 같음"]},"blues-for-alice":{"s":"rb","n":"비밥 블루스(찰리 파커). 마지막 두 마디 턴어라운드는 판본에 따라 다름","a":[]},"blues-in-the-closet":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 11곡과 같음"]},"c-jam-blues":{"s":"rb","n":"12마디 C 블루스","a":["진행 전체가 다른 11곡과 같음"]},"cantaloupe-island":{"s":"rb","n":"16마디(F m7 · D♭7 · D m7 · F m7 각 4마디)","a":[]},"chameleon":{"s":"rb","n":"솔로 섹션 2마디 뱀프(B♭m7 · E♭7)만 수록","a":[]},"confirmation":{"s":"rbq","n":"A 섹션 6~8마디(Am7 D7 | G7 | Gm7 C7)는 확인 필요. 브리지는 확신","a":[]},"fine-and-mellow":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 11곡과 같음"]},"fly-me-to-the-moon":{"s":"rb","n":"4·12·20마디 세부(C7·Am7)는 판본마다 조금씩 다름","a":["조 표기(C)와 첫·끝 화음이 맞지 않음"]},"footprints":{"s":"rbq","n":"원곡은 6/4박 12마디 — 앱은 3/4박 24마디로 나눠 적음. 17~22마디(F♯ø B7 E7♯9 A7♯9 D7♯9 D♭7♯11)는 확인 권장","a":["첫 8마디가 다른 2곡과 같음"]},"freedom-jazz-dance":{"s":"rb","n":"B♭7 한 코드 위 16마디","a":[]},"giant-steps":{"s":"rb","n":"16마디","a":[]},"i-got-rhythm":{"s":"form","n":"리듬 체인지 변형","a":["진행 전체가 다른 1곡과 같음"]},"impressions":{"s":"rb","n":"So What과 같은 형식(D 도리안 16 · E♭ 도리안 8 · D 도리안 8)","a":["진행 전체가 다른 1곡과 같음"]},"jumpin-with-symphony-sid":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 11곡과 같음"]},"kansas-city":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 11곡과 같음"]},"lady-bird":{"s":"rb","n":"16마디(태드 대머런). 마지막 두 마디가 「태드 대머런 턴어라운드」","a":[]},"maiden-voyage":{"s":"rbq","n":"sus4 코드 4마디씩. 브리지 둘째 코드(C♯m7)는 확인 권장","a":[]},"misty":{"s":"rbq","n":"A 섹션은 확신. 15~16마디와 브리지 21~24마디(Am7 | D7 | Gm7♭5 C7♭9 | Fm7 B♭7)는 확인 필요","a":[]},"mr-pc":{"s":"ok","n":"","a":["첫 8마디가 다른 1곡과 같음"]},"oleo":{"s":"form","n":"리듬 체인지 변형","a":["진행 전체가 다른 1곡과 같음"]},"one-oclock-jump":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 11곡과 같음"]},"oye-como-va":{"s":"form","n":"Am7 D7 뱀프","a":[]},"reunion-blues":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 11곡과 같음"]},"sandu":{"s":"form","n":"","a":[]},"satin-doll":{"s":"rb","n":"브리지는 판본에 따라 Gm7 C7·Am7 D7을 마디마다 반복해 적기도 함","a":[]},"so-what":{"s":"rb","n":"D 도리안 16 · E♭ 도리안 8 · D 도리안 8","a":["진행 전체가 다른 1곡과 같음"]},"solar":{"s":"rb","n":"12마디(마일스 데이비스)","a":[]},"song-for-my-father":{"s":"rbq","n":"B 섹션 5~6마디(E♭7 | D♭7 C7)는 확인 권장","a":[]},"stella-by-starlight":{"s":"rb","n":"17~18마디는 G7(♯5)로 적기도 함","a":[]},"straight-no-chaser":{"s":"form","n":"","a":["진행 전체가 다른 11곡과 같음"]},"take-the-a-train":{"s":"rb","n":"3~4마디 D7(♭5)는 앱 표기 D7♯11","a":[]},"tenor-madness":{"s":"form","n":"","a":["진행 전체가 다른 11곡과 같음"]},"girl-from-ipanema":{"s":"rb","n":"40마디(브리지 16마디). 보사노바","a":[]},"hucklebuck":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 11곡과 같음"]},"the-thrill-is-gone":{"s":"form","n":"B단조 마이너 블루스","a":["첫 8마디가 다른 1곡과 같음"]},"there-will-never-be-another-you":{"s":"rb","n":"27~30마디는 판본에 따라 세부가 다름(E♭maj7 A7 | Fm7 B♭7 등)","a":[]},"things-aint-what-they-used-to-be":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 11곡과 같음"]},"p251":{"s":"practice","n":"앱 연습용 진행","a":[]},"blues12":{"s":"practice","n":"앱 연습용 진행","a":[]},"m25":{"s":"practice","n":"앱 연습용 진행","a":[]}};
 
-/* ── 곡 데이터베이스 v0.13 ─────────────────────────────────────────
+/* ── 곡 데이터베이스 v0.37 ─────────────────────────────────────────
+   v0.37에서 정리: 이전 판(v0.13~v0.26)의 곡 중 코드 진행이 확인된 곡(확인됨·형식 확인)만 남기고 모두 지웠다.
+   그 위에 리얼북 계열 스탠다드를 새로 적었다 — 스윙·라틴·펑크·발라드 위주, 마디 단위까지 확신하는 곡만.
+   확실하지 않은 마디는 고치지 않고 x(메모)에 '확인 필요'로 적어 둔다. 상태는 engine/song_status.js(tools/song_audit.js 생성).
+   이전 판 전체는 claude/checkpoint-2 브랜치에 그대로 있다.
    수록 원칙 (기획안 7장 법적 프레임 준수):
-   · 코드 진행만 수록 — 원곡 멜로디·가사 없음. 진행은 "일반적으로 연주되는 스탠다드" 기준이며
-     판본(리얼북 판·연주자별 악보)에 따라 세부가 다를 수 있다.
-   · ch 문법: '|' = 마디 구분, ' ' = 한 마디 두 코드. m7·7·maj7·m7b5·7b9·7#9·6·m6·9·dim7 만 사용.
-   · k = 원곡 조(으뜸음 pc, C=0) · bpm = 기본 템포 · m = 박자(기본 4/4) · f = [형식, 프레이즈 마디수]
-   · c = 분류 */
+   · 코드 진행만 수록 — 원곡 멜로디·가사 없음. 판본(리얼북 판·연주자별 악보)에 따라 세부가 다를 수 있다.
+   · ch 문법: '|' = 마디 구분, ' ' = 한 마디 두 코드. maj7·m7·7·m7b5·7b9·7#9·6·m6·9·m9·dim7·7sus4·mmaj7·7#11·maj7#11 만 사용.
+   · k = 원곡 조(으뜸음 pc, C=0) · bpm = 기본 템포 · m = 박자(기본 4/4) · f = [형식, 프레이즈 마디수] · c = 분류 · x = 확인 메모
+   · 정렬: 곡 이름 알파벳 순 */
 'use strict';
 
 const RAW_SONGS = [
-/* ═══ 1. 미디엄/업템포 스윙 (1~30) ═══ */
-{id:'autumn-leaves',n:'Autumn Leaves',c:'스윙',k:7,bpm:140,f:['AABA',8],
- ch:'Cm7|F9|Bbmaj7|Ebmaj7|Am7b5|D7b9|Gm6|Gm6|Cm7|F9|Bbmaj7|Ebmaj7|Am7b5|D7b9|Gm6|Gm6|Am7b5|D7b9|Gm6|Gm6|Cm7|F7|Bbmaj7|Ebmaj7|Am7b5|D7b9|Gm7 Db7|Cm7 F7|Bbmaj7|D7#9|Gm6|Gm6'},
+{id:'a-night-in-tunisia',n:'A Night in Tunisia',c:'라틴',k:2,bpm:170,f:['AABA',8],
+ x:'헤드 형식 32마디(인터루드·브레이크 생략)',
+ ch:'Eb7|Dm6|Eb7|Dm6|Eb7|Dm6|Em7b5 A7b9|Dm6|Eb7|Dm6|Eb7|Dm6|Eb7|Dm6|Em7b5 A7b9|Dm6|Am7b5|D7b9|Gm6|Gm6|Gm7b5|C7b9|Fmaj7|Em7b5 A7b9|Eb7|Dm6|Eb7|Dm6|Eb7|Dm6|Em7b5 A7b9|Dm6'},
+{id:'all-blues',n:'All Blues',c:'스윙',k:7,bpm:150,m:3,f:['AAB',4],
+ x:'원곡은 6/8박 — 앱은 3/4박으로 재생',
+ ch:'G7|G7|G7|G7|Gm7|Gm7|G7|G7|D7#9|Eb7#9 D7#9|G7|G7'},
 {id:'all-of-me',n:'All of Me',c:'스윙',k:0,bpm:130,f:['ABAC',8],
  ch:'Cmaj7|Cmaj7|E7|E7|A7|A7|Dm7|Dm7|E7|E7|Am7|Am7|D7|D7|Dm7|G7|Cmaj7|Cmaj7|E7|E7|A7|A7|Dm7|Dm7|F6|Fm6|Cmaj7 Em7|A7|Dm7|G7|C6|C6'},
-{id:'all-the-things-you-are',n:'All the Things You Are',c:'스윙',k:8,bpm:130,f:['AABA',8],
- ch:'Fm7|Bbm7|Eb7|Abmaj7|Dbmaj7|Dm7b5 G7|Cmaj7|Cmaj7|Fm7|Bbm7|Eb7|Abmaj7|Dbmaj7|Dm7b5 G7|Cmaj7|Cmaj7|Cm7|Fm7|Bb7|Ebmaj7|Abmaj7|Dbmaj7|Dbm7 G7|Cmaj7|Fm7|Bbm7|Eb7|Abmaj7|Dbmaj7 Dbm7|Cm7 Bbm7|Bbm7 Eb7|Abmaj7'},
-{id:'take-the-a-train',n:"Take the 'A' Train",c:'스윙',k:0,bpm:140,f:['AABA',8],
- ch:'Cmaj7|Cmaj7|D7|D7|Dm7 G7|Dm7 G7|Cmaj7|Cmaj7|Cmaj7|Cmaj7|D7|D7|Dm7 G7|Dm7 G7|Cmaj7|Cmaj7|Fmaj7|Fmaj7|Fmaj7|Fmaj7|D7|D7|D7|D7|Cmaj7|Cmaj7|D7|D7|Dm7 G7|Dm7 G7|Cmaj7|Cmaj7'},
-{id:'satin-doll',n:'Satin Doll',c:'스윙',k:0,bpm:130,f:['AABA',8],
- ch:'Dm7 G7|Dm7 G7|Ebm7 Ab7|Dm7 G7|F#m7b5 B7|Em7 A7|Am7 D7|Dm7 G7|Dm7 G7|Dm7 G7|Ebm7 Ab7|Dm7 G7|F#m7b5 B7|Em7 A7|Am7 D7|Dm7 G7|Gm7 C7|Gm7 C7|Fm7 Bb7|Fm7 Bb7|Ebm7 Ab7|Dm7 G7|Am7 D7|Dm7 G7|Dm7 G7|Dm7 G7|Ebm7 Ab7|Dm7 G7|F#m7b5 B7|Em7 A7|Am7 D7|Dm7 G7'},
-{id:'there-will-never-be-another-you',n:'There Will Never Be Another You',c:'스윙',k:3,bpm:135,f:['AABA',8],
- ch:'Ebmaj7|Dm7b5 G7|Cm7 F7|Bbm7 Eb7|Abmaj7|D7b9|Gm7 C7|Fm7 Bb7|Ebmaj7|Dm7b5 G7|Cm7 F7|Bbm7 Eb7|Abmaj7|D7b9|Gm7 C7|Fm7 Bb7|Gm7b5 C7|Fm7 Bb7|Ebmaj7|Cm7 F7|Bbm7|Ebmaj7|Fm7 Bb7|Fm7 Bb7|Ebmaj7|Dm7b5 G7|Cm7 F7|Bbm7 Eb7|Abmaj7|D7b9|Gm7 C7|Fm7 Bb7'},
-{id:'fly-me-to-the-moon',n:'Fly Me to the Moon',c:'스윙',k:0,bpm:130,f:['AABA',8],
- ch:'Am7|Dm7|G7|Cmaj7|Fmaj7|Bm7b5 E7|Am7|Am7|Am7|Dm7|G7|Cmaj7|Fmaj7|Bm7b5 E7|Am7|Am7|Dm7|G7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|Dm7|G7|Cmaj7|Fmaj7|Bm7b5 E7|Am7|Am7'},
-{id:'stella-by-starlight',n:'Stella by Starlight',c:'스윙',k:10,bpm:145,f:['ABAC',8],
- ch:'Em7b5 A7|Cm7 F7|Fmaj7|Em7b5 A7|Ebmaj7|Cm7|Ab7|Bb7|Cm7 F7|Bbmaj7|Ebmaj7|Ab7|Bbmaj7|Em7b5 A7|Cm7 F7|Fmaj7|Ebmaj7|Em7b5 A7|Fmaj7|Fm7|Gm7b5 C7|Fm7|Em7b5 A7|Cm7 F7|Fmaj7|Fmaj7|Ebmaj7|Cm7|Ab7|Bb7|Fmaj7|Fmaj7'},
-{id:'it-could-happen-to-you',n:'It Could Happen to You',c:'스윙',k:5,bpm:140,f:['AABA',8],
- ch:'Fmaj7|Fmaj7|Gm7 C7|Fmaj7|D7|D7|Gm7 C7|Fmaj7|Fmaj7|Fmaj7|Gm7 C7|Fmaj7|D7|D7|Gm7 C7|Fmaj7|Em7b5 A7|Dm7|Gm7 C7|Fmaj7|D7|D7|Gm7 C7|Fmaj7|Fmaj7|Fmaj7|Gm7 C7|Fmaj7|D7|D7|Gm7 C7|Fmaj7'},
-{id:'just-friends',n:'Just Friends',c:'스윙',k:10,bpm:140,f:['AABA',8],
- ch:'Bbmaj7|Bbm7 Eb7|Abm7 Db7|Gm7 C7|Cm7 F7|Bbmaj7|Cm7 F7|Bbmaj7|Bbmaj7|Bbm7 Eb7|Abm7 Db7|Gm7 C7|Cm7 F7|Bbmaj7|Cm7 F7|Bbmaj7|Dm7b5 G7|Cm7 F7|Bbmaj7|Bbmaj7|Dm7b5 G7|Cm7 F7|Bbmaj7|Cm7 F7|Bbmaj7|Bbm7 Eb7|Abm7 Db7|Gm7 C7|Cm7 F7|Bbmaj7|Cm7 F7|Bbmaj7'},
-{id:'on-green-dolphin-street',n:'On Green Dolphin Street',c:'스윙',k:0,bpm:135,f:['AABA',8],
- ch:'Cmaj7|Cmaj7|Ebm7 Ab7|Dbmaj7|Cmaj7|Ebm7 Ab7|Dbmaj7|Cmaj7|Dm7 G7|Cmaj7|Am7 D7|G7|Abm7 Db7|Gbmaj7|Fm7 Bb7|Cmaj7|Cmaj7|Cmaj7|Ebm7 Ab7|Dbmaj7|Cmaj7|Ebm7 Ab7|Dbmaj7|Cmaj7|Dm7 G7|Cmaj7|Am7 D7|G7|Abm7 Db7|Gbmaj7|Fm7 Bb7|Cmaj7'},
-{id:'alone-together',n:'Alone Together',c:'스윙',k:0,bpm:100,f:['AABA',8],
- ch:'Cmaj7|B7|Bbmaj7|A7|Abmaj7|G7|Gm7b5 C7|Fm7|Cmaj7|B7|Bbmaj7|A7|Abmaj7|G7|Gm7b5 C7|Fm7|Fm7|Bb7|Ebmaj7|Ab7|Dbmaj7|Dbmaj7|Dm7b5 G7|Cmaj7|Cmaj7|B7|Bbmaj7|A7|Abmaj7|G7|Fm7|Cmaj7'},
-{id:'beautiful-love',n:'Beautiful Love',c:'스윙',k:5,bpm:110,f:['AABA',8],
- ch:'Fm7|Fm7|Bbm7 Eb7|Abmaj7|Dbmaj7|Dbmaj7|Gm7b5 C7|Fm7|Fm7|Fm7|Bbm7 Eb7|Abmaj7|Dbmaj7|Dbmaj7|Gm7b5 C7|Fm7|Fm7|Bbm7 Eb7|Abmaj7|Dbmaj7|Gm7b5 C7|Fm7b5 Bb7|Ebm7|C7|Fm7|Fm7|Bbm7 Eb7|Abmaj7|Dbmaj7|Dbmaj7|Gm7b5 C7|Fm7'},
-{id:'what-is-this-thing-called-love',n:'What Is This Thing Called Love?',c:'스윙',k:0,bpm:140,f:['AABA',8],
- ch:'Gm7b5 C7|Fm7|Gm7b5 C7|Fm7|Bbm7|Bbm7|Ab7|Gm7b5 C7|Gm7b5 C7|Fm7|Gm7b5 C7|Fm7|Bbm7|Bbm7|Ab7|Gm7b5 C7|Am7b5 D7|Gm7 C7|Fm7 Bb7|Ebmaj7|Abmaj7|Dm7b5 G7|Cm7 F7|Fm7|Gm7b5 C7|Fm7|Gm7b5 C7|Fm7|Bbm7|Bbm7|Ab7|Fm7'},
-{id:'ill-remember-april',n:"I'll Remember April",c:'스윙',k:7,bpm:130,f:['AABA',8],
- ch:'Gmaj7|Gmaj7|Am7 D7|Gmaj7|Bm7 E7|Am7 D7|Gmaj7|Am7 D7|Gmaj7|Gmaj7|Am7 D7|Gmaj7|Bm7 E7|Am7 D7|Gmaj7|Am7 D7|Am7 D7|Gmaj7|C7 B7|Bbm7 Eb7|Am7 D7|Gmaj7|Am7 D7|Gmaj7|Gmaj7|Gmaj7|Am7 D7|Gmaj7|Bm7 E7|Am7 D7|Gmaj7|Gmaj7'},
-{id:'youd-be-so-nice-to-come-home-to',n:'You’d Be So Nice to Come Home To',c:'스윙',k:5,bpm:135,f:['AABA',8],
- ch:'Dm7 G7|Cmaj7|Am7 D7|Gm7 C7|Fmaj7|Dm7 G7|Bm7b5 E7|Am7|Dm7 G7|Cmaj7|Am7 D7|Gm7 C7|Fmaj7|Dm7 G7|Bm7b5 E7|Am7|Gm7 C7|Fmaj7|Bm7b5 E7|Am7|Abm7 Db7|Gbmaj7|Gm7 C7|C7|Dm7 G7|Cmaj7|Am7 D7|Gm7 C7|Fmaj7|Dm7 G7|Bm7b5 E7|Am7 D7'},
-{id:'but-not-for-me',n:'But Not for Me',c:'스윙',k:3,bpm:120,f:['AABA',8],
- ch:'Ebmaj7|Ebmaj7|Fm7 Bb7|Ebmaj7|Cm7 F7|Fm7 Bb7|Ebmaj7|Cm7 F7|Ebmaj7|Ebmaj7|Fm7 Bb7|Ebmaj7|Cm7 F7|Fm7 Bb7|Ebmaj7|Cm7 F7|Abmaj7|Abmaj7|Gm7 C7|Fm7 Bb7|Abmaj7|Abmaj7|Am7b5 D7|Gm7 C7|Ebmaj7|Ebmaj7|Fm7 Bb7|Ebmaj7|Cm7 F7|Fm7 Bb7|Ebmaj7|Ebmaj7'},
-{id:'if-i-were-a-bell',n:'If I Were a Bell',c:'스윙',k:5,bpm:145,f:['AABA',8],
- ch:'Fmaj7|Fmaj7|D7|D7|Gm7 C7|Fmaj7|Dm7 G7|C7|Fmaj7|Fmaj7|D7|D7|Gm7 C7|Fmaj7|Dm7 G7|C7|Bbmaj7|Bbmaj7|Bm7b5 E7|Am7 D7|Gm7 C7|Fmaj7|Dm7 G7|C7|Fmaj7|Fmaj7|D7|D7|Gm7 C7|Fmaj7|Dm7 G7|C7'},
-{id:'love-for-sale',n:'Love for Sale',c:'스윙',k:5,bpm:135,f:['AABA',8],
- ch:'Fmaj7|Fmaj7|Gm7b5 C7|Fmaj7|Ebmaj7|Ebmaj7|C7|Fmaj7|Fmaj7|Fmaj7|Gm7b5 C7|Fmaj7|Ebmaj7|Ebmaj7|C7|Fmaj7|D7b9|Gm7|C7|Fmaj7|A7|Dm7|Gm7 C7|Fmaj7|Fmaj7|Fmaj7|Gm7b5 C7|Fmaj7|Ebmaj7|Ebmaj7|C7|Fmaj7'},
-{id:'lullaby-of-birdland',n:'Lullaby of Birdland',c:'스윙',k:5,bpm:145,f:['AABA',8],
- ch:'Fmaj7|Fmaj7|Gm7 C7|Fmaj7|Am7 D7|Gm7 C7|Fmaj7|Fmaj7|Fmaj7|Fmaj7|Gm7 C7|Fmaj7|Am7 D7|Gm7 C7|Fmaj7|Fmaj7|Gm7|C7|Fmaj7|D7|Gm7 C7|Am7 D7|Gm7 C7|C7|Fmaj7|Fmaj7|Gm7 C7|Fmaj7|Am7 D7|Gm7 C7|Fmaj7|Fmaj7'},
-{id:'softly-as-in-a-morning-sunrise',n:'Softly, as in a Morning Sunrise',c:'스윙',k:0,bpm:135,f:['AABA',8],
- ch:'Cm7|Cm7|Fm7|Bb7|Ebmaj7|Ebmaj7|Cm7|G7|Cm7|Cm7|Fm7|Bb7|Ebmaj7|Ebmaj7|Cm7|G7|Cm7|Cm7|Fm7 Bb7|Ebmaj7|Ab7|G7|Cm7|Cm7|Cm7|Cm7|Fm7|Bb7|Ebmaj7|Ebmaj7|Cm7|G7'},
-{id:'have-you-met-miss-jones',n:'Have You Met Miss Jones?',c:'스윙',k:5,bpm:150,f:['AABA',8],
- ch:'Fmaj7|Fmaj7|Bbm7 Eb7|Cm7 F7|Fmaj7|D7b9|Gm7 C7|Cm7 F7|Fmaj7|Fmaj7|Bbm7 Eb7|Cm7 F7|Fmaj7|D7b9|Gm7 C7|Cm7 F7|Bmaj7|Bbmaj7|Abmaj7|Dbmaj7|Gm7 C7|Cm7 F7|Fmaj7|Cm7 F7|Fmaj7|Fmaj7|Bbm7 Eb7|Cm7 F7|Fmaj7|D7b9|Gm7 C7|Cm7 F7'},
-{id:'mack-the-knife',n:'Mack the Knife',c:'스윙',k:5,bpm:140,f:['AABA',8],
- ch:'F6|F6|C7|C7|F6|F6|C7 F6|C7|F6|F6|C7|C7|F6|F6|C7 F6|C7|Bb6|Bb6|F6|F6|C7|C7|F6|F6|F6|F6|C7|C7|F6|F6|C7 F6|C7'},
-{id:'like-someone-in-love',n:'Like Someone in Love',c:'스윙',k:0,bpm:110,f:['AABA',8],
- ch:'Cmaj7|Cmaj7|Bm7b5 E7|Am7|Dm7 G7|Em7 A7|Dm7 G7|Cmaj7|Cmaj7|Cmaj7|Bm7b5 E7|Am7|Dm7 G7|Em7 A7|Dm7 G7|Cmaj7|Eb7|Abmaj7|Dbmaj7|Gm7 C7|Cmaj7|Am7 D7|Dm7 G7|Cmaj7|Cmaj7|Cmaj7|Bm7b5 E7|Am7|Dm7 G7|Em7 A7|Dm7 G7|Cmaj7'},
-{id:'gone-with-the-wind',n:'Gone with the Wind',c:'스윙',k:0,bpm:140,f:['AABA',8],
- ch:'Cmaj7|Cmaj7|E7|A7|Dm7|G7|Cmaj7|Cmaj7|Cmaj7|Cmaj7|E7|A7|Dm7|G7|Cmaj7|Cmaj7|E7|A7|D7|G7|Cmaj7|A7|D7|G7|Cmaj7|Cmaj7|E7|A7|Dm7|G7|Cmaj7|Cmaj7'},
-{id:'out-of-nowhere',n:'Out of Nowhere',c:'스윙',k:7,bpm:140,f:['AABA',8],
- ch:'Gmaj7|Gmaj7|B7|B7|Am7|D7|Bm7 E7|Am7 D7|Gmaj7|Gmaj7|B7|B7|Am7|D7|Bm7 E7|Am7 D7|Am7 D7|Gmaj7|C7 B7|Em7 A7|Am7 D7|Gmaj7|Am7 D7|D7|Gmaj7|Gmaj7|B7|B7|Am7|D7|Bm7 E7|Am7 D7'},
-{id:'cherokee',n:'Cherokee',c:'스윙',k:10,bpm:200,f:['AABA',8],
- ch:'Bbmaj7|Bbmaj7|Bbm7 Eb7|Abmaj7|Abm7 Db7|Gbmaj7|F7|Bbmaj7|Bbmaj7|Bbmaj7|Bbm7 Eb7|Abmaj7|Abm7 Db7|Gbmaj7|F7|Bbmaj7|D7|D7|G7|G7|C7|C7|F7|F7|Bbmaj7|Bbmaj7|Bbm7 Eb7|Abmaj7|Abm7 Db7|Gbmaj7|F7|Bbmaj7'},
-{id:'sweet-georgia-brown',n:'Sweet Georgia Brown',c:'스윙',k:5,bpm:150,f:['AABA',8],
- ch:'F6|F6|A7|A7|D7|D7|G7 C7|F6|F6|F6|A7|A7|D7|D7|G7 C7|F6|G7|G7|C7|C7|F6|D7|G7 C7|F6|F6|F6|A7|A7|D7|D7|G7 C7|F6'},
-{id:'cheek-to-cheek',n:'Cheek to Cheek',c:'스윙',k:5,bpm:125,f:['AABA',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Dm7|G7|C7|F6|D7|G7|C7|F6|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7'},
-{id:'bye-bye-blackbird',n:'Bye Bye Blackbird',c:'스윙',k:5,bpm:135,f:['AABA',8],
- ch:'F6|F6|A7|A7|D7|Gm7 C7|F6|F6|F6|F6|A7|A7|D7|Gm7 C7|F6|F6|D7|D7|G7|G7|C7|C7|F6|F6|F6|F6|A7|A7|D7|Gm7 C7|F6|F6'},
-
-/* ═══ 2. 재즈 블루스 & 리듬 체인지 (31~44) ═══ */
-{id:'blue-monk',n:'Blue Monk',c:'블루스',k:10,bpm:120,f:['AAB',4],
- ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
-{id:'billies-bounce',n:"Billie's Bounce",c:'블루스',k:5,bpm:120,f:['AAB',4],
- ch:'F7|F7|F7|F7|Bb7|Bb7|F7|F7|C7|Bb7|F7|C7'},
-{id:'straight-no-chaser',n:'Straight, No Chaser',c:'블루스',k:5,bpm:135,f:['AAB',4],
- ch:'F7|Bb7|F7|F7|Bb7|Bb7|F7|F7|C7|Bb7|F7|C7'},
-{id:'nows-the-time',n:"Now's the Time",c:'블루스',k:10,bpm:130,f:['AAB',4],
- ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
+{id:'all-the-things-you-are',n:'All the Things You Are',c:'스윙',k:8,bpm:140,f:['AABA',8],
+ x:'36마디(마지막 A 12마디). 6·14마디는 판본에 따라 G7 / D7 한 코드, 24마디 C7은 C7(♯5)로 적기도 함',
+ ch:'Fm7|Bbm7|Eb7|Abmaj7|Dbmaj7|Dm7 G7|Cmaj7|Cmaj7|Cm7|Fm7|Bb7|Ebmaj7|Abmaj7|Am7 D7|Gmaj7|Gmaj7|Am7|D7|Gmaj7|Gmaj7|F#m7|B7|Emaj7|C7|Fm7|Bbm7|Eb7|Abmaj7|Dbmaj7|Dbm7|Cm7|Bdim7|Bbm7|Eb7|Abmaj7|Gm7b5 C7'},
 {id:'au-privave',n:'Au Privave',c:'블루스',k:5,bpm:130,f:['AAB',4],
  ch:'F7|F7|F7|F7|Bb7|Bb7|F7|F7|C7|Bb7|F7|C7'},
-{id:'blues-for-alice',n:'Blues for Alice',c:'블루스',k:5,bpm:120,f:['AAB',4],
- ch:'F7|E7|Eb7|D7|Gm7|C7|F7|D7b9|Gm7|C7|F7|C7'},
-{id:'bags-groove',n:"Bags' Groove",c:'블루스',k:5,bpm:110,f:['AAB',4],
+{id:'autumn-leaves',n:'Autumn Leaves',c:'스윙',k:7,bpm:140,f:['AABC',8],
+ x:'G단조 판. 27~28마디 반음 하행(Gm7 G♭7 | Fm7 E7)은 리얼북식 표기',
+ ch:'Cm7|F7|Bbmaj7|Ebmaj7|Am7b5|D7b9|Gm6|Gm6|Cm7|F7|Bbmaj7|Ebmaj7|Am7b5|D7b9|Gm6|Gm6|Am7b5|D7b9|Gm6|Gm6|Cm7|F7|Bbmaj7|Ebmaj7|Am7b5|D7b9|Gm7 Gb7|Fm7 E7|Ebmaj7|D7b9|Gm6|Gm6'},
+{id:'bags-groove',n:'Bags\' Groove',c:'블루스',k:5,bpm:110,f:['AAB',4],
  ch:'F7|F7|F7|F7|Bb7|Bb7|F7|F7|C7|Bb7|F7|C7'},
-{id:'tenor-madness',n:'Tenor Madness',c:'블루스',k:10,bpm:130,f:['AAB',4],
- ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
-{id:'mr-pc',n:'Mr. P.C.',c:'블루스',k:0,bpm:140,f:['AAB',4],
- ch:'Cm7|Cm7|Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|Ab7|G7|Cm7|G7'},
-{id:'footprints',n:'Footprints',c:'블루스',k:0,bpm:100,m:3,f:['AAB',4],
- ch:'Cm7|Cm7|Cm7|Cm7|Fm7|Fm7|Ab7|Cm7|Dbmaj7|Cm7|Ab7|G7'},
-{id:'oleo',n:'Oleo',c:'블루스',k:10,bpm:180,f:['AABA',8],
- ch:'Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7|D7|D7|G7|G7|C7|C7|F7|F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7'},
-{id:'i-got-rhythm',n:'I Got Rhythm',c:'블루스',k:10,bpm:160,f:['AABA',8],
- ch:'Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7|D7|D7|G7|G7|C7|C7|F7|F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7'},
-{id:'anthropology',n:'Anthropology',c:'블루스',k:10,bpm:180,f:['AABA',8],
- ch:'Bb6|Fm7 Bb7|Bb6|Cm7 F7|F7|Ab7|Db7|Cm7 F7|Bb6|Fm7 Bb7|Bb6|Cm7 F7|F7|Ab7|Db7|Cm7 F7|D7|D7|G7|G7|C7|C7|F7|F7|Bb6|Fm7 Bb7|Bb6|Cm7 F7|F7|Ab7|Db7|Cm7 F7'},
-{id:'scrapple-from-the-apple',n:'Scrapple from the Apple',c:'블루스',k:5,bpm:160,f:['AABA',8],
- ch:'Fmaj7|Fmaj7|A7|A7|D7|D7|G7|C7|Fmaj7|Fmaj7|A7|A7|D7|D7|G7|C7|D7|D7|G7|G7|C7|C7|F7|F7|Fmaj7|Fmaj7|A7|A7|D7|D7|G7|C7'}
-];
-RAW_SONGS.push(
-/* ═══ 3. 보사노바 & 라틴 재즈 (45~60) ═══ */
+{id:'billies-bounce',n:'Billie\'s Bounce',c:'블루스',k:5,bpm:120,f:['AAB',4],
+ ch:'F7|F7|F7|F7|Bb7|Bb7|F7|F7|C7|Bb7|F7|C7'},
+{id:'bloomdido',n:'Bloomdido',c:'비밥',k:10,bpm:200,f:['AAB',4],
+ ch:'Bb6|Eb7|Bb6|Bb7|Eb7|Eb7|Bb6|D7|G7|C7|F7|Bb7'},
 {id:'blue-bossa',n:'Blue Bossa',c:'라틴',k:0,bpm:145,f:['AB',8],
  ch:'Cm7|Cm7|Fm7|Fm7|Dm7b5|G7b9|Cm7|Cm7|Ebm7|Ab7|Dbmaj7|Dbmaj7|Dm7b5|G7b9|Cm7|Dm7b5 G7b9'},
-{id:'girl-from-ipanema',n:'The Girl from Ipanema',c:'라틴',k:5,bpm:140,f:['AABA',8],
- ch:'Fmaj7|G7|Gm7|Gbmaj7|Fmaj7|G7|Gm7|Fmaj7|Fmaj7|G7|Gm7|Gbmaj7|Fmaj7|G7|Gm7|Fmaj7|Gm7|Gm7|A7|A7|Dm7|Dm7|G7|G7|Fmaj7|G7|Gm7|Gbmaj7|Fmaj7|G7|Gm7|Fmaj7'},
-{id:'black-orpheus',n:'Black Orpheus (Manhã de Carnaval)',c:'라틴',k:9,bpm:130,f:['AB',8],
- ch:'Am7|Am7|Bm7b5 E7|Am7|Dm7|Dm7|E7|E7|Bm7b5 E7|Am7|Bm7b5 E7|Am7|Dm7|Dm7|E7|Am7'},
-{id:'how-insensitive',n:'How Insensitive (Insensatez)',c:'라틴',k:5,bpm:120,f:['AB',8],
- ch:'Fm7|Fm7|Gm7b5 C7|Fm7|Bbm7|Bbm7|Gm7b5 C7|Fm7|Dbmaj7|Dbmaj7|Gm7b5 C7|Fm7|Gm7b5 C7|Fm7|Fm7|Fm7'},
-{id:'corcovado',n:'Corcovado (Quiet Nights of Quiet Stars)',c:'라틴',k:5,bpm:110,f:['AB',8],
- ch:'Fmaj7|Fmaj7|Em7b5 A7|Dm7|Gm7 C7|Fmaj7|Gm7 C7|Fmaj7|Am7|D7|Gm7 C7|Fmaj7|Gm7 C7|Fmaj7|Gm7 C7|Fmaj7'},
-{id:'desafinado',n:'Desafinado',c:'라틴',k:5,bpm:130,f:['AB',8],
- ch:'Fmaj7|Fmaj7|Fmaj7|Gm7 C7|Cm7 F7|Bbmaj7|Bm7b5 E7|Am7|Abmaj7|Gm7 C7|Cm7 F7|Bbmaj7|Am7b5 D7b9|Gm7 C7|Fmaj7|Fmaj7'},
-{id:'wave',n:'Wave',c:'라틴',k:2,bpm:120,f:['AABA',8],
- ch:'Dm7|Dm7|Gm7|Gm7|C7|C7|Fmaj7|Fmaj7|Dm7|Dm7|Gm7|Gm7|C7|C7|Fmaj7|Fmaj7|Gm7|C7|Fmaj7|Am7b5 D7|Gm7|G7b9|C7|C7|Dm7|Dm7|Gm7|Gm7|C7|C7|Fmaj7|Fmaj7'},
-{id:'triste',n:'Triste',c:'라틴',k:5,bpm:130,f:['AB',8],
- ch:'Fmaj7|Fmaj7|Dm7 G7|Cmaj7|Am7 D7|Gm7 C7|Fmaj7|Fmaj7|Ebmaj7|Dm7|Gm7 C7|Fmaj7|Ebmaj7|D7b9|Gm7 C7|C7'},
-{id:'meditation',n:'Meditation (Meditação)',c:'라틴',k:5,bpm:120,f:['AB',8],
- ch:'Cm7 F7|Bbmaj7|Bbm7 Eb7|Abmaj7|Gm7 C7|Fmaj7|Gm7 C7|Fmaj7|Gm7 C7|Fmaj7|Em7b5 A7|Dm7|Gm7 C7|C7|Fmaj7|Fmaj7'},
-{id:'once-i-loved',n:'Once I Loved (O Amor em Paz)',c:'라틴',k:7,bpm:130,f:['AB',8],
- ch:'Bm7 E7|Am7 D7|Gmaj7|Gmaj7|Cm7 F7|Bbmaj7|Am7 D7|Gmaj7|Bm7 E7|Am7 D7|Gmaj7|E7|Am7 D7|Gmaj7|Am7 D7|D7'},
-{id:'recorda-me',n:'Recorda Me',c:'라틴',k:9,bpm:120,f:['AB',8],
- ch:'Am7|Am7|Am7|Am7|Dm7|Dm7|E7|Am7|Cm7|Cm7|Bm7b5 E7|Am7|Dm7|Dm7|E7|Am7'},
-{id:'spain',n:'Spain',c:'라틴',k:2,bpm:130,f:['AB',8],
- ch:'Dmaj7|Cmaj7|Bm7|E7|Am7|D7|Dmaj7|Dmaj7|Em7|A7|Dmaj7|Cmaj7|Bm7|E7|Am7 D7|Dmaj7'},
-{id:'a-night-in-tunisia',n:'A Night in Tunisia',c:'라틴',k:2,bpm:130,f:['AB',8],
- ch:'Dm6|Dm6|A7#9|A7#9|Dm6|Dm6|A7#9|A7#9|Ebm7|Ebm7|Ebm7|Ebm7|Ab7|Ab7|A7#9|A7#9'},
-{id:'caravan',n:'Caravan',c:'라틴',k:2,bpm:120,f:['AB',8],
- ch:'Dm6|A7#9|Dm6|A7#9|Dm6|A7#9|Dm6|A7#9|Dm6|Dm6|Gm7|A7|Dm6|Dm6|E7b9 A7b9|Dm6'},
-{id:'st-thomas',n:'St. Thomas',c:'라틴',k:0,bpm:140,f:['AB',8],
- ch:'Cmaj7|Dm7 G7|Cmaj7|Cmaj7|Dm7 G7|Dm7 G7|Cmaj7|Cmaj7|Gm7|C7|Fmaj7|Fmaj7|Em7 A7|Dm7 G7|Cmaj7|Cmaj7'},
-{id:'afro-blue',n:'Afro Blue',c:'라틴',k:11,bpm:100,m:3,f:['AB',8],
- ch:'Bbm7|Bbm7|Ebm7|Bbm7|Bbm7|Bbm7|Ebm7|Bbm7|Bbm7|Bbm7|Ebm7|Bbm7|Bbm7|Bbm7|Ebm7|Bbm7'},
-
-/* ═══ 4. 재즈 발라드 (61~75) ═══ */
-{id:'my-funny-valentine',n:'My Funny Valentine',c:'발라드',k:0,bpm:80,f:['AABA',8],
- ch:'Cm7|Cm7|Ab7|Gm7|Cm7|Fm7|G7|G7|Cm7|Cm7|Ab7|Gm7|Cm7|Fm7|G7|G7|Abmaj7|Abmaj7|Dm7b5 G7|Cm7|Fm7|Bb7|Ebmaj7|G7|Cm7|Cm7|Ab7|Gm7|Cm7|Fm7|G7|Cm7'},
-{id:'misty',n:'Misty',c:'발라드',k:3,bpm:80,f:['AABA',8],
- ch:'Ebmaj7|Bbm7 Eb7|Abm7 Db7|Gbmaj7|Fm7 Bb7|Ebmaj7|Cm7 F7|Fm7 Bb7|Ebmaj7|Bbm7 Eb7|Abm7 Db7|Gbmaj7|Fm7 Bb7|Ebmaj7|Cm7 F7|Fm7 Bb7|Cm7|Fm7|Bbm7|Eb7|Abmaj7|Abm7 Db7|Gm7 C7|Fm7 Bb7|Ebmaj7|Bbm7 Eb7|Abm7 Db7|Gbmaj7|Fm7 Bb7|Ebmaj7|Cm7 F7|Fm7 Bb7'},
-{id:'body-and-soul',n:'Body and Soul',c:'발라드',k:1,bpm:75,f:['AABA',8],
- ch:'Dbmaj7|Dbmaj7|Gbmaj7|Gbmaj7|Fm7|Fm7|Bb7|Bb7|Dbmaj7|Dbmaj7|Gbmaj7|Gbmaj7|Fm7|Fm7|Bb7|Bb7|C7|F7|Bbm7|Ebm7|Ab7|Ab7|Abm7 Db7|Dbmaj7|Dbmaj7|Dbmaj7|Gbmaj7|Gbmaj7|Fm7|Fm7|Bb7|Bbm7 Eb7'},
-{id:'in-a-sentimental-mood',n:'In a Sentimental Mood',c:'발라드',k:10,bpm:85,f:['AABA',8],
- ch:'Bbmaj7|Bbmaj7|D7b9|Gm7|Cm7 F7|Bbmaj7|Ebm7 Ab7|Dbmaj7|Bbmaj7|Bbmaj7|D7b9|Gm7|Cm7 F7|Bbmaj7|Ebm7 Ab7|Dbmaj7|Dbmaj7|Dbmaj7|Gm7b5 C7|Fm7|Ebm7 Ab7|Dbmaj7|Dm7b5 G7|Cm7 F7|Bbmaj7|Bbmaj7|D7b9|Gm7|Cm7 F7|Bbmaj7|Ebm7 Ab7|Dbmaj7'},
-{id:'round-midnight',n:"'Round Midnight",c:'발라드',k:3,bpm:75,f:['AABA',8],
- ch:'Ebm6|Ebm6|B7#9|B7#9|Ebm6|Ebm6|C7b9|Fm7|Ebm6|Ebm6|B7#9|B7#9|Ebm6|Cm7b5|C7b9|Fm7|Ab7|Ab7|Dbmaj7|Dbmaj7|C7b9|Fm7|Bb7|Ebm6|Ebm6|Ebm6|B7#9|B7#9|Ebm6|Cm7b5|C7b9|Fm7'},
-{id:'my-foolish-heart',n:'My Foolish Heart',c:'발라드',k:10,bpm:80,f:['AABA',8],
- ch:'Bbmaj7|Bbmaj7|Am7b5 D7|Gm7|Cm7|F7|Bbmaj7|Bbmaj7|Bbmaj7|Bbmaj7|Am7b5 D7|Gm7|Cm7|F7|Bbmaj7|Bbmaj7|Ebmaj7|Ebmaj7|Dm7 G7|Cm7|F7|Bb6|Am7b5 D7|Gm7 C7|Bbmaj7|Bbmaj7|Am7b5 D7|Gm7|Cm7|F7|Bbmaj7|Bbmaj7'},
-{id:'blue-in-green',n:'Blue in Green',c:'발라드',k:5,bpm:75,f:['A',10],
- ch:'Fmaj7|Fmaj7|Ebmaj7|Ebmaj7|Dmaj7|Dmaj7|Gm9|C9|Fmaj7|Fmaj7'},
-{id:'easy-living',n:'Easy Living',c:'발라드',k:5,bpm:90,f:['AABA',8],
- ch:'Fmaj7|Fmaj7|Gm7 C7|Fmaj7|Am7 D7|Gm7 C7|Fmaj7|Fmaj7|Fmaj7|Fmaj7|Gm7 C7|Fmaj7|Am7 D7|Gm7 C7|Fmaj7|Fmaj7|D7|D7|G7|G7|C7|C7|Fmaj7|Fmaj7|Fmaj7|Fmaj7|Gm7 C7|Fmaj7|Am7 D7|Gm7 C7|Fmaj7|Fmaj7'},
-{id:'the-nearness-of-you',n:'The Nearness of You',c:'발라드',k:5,bpm:80,f:['AABA',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Bbmaj7|Bbmaj7|Am7 D7|Gm7 C7|Fmaj7|D7|Gm7 C7|Fmaj7|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7'},
-{id:'polka-dots-and-moonbeams',n:'Polka Dots and Moonbeams',c:'발라드',k:5,bpm:90,f:['AABA',8],
- ch:'Fmaj7|Fmaj7|Bm7b5 E7|Am7|Dm7|G7|C7|Fmaj7|Fmaj7|Fmaj7|Bm7b5 E7|Am7|Dm7|G7|C7|Fmaj7|D7|D7|G7|G7|C7|A7|D7 G7|C7|Fmaj7|Fmaj7|Bm7b5 E7|Am7|Dm7|G7|C7|Fmaj7'},
-{id:'angel-eyes',n:'Angel Eyes',c:'발라드',k:7,bpm:75,f:['AABA',8],
- ch:'Gm6|Gm6|Am7b5 D7|Gm6|Cm7|F7|Bbmaj7|Am7 D7|Gm6|Gm6|Am7b5 D7|Gm6|Cm7|F7|Bbmaj7|Am7 D7|Bbmaj7|Bbmaj7|Am7b5 D7|Gm6|Cm7 F7|Bbmaj7|Am7 D7|Gm6|Gm6|Gm6|Am7b5 D7|Gm6|Cm7|F7|Bbmaj7|Am7 D7'},
-{id:'i-fall-in-love-too-easily',n:'I Fall in Love Too Easily',c:'발라드',k:5,bpm:80,f:['AABA',8],
- ch:'Fmaj7|Fmaj7|Em7b5 A7|Dm7|Gm7|C7|Fmaj7|Fmaj7|Fmaj7|Fmaj7|Em7b5 A7|Dm7|Gm7|C7|Fmaj7|Fmaj7|Bbmaj7|Bbmaj7|Am7b5 D7|Gm7|C7|A7|D7 G7|C7|Fmaj7|Fmaj7|Em7b5 A7|Dm7|Gm7|C7|Fmaj7|Fmaj7'},
-{id:'you-dont-know-what-love-is',n:"You Don't Know What Love Is",c:'발라드',k:0,bpm:75,f:['AABA',8],
- ch:'Cm7|Cm7|Fm7|Bb7|Ebmaj7|Ab7|G7|Cm7|Cm7|Cm7|Fm7|Bb7|Ebmaj7|Ab7|G7|Cm7|Abmaj7|Abmaj7|Dm7b5 G7|Cm7|Fm7|Bb7|Ebmaj7 Ab7|G7|Cm7|Cm7|Fm7|Bb7|Ebmaj7|Ab7|G7|Cm7'},
-{id:'darn-that-dream',n:'Darn That Dream',c:'발라드',k:0,bpm:85,f:['AABA',8],
- ch:'Cmaj7|Cmaj7|Bm7b5 E7|Am7|Dm7|G7|Cmaj7|Dm7 G7|Cmaj7|Cmaj7|Bm7b5 E7|Am7|Dm7|G7|Cmaj7|Dm7 G7|Ebmaj7|Dm7|Gm7|C7|Fmaj7|Em7 A7|Dm7 G7|C7|Cmaj7|Cmaj7|Bm7b5 E7|Am7|Dm7|G7|Cmaj7|Cmaj7'},
-{id:'good-morning-heartache',n:'Good Morning Heartache',c:'발라드',k:5,bpm:75,f:['AABA',8],
- ch:'F6|F6|D7b9|Gm7|C7|C7|F6|C7|F6|F6|D7b9|Gm7|C7|C7|F6|C7|Bbmaj7|Bbmaj7|Cm7 F7|F6|Ab7|Gb7|Am7b5 D7|G7 C7|F6|F6|D7b9|Gm7|C7|C7|F6|F6'},
-
-/* ═══ 5. 모달 재즈 & 쿨/하드밥 (76~89) ═══ */
-{id:'so-what',n:'So What',c:'모달',k:0,bpm:135,f:['ABA',8],
- ch:'Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7'},
-{id:'cantaloupe-island',n:'Cantaloupe Island',c:'모달',k:5,bpm:100,f:['AB',8],
- ch:'F7|F7|F7|F7|Eb7|Eb7|Eb7|Eb7|F7|F7|F7|F7|Db7|Db7|F7|F7'},
-{id:'moanin',n:"Moanin'",c:'모달',k:5,bpm:105,f:['AAB',4],
- ch:'Fm7|Fm7|Fm7|Fm7|Bbm7|Bbm7|Fm7|Fm7|Db7|Db7|Fm7|C7'},
-{id:'take-five',n:'Take Five',c:'모달',k:4,bpm:170,m:5,f:['AB',8],
- ch:'Em7|Em7|Em7|Em7|Bm7|Bm7|Em7|Em7|Gmaj7|Gmaj7|Am7|Am7|Bm7|Bm7|Em7|Em7'},
-{id:'giant-steps',n:'Giant Steps',c:'모달',k:11,bpm:200,f:['AABA',8],
- ch:'Bmaj7 D7|Gmaj7 Bb7|Ebmaj7|Ebmaj7|Am7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7|Bmaj7 D7|Gmaj7 Bb7|Ebmaj7|Ebmaj7|Am7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7|Fm7 Bb7|Ebmaj7|Am7 D7|Gmaj7|Bm7 E7|Am7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7 D7|Gmaj7 Bb7|Ebmaj7|Ebmaj7|Am7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7'},
-{id:'equinox',n:'Equinox',c:'모달',k:0,bpm:100,f:['AAB',4],
- ch:'Cm7|Cm7|Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|Ab7|G7|Cm7|Cm7'},
-{id:'the-sidewinder',n:'The Sidewinder',c:'모달',k:0,bpm:130,f:['AAB',4],
- ch:'C7|C7|C7|C7|F7|F7|C7|C7|G7|F7|C7|G7'},
-{id:'watermelon-man',n:'Watermelon Man',c:'모달',k:5,bpm:100,f:['AB',8],
- ch:'F7|F7|F7|F7|Bb7|Bb7|Bb7|Bb7|F7|F7|F7|F7|G7|F7|C7|F7'},
-{id:'song-for-my-father',n:'Song for My Father',c:'모달',k:5,bpm:130,f:['AB',8],
- ch:'Fm7|Fm7|Fm7|Fm7|Eb7|Eb7|Eb7|Eb7|Fm7|Fm7|Fm7|Fm7|Db7|Db7|C7 Fm7|Fm7'},
-{id:'four',n:'Four',c:'모달',k:3,bpm:140,f:['AABA',8],
- ch:'Ebmaj7|Ebmaj7|Abm7 Db7|Gbmaj7|Fm7 Bb7|Ebmaj7|Cm7 F7|Bbm7 Eb7|Ebmaj7|Ebmaj7|Abm7 Db7|Gbmaj7|Fm7 Bb7|Ebmaj7|Cm7 F7|Bbm7 Eb7|Bbm7 Eb7|Abmaj7|Dm7 G7|Cm7 F7|Bbm7 Eb7|Abmaj7|Dm7 G7|Cm7 F7|Ebmaj7|Ebmaj7|Abm7 Db7|Gbmaj7|Fm7 Bb7|Ebmaj7|Cm7 F7|Bbm7 Eb7'},
-{id:'nardis',n:'Nardis',c:'모달',k:0,bpm:90,f:['AB',8],
- ch:'Cm7|Cm7|Bbmaj7|Abmaj7|G7b9|Cm7|G7b9|Cm7|Fm7|Fm7|Bbm7 Eb7|Abmaj7|G7b9|Cm7|G7b9|Cm7'},
-{id:'soul-eyes',n:'Soul Eyes',c:'모달',k:5,bpm:100,f:['AABA',8],
- ch:'Fmaj7|Fmaj7|Em7b5 A7|Dm7|Bm7b5 E7|Am7|Dm7 G7|Cmaj7|Fmaj7|Fmaj7|Em7b5 A7|Dm7|Bm7b5 E7|Am7|Dm7 G7|Cmaj7|Cm7 F7|Bbmaj7|Am7 D7|Gm7 C7|Fmaj7|D7|Gm7 C7|C7|Fmaj7|Fmaj7|Em7b5 A7|Dm7|Bm7b5 E7|Am7|Dm7 G7|Cmaj7'},
-{id:'blue-train',n:'Blue Train',c:'모달',k:3,bpm:140,f:['AB',8],
- ch:'Ebm7|Ebm7|Ebm7|Ebm7|Bbm7|Bbm7|Ebm7|Ebm7|Fm7 Bb7|Ebmaj7|Abm7 Db7|Gbmaj7|Cm7b5 F7|Bbm7 Eb7|Abm7 Db7|Gbmaj7'},
-
-/* ═══ 6. 비밥 & 재즈 왈츠 및 기타 필수곡 (90~100) ═══ */
-{id:'confirmation',n:'Confirmation',c:'비밥·왈츠',k:5,bpm:180,f:['AABA',8],
- ch:'Fmaj7|Gm7 C7|Am7 D7|Gm7 C7|Fmaj7|D7|Gm7 C7|C7|Fmaj7|Gm7 C7|Am7 D7|Gm7 C7|Fmaj7|D7|Gm7 C7|C7|Am7b5 D7|Gm7 C7|Fmaj7|D7|Gm7 C7|C7|Fmaj7|C7|Fmaj7|Gm7 C7|Am7 D7|Gm7 C7|Fmaj7|D7|Gm7 C7|C7'},
-{id:'someday-my-prince-will-come',n:'Someday My Prince Will Come',c:'비밥·왈츠',k:10,bpm:140,m:3,f:['AABA',8],
- ch:'Bbmaj7|Cm7 F7|Bbmaj7|D7b9|Gm7|Cm7 F7|Bbmaj7|F7|Bbmaj7|Cm7 F7|Bbmaj7|D7b9|Gm7|Cm7 F7|Bbmaj7|F7|Ebmaj7|Ebmaj7|Dbmaj7|Dbmaj7|F7|Cm7 F7|Bbmaj7|Cm7 F7|Bbmaj7|Cm7 F7|Bbmaj7|D7b9|Gm7|Cm7 F7|Bbmaj7|Bbmaj7'},
-{id:'alice-in-wonderland',n:'Alice in Wonderland',c:'비밥·왈츠',k:5,bpm:130,m:3,f:['AABA',8],
- ch:'Fmaj7|Gm7 C7|Fmaj7|D7|Gm7|C7|Fmaj7|C7|Fmaj7|Gm7 C7|Fmaj7|D7|Gm7|C7|Fmaj7|C7|Bbmaj7|Bbmaj7|Am7 D7|Gm7|C7|A7|Dm7 G7|C7|Fmaj7|Gm7 C7|Fmaj7|D7|Gm7|C7|Fmaj7|Fmaj7'},
-{id:'summertime',n:'Summertime',c:'비밥·왈츠',k:9,bpm:95,f:['AB',8],
- ch:'Am7|Am7|Dm7|Am7|Cmaj7|Bm7b5 E7|Am7|Am7|Dm7|Dm7|Cmaj7|Bm7b5 E7|Am7|Am7|Am7|Am7'},
-{id:'bluesette',n:'Bluesette',c:'비밥·왈츠',k:10,bpm:160,m:3,f:['AABA',8],
- ch:'Bbmaj7|Abm7 Db7|Gbmaj7|Emaj7|Bbmaj7|Abm7 Db7|Gbmaj7|F#7|Bbmaj7|Abm7 Db7|Gbmaj7|Emaj7|Bbmaj7|Abm7 Db7|Gbmaj7|F#7|Bm7 E7|Amaj7|D7b9|Gmaj7|Cm7 F7|Bbmaj7|Abm7 Db7|Gbmaj7 F#7|Bbmaj7|Abm7 Db7|Gbmaj7|Emaj7|Bbmaj7|Abm7 Db7|Gbmaj7|Bbmaj7'},
-{id:'waltz-for-debby',n:'Waltz for Debby',c:'비밥·왈츠',k:5,bpm:140,m:3,f:['AABA',8],
- ch:'Fmaj7|Em7 A7|Dm7|Gm7 C7|Fmaj7|Em7 A7|Dm7 G7|C7|Fmaj7|Em7 A7|Dm7|Gm7 C7|Fmaj7|Em7 A7|Dm7 G7|C7|Ebmaj7|Dm7|Gm7 C7|Fmaj7|Ebmaj7|Dbmaj7|Am7 D7|Gm7 C7|Fmaj7|Em7 A7|Dm7|Gm7 C7|Fmaj7|Em7 A7|Dm7 G7|C7'},
-{id:'yardbird-suite',n:'Yardbird Suite',c:'비밥·왈츠',k:0,bpm:150,f:['AABA',8],
- ch:'Cmaj7|Cmaj7|D7b9|G7|Cmaj7|A7|D7b9|G7|Cmaj7|Cmaj7|D7b9|G7|Cmaj7|A7|D7b9|G7|E7|A7|D7|G7|C7|A7|D7 G7|C7|Cmaj7|Cmaj7|D7b9|G7|Cmaj7|A7|D7b9|G7'},
-{id:'ornithology',n:'Ornithology',c:'비밥·왈츠',k:7,bpm:180,f:['AABA',8],
- ch:'Gmaj7|Bm7 E7|Am7 D7|Gmaj7|C7 B7|Bbm7 Eb7|Am7 D7|Gmaj7|Gmaj7|Bm7 E7|Am7 D7|Gmaj7|C7 B7|Bbm7 Eb7|Am7 D7|Gmaj7|Am7 D7|Gmaj7|Bm7 E7|Am7 D7|Gmaj7|Bm7 E7|Am7 D7|D7|Gmaj7|Bm7 E7|Am7 D7|Gmaj7|C7 B7|Bbm7 Eb7|Am7 D7|Gmaj7'},
-{id:'there-is-no-greater-love',n:'There Is No Greater Love',c:'비밥·왈츠',k:0,bpm:140,f:['AABA',8],
- ch:'Cmaj7|Cmaj7|Bb7|A7|Dm7|G7|Cmaj7|Cmaj7|Cmaj7|Cmaj7|Bb7|A7|Dm7|G7|Cmaj7|Cmaj7|Gm7 C7|Fmaj7|Em7 A7|Dm7|G7|C7|Am7 D7|Dm7 G7|Cmaj7|Cmaj7|Bb7|A7|Dm7|G7|Cmaj7|Cmaj7'},
-{id:'stardust',n:'Stardust',c:'비밥·왈츠',k:0,bpm:85,f:['AABA',8],
- ch:'Cmaj7|Cmaj7|Dm7|G7|Cmaj7|E7|Am7|Dm7 G7|Cmaj7|Cmaj7|Dm7|G7|Cmaj7|E7|Am7|Dm7 G7|Fmaj7|Fmaj7|Em7 A7|Dm7|G7|C7|Fmaj7|C7|Cmaj7|Cmaj7|Dm7|G7|Cmaj7|E7|Am7|Dm7 G7'},
-{id:'sweet-lorraine',n:'Sweet Lorraine',c:'비밥·왈츠',k:5,bpm:130,f:['AABA',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Bbmaj7|Bbmaj7|Am7 D7|Gm7 C7|Fmaj7|D7|Gm7 C7|C7|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7'}
-);
-
+{id:'blue-in-green',n:'Blue in Green',c:'발라드',k:2,bpm:60,f:['A',10],
+ x:'10마디. 7마디는 판본에 따라 Dm6',
+ ch:'Bbmaj7#11|A7#9|Dm7 Db7|Cm7 F7|Bbmaj7|A7#9|Dm7|E7#9|Am7|Dm7'},
+{id:'blue-monk',n:'Blue Monk',c:'블루스',k:10,bpm:120,f:['AAB',4],
+ ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
+{id:'blues-for-alice',n:'Blues for Alice',c:'스윙',k:5,bpm:170,f:['AAB',4],
+ x:'비밥 블루스(찰리 파커). 마지막 두 마디 턴어라운드는 판본에 따라 다름',
+ ch:'Fmaj7|Em7b5 A7b9|Dm7 G7|Cm7 F7|Bb7|Bbm7 Eb7|Am7 D7|Abm7 Db7|Gm7|C7|Fmaj7 D7|Gm7 C7'},
+{id:'blues-in-the-closet',n:'Blues in the Closet',c:'비밥',k:5,bpm:180,f:['AAB',4],
+ ch:'F7|Bb7|F7|F7|Bb7|Bb7|F7|F7|C7|Bb7|F7|C7'},
+{id:'c-jam-blues',n:'C Jam Blues',c:'스윙',k:0,bpm:150,f:['AAB',4],
+ x:'12마디 C 블루스',
+ ch:'C7|F7|C7|C7|F7|F7|C7|C7|G7|F7|C7|G7'},
+{id:'cantaloupe-island',n:'Cantaloupe Island',c:'펑키',k:5,bpm:110,f:['ABCA',4],
+ x:'16마디(F m7 · D♭7 · D m7 · F m7 각 4마디)',
+ ch:'Fm7|Fm7|Fm7|Fm7|Db7|Db7|Db7|Db7|Dm7|Dm7|Dm7|Dm7|Fm7|Fm7|Fm7|Fm7'},
+{id:'chameleon',n:'Chameleon',c:'펑키',k:10,bpm:100,f:['A',8],
+ x:'솔로 섹션 2마디 뱀프(B♭m7 · E♭7)만 수록',
+ ch:'Bbm7|Eb7|Bbm7|Eb7|Bbm7|Eb7|Bbm7|Eb7'},
+{id:'confirmation',n:'Confirmation',c:'스윙',k:5,bpm:200,f:['AABA',8],
+ x:'A 섹션 6~8마디(Am7 D7 | G7 | Gm7 C7)는 확인 필요. 브리지는 확신',
+ ch:'Fmaj7|Em7b5 A7|Dm7 G7|Cm7 F7|Bb7|Am7 D7|G7|Gm7 C7|Fmaj7|Em7b5 A7|Dm7 G7|Cm7 F7|Bb7|Am7 D7|Gm7 C7|Fmaj7|Cm7|F7|Bbmaj7|Bbmaj7|Ebm7|Ab7|Dbmaj7|Gm7 C7|Fmaj7|Em7b5 A7|Dm7 G7|Cm7 F7|Bb7|Am7 D7|Gm7 C7|Fmaj7'},
+{id:'fine-and-mellow',n:'Fine and Mellow',c:'블루스',k:0,bpm:80,f:['AAB',4],
+ ch:'C7|F7|C7|C7|F7|F7|C7|C7|G7|F7|C7|G7'},
+{id:'fly-me-to-the-moon',n:'Fly Me to the Moon',c:'스윙',k:0,bpm:130,f:['ABAC',8],
+ x:'4·12·20마디 세부(C7·Am7)는 판본마다 조금씩 다름',
+ ch:'Am7|Dm7|G7|Cmaj7 C7|Fmaj7|Bm7b5|E7|Am7 A7|Dm7|G7|Cmaj7|Am7|Dm7|G7|Cmaj7|Bm7b5 E7|Am7|Dm7|G7|Cmaj7 C7|Fmaj7|Bm7b5|E7|Am7 A7|Dm7|G7|Em7|A7|Dm7|G7|Cmaj7|Bm7b5 E7'},
+{id:'footprints',n:'Footprints',c:'스윙',k:0,bpm:160,m:3,f:['AAB',8],
+ x:'원곡은 6/4박 12마디 — 앱은 3/4박 24마디로 나눠 적음. 17~22마디(F♯ø B7 E7♯9 A7♯9 D7♯9 D♭7♯11)는 확인 권장',
+ ch:'Cm7|Cm7|Cm7|Cm7|Cm7|Cm7|Cm7|Cm7|Fm7|Fm7|Fm7|Fm7|Cm7|Cm7|Cm7|Cm7|F#m7b5|B7|E7#9|A7#9|D7#9|Db7#11|Cm7|Cm7'},
+{id:'freedom-jazz-dance',n:'Freedom Jazz Dance',c:'펑키',k:10,bpm:130,f:['AB',8],
+ x:'B♭7 한 코드 위 16마디',
+ ch:'Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7'},
+{id:'giant-steps',n:'Giant Steps',c:'스윙',k:11,bpm:220,f:['AB',8],
+ x:'16마디',
+ ch:'Bmaj7 D7|Gmaj7 Bb7|Ebmaj7|Am7 D7|Gmaj7 Bb7|Ebmaj7 F#7|Bmaj7|Fm7 Bb7|Ebmaj7|Am7 D7|Gmaj7|C#m7 F#7|Bmaj7|Fm7 Bb7|Ebmaj7|C#m7 F#7'},
+{id:'i-got-rhythm',n:'I Got Rhythm',c:'블루스',k:10,bpm:160,f:['AABA',8],
+ ch:'Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7|D7|D7|G7|G7|C7|C7|F7|F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7'},
+{id:'impressions',n:'Impressions',c:'스윙',k:2,bpm:240,f:['AABA',8],
+ x:'So What과 같은 형식(D 도리안 16 · E♭ 도리안 8 · D 도리안 8)',
+ ch:'Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7'},
+{id:'jumpin-with-symphony-sid',n:'Jumpin\' with Symphony Sid',c:'블루스',k:10,bpm:160,f:['AAB',4],
+ ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
+{id:'kansas-city',n:'Kansas City',c:'리듬앤블루스',k:0,bpm:130,f:['AAB',4],
+ ch:'C7|F7|C7|C7|F7|F7|C7|C7|G7|F7|C7|G7'},
+{id:'lady-bird',n:'Lady Bird',c:'스윙',k:0,bpm:160,f:['AB',8],
+ x:'16마디(태드 대머런). 마지막 두 마디가 「태드 대머런 턴어라운드」',
+ ch:'Cmaj7|Cmaj7|Fm7|Bb7|Cmaj7|Cmaj7|Bbm7|Eb7|Abmaj7|Abmaj7|Am7|D7|Dm7|G7|Cmaj7 Ebmaj7|Abmaj7 Dbmaj7'},
+{id:'maiden-voyage',n:'Maiden Voyage',c:'펑키',k:2,bpm:120,f:['AABA',8],
+ x:'sus4 코드 4마디씩. 브리지 둘째 코드(C♯m7)는 확인 권장',
+ ch:'D7sus4|D7sus4|D7sus4|D7sus4|F7sus4|F7sus4|F7sus4|F7sus4|D7sus4|D7sus4|D7sus4|D7sus4|F7sus4|F7sus4|F7sus4|F7sus4|Eb7sus4|Eb7sus4|Eb7sus4|Eb7sus4|C#m7|C#m7|C#m7|C#m7|D7sus4|D7sus4|D7sus4|D7sus4|F7sus4|F7sus4|F7sus4|F7sus4'},
+{id:'misty',n:'Misty',c:'발라드',k:3,bpm:66,f:['AABA',8],
+ x:'A 섹션은 확신. 15~16마디와 브리지 21~24마디(Am7 | D7 | Gm7♭5 C7♭9 | Fm7 B♭7)는 확인 필요',
+ ch:'Ebmaj7|Bbm7 Eb7|Abmaj7|Abm7 Db7|Ebmaj7 Cm7|Fm7 Bb7|Gm7 C7|Fm7 Bb7|Ebmaj7|Bbm7 Eb7|Abmaj7|Abm7 Db7|Ebmaj7 Cm7|Fm7 Bb7|Eb6|Eb6|Bbm7|Eb7b9|Abmaj7|Abmaj7|Am7|D7|Gm7b5 C7b9|Fm7 Bb7|Ebmaj7|Bbm7 Eb7|Abmaj7|Abm7 Db7|Ebmaj7 Cm7|Fm7 Bb7|Eb6|Eb6'},
+{id:'mr-pc',n:'Mr. P.C.',c:'블루스',k:0,bpm:140,f:['AAB',4],
+ ch:'Cm7|Cm7|Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|Ab7|G7|Cm7|G7'},
+{id:'oleo',n:'Oleo',c:'블루스',k:10,bpm:180,f:['AABA',8],
+ ch:'Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7|D7|D7|G7|G7|C7|C7|F7|F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Eb7|Ab7|Dm7 G7|Cm7 F7'},
+{id:'one-oclock-jump',n:'One O\'Clock Jump',c:'스윙',k:10,bpm:180,f:['AAB',4],
+ ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
+{id:'oye-como-va',n:'Oye Como Va',c:'라틴',k:9,bpm:130,f:['AB',8],
+ ch:'Am7|Am7|D7|D7|Am7|Am7|D7|D7|Am7|Am7|D7|D7|Am7|Am7|D7|Am7'},
+{id:'reunion-blues',n:'Reunion Blues',c:'블루스',k:10,bpm:180,f:['AAB',4],
+ ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
+{id:'sandu',n:'Sandu',c:'비밥',k:3,bpm:130,f:['AAB',4],
+ ch:'Eb7|Ab7|Eb7|Eb7|Ab7|Ab7|Eb7|Bb7|Eb7|Ab7|Eb7|Bb7'},
+{id:'satin-doll',n:'Satin Doll',c:'스윙',k:0,bpm:130,f:['AABA',8],
+ x:'브리지는 판본에 따라 Gm7 C7·Am7 D7을 마디마다 반복해 적기도 함',
+ ch:'Dm7 G7|Dm7 G7|Em7 A7|Em7 A7|Am7 D7|Abm7 Db7|Cmaj7|Cmaj7|Dm7 G7|Dm7 G7|Em7 A7|Em7 A7|Am7 D7|Abm7 Db7|Cmaj7|Cmaj7|Gm7|C7|Fmaj7|Fmaj7|Am7|D7|Dm7|G7|Dm7 G7|Dm7 G7|Em7 A7|Em7 A7|Am7 D7|Abm7 Db7|Cmaj7|Cmaj7'},
+{id:'so-what',n:'So What',c:'스윙',k:2,bpm:136,f:['AABA',8],
+ x:'D 도리안 16 · E♭ 도리안 8 · D 도리안 8',
+ ch:'Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Ebm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7'},
+{id:'solar',n:'Solar',c:'스윙',k:0,bpm:160,f:['A',12],
+ x:'12마디(마일스 데이비스)',
+ ch:'Cmmaj7|Cmmaj7|Gm7|C7|Fmaj7|Fmaj7|Fm7|Bb7|Ebmaj7|Ebm7 Ab7|Dbmaj7|Dm7b5 G7'},
+{id:'song-for-my-father',n:'Song for My Father',c:'라틴',k:5,bpm:120,f:['AAB',8],
+ x:'B 섹션 5~6마디(E♭7 | D♭7 C7)는 확인 권장',
+ ch:'Fm7|Fm7|Eb7|Eb7|Db7|C7|Fm7|Fm7|Fm7|Fm7|Eb7|Eb7|Db7|C7|Fm7|Fm7|Eb7|Eb7|Fm7|Fm7|Eb7|Db7 C7|Fm7|Fm7'},
+{id:'stella-by-starlight',n:'Stella by Starlight',c:'스윙',k:10,bpm:120,f:['ABCD',8],
+ x:'17~18마디는 G7(♯5)로 적기도 함',
+ ch:'Em7b5|A7b9|Cm7|F7|Fm7|Bb7|Ebmaj7|Ab7|Bbmaj7|Em7b5 A7|Dm7|Bbm7 Eb7|Fmaj7|Em7b5 A7|Am7b5|D7b9|G7|G7|Cm7|Cm7|Ab7|Ab7|Bbmaj7|Bbmaj7|Em7b5|A7b9|Dm7b5|G7b9|Cm7b5|F7b9|Bbmaj7|Bbmaj7'},
+{id:'straight-no-chaser',n:'Straight, No Chaser',c:'블루스',k:5,bpm:135,f:['AAB',4],
+ ch:'F7|Bb7|F7|F7|Bb7|Bb7|F7|F7|C7|Bb7|F7|C7'},
+{id:'take-the-a-train',n:'Take the "A" Train',c:'스윙',k:0,bpm:170,f:['AABA',8],
+ x:'3~4마디 D7(♭5)는 앱 표기 D7♯11',
+ ch:'C6|C6|D7#11|D7#11|Dm7|G7|C6|Dm7 G7|C6|C6|D7#11|D7#11|Dm7|G7|C6|C6|Fmaj7|Fmaj7|Fmaj7|Fmaj7|D7|D7|Dm7|G7|C6|C6|D7#11|D7#11|Dm7|G7|C6|C6'},
+{id:'tenor-madness',n:'Tenor Madness',c:'블루스',k:10,bpm:130,f:['AAB',4],
+ ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
+{id:'girl-from-ipanema',n:'The Girl from Ipanema',c:'라틴',k:5,bpm:130,f:['AABBA',8],
+ x:'40마디(브리지 16마디). 보사노바',
+ ch:'Fmaj7|Fmaj7|G7|G7|Gm7|Gb7|Fmaj7|Gb7|Fmaj7|Fmaj7|G7|G7|Gm7|Gb7|Fmaj7|Fmaj7|Gbmaj7|Gbmaj7|B7|B7|F#m7|F#m7|D7|D7|Gm7|Gm7|Eb7|Eb7|Am7|D7b9|Gm7|C7b9|Fmaj7|Fmaj7|G7|G7|Gm7|Gb7|Fmaj7|Fmaj7'},
+{id:'hucklebuck',n:'The Hucklebuck',c:'블루스',k:5,bpm:130,f:['AAB',4],
+ ch:'F7|Bb7|F7|F7|Bb7|Bb7|F7|F7|C7|Bb7|F7|C7'},
+{id:'the-thrill-is-gone',n:'The Thrill Is Gone',c:'블루스',k:11,bpm:90,f:['AAB',4],
+ ch:'Bm7|Bm7|Bm7|Bm7|Em7|Em7|Bm7|Bm7|Gb7|Gb7|Em7 Gb7|Bm7'},
+{id:'there-will-never-be-another-you',n:'There Will Never Be Another You',c:'스윙',k:3,bpm:150,f:['ABAC',8],
+ x:'27~30마디는 판본에 따라 세부가 다름(E♭maj7 A7 | Fm7 B♭7 등)',
+ ch:'Ebmaj7|Ebmaj7|Dm7b5|G7b9|Cm7|Cm7|Bbm7|Eb7|Abmaj7|Db7|Ebmaj7|Cm7|F7|F7|Fm7|Bb7|Ebmaj7|Ebmaj7|Dm7b5|G7b9|Cm7|Cm7|Bbm7|Eb7|Abmaj7|Db7|Ebmaj7|Cm7|Fm7|Bb7|Ebmaj7|Fm7 Bb7'},
+{id:'things-aint-what-they-used-to-be',n:'Things Ain\'t What They Used to Be',c:'블루스',k:10,bpm:140,f:['AAB',4],
+ ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'}
+];
 /* ── 파서 + SONGDB 구성 ── */
 function parseCh(ch){
-  const m=/^([A-G])([b#\u266d\u266f]?)((?:maj7|m7b5|m7|m6|m9|dim7|7b9|7#9|7|6|9))$/.exec(ch.trim());
+  const m=/^([A-G])([b#\u266d\u266f]?)((?:maj7#11|maj7|mmaj7|m7b5|m7|m6|m9|dim7|7sus4|7b9|7#9|7#11|7|6|9))$/.exec(ch.trim());
   if(!m)throw new Error('bad chord: '+ch);
   const base={C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]];
   const r=(base+(m[2]==='b'||m[2]==='\u266d'?-1:(m[2]==='#'||m[2]==='\u266f')?1:0)+12)%12;
@@ -3004,574 +3008,6 @@ RAW_SONGS.forEach(s=>{SONGDB[s.id]={name:s.n,c:s.c,key:s.k,bpm:s.bpm,bpb:s.m||4,
 SONGDB.p251={name:'메이저 Ⅱ-Ⅴ-Ⅰ (연습)',c:'연습',key:0,bpm:120,bpb:4,form:PROGS.p251.form,bars:PROGS.p251.bars};
 SONGDB.blues12={name:'블루스 12마디 (연습)',c:'연습',key:0,bpm:120,bpb:4,form:PROGS.blues.form,bars:PROGS.blues.bars};
 SONGDB.m25={name:'마이너 Ⅱ-Ⅴ 연쇄 (연습)',c:'연습',key:0,bpm:120,bpb:4,form:PROGS.autumn.form,bars:PROGS.autumn.bars};
-/* ── 리얼북 1권 추가 수록 (v0.15) ──
-   코드 진행만 수록 — 원곡 멜로디·가사 없음. 진행은 "일반적으로 연주되는 스탠다드" 기준이며
-   판본(리얼북 판·연주자별 악보)에 따라 세부가 다를 수 있다. */
-RAW_SONGS.push(
-{id:'afternoon-in-paris',n:'Afternoon In Paris',c:'스윙',k:0,bpm:140,f:['AABA',8],
- ch:'Cmaj7|Bm7b5 E7|Am7|D7b9|Dm7|G7|Cmaj7|Dm7 G7|Fmaj7|Em7 A7|Dm7|G7|Cmaj7|A7|Dm7 G7|Cmaj7|Cmaj7|Bm7b5 E7|Am7|D7b9|Dm7|G7|Cmaj7|Dm7 G7|Fm7|Bb7|Ebmaj7|Ab7|Dbmaj7|Dbm7 Gb7|Cmaj7|Dm7 G7'},
-{id:'airegin',n:'Airegin',c:'비밥·왈츠',k:7,bpm:200,f:['AABA',8],
- ch:'Gm7|C7|Gm7|C7|F7|Bb7|Ebmaj7|D7b9|Gm7|C7|Gm7|C7|F7|Bb7|Ebmaj7|D7b9|Bm7b5 E7|Am7|D7|Gm7|C7|Fmaj7|Bb7|Am7b5 D7b9|Gm7|C7|Gm7|C7|F7|Bb7|Ebmaj7|Gm6'},
-{id:'alfie',n:'Alfie',c:'발라드',k:2,bpm:90,f:['ABAC',8],
- ch:'Dm7|Gm7|Dm7|A7b9|Dm7|Bbmaj7|Gm7|A7b9|Gm7|C7|Fmaj7|A7b9|Dm7|Gm7 C7|Fmaj7|A7b9|Bbmaj7|Am7b5 D7b9|Gm7|Gm7 F7|Bbmaj7|Am7b5 D7b9|Gm7|A7b9|Dm7|Gm7|Dm7|A7b9|Dm7|Gm7 A7|Dm7|A7b9'},
-{id:'all-blues',n:'All Blues',c:'모달',k:7,bpm:130,f:['AB',8],
- ch:'G7|G7|G7|G7|G7|G7|G7|G7|C7|Bb7|G7|G7|D7b9|Eb7#9 D7b9 Eb7#9 D7b9|G7|D7b9'},
-{id:'all-by-myself',n:'All By Myself',c:'발라드',k:0,bpm:95,f:['ABAC',8],
- ch:'Cmaj7|Em7 A7|Dm7|G7|Cmaj7|Am7|Dm7|G7|Fmaj7|Bm7b5 E7|Am7|D7|G7|C7|Fmaj7|Cmaj7|Cmaj7|Em7 A7|Dm7|G7|Cmaj7|A7|Dm7|G7|Fmaj7|Fm7|Em7|A7|Dm7|G7|Cmaj7|Dm7 G7'},
-{id:'all-of-you',n:'All Of You',c:'스윙',k:3,bpm:140,f:['ABAC',8],
- ch:'Ebmaj7|Cm7|Fm7 Bb7|Ebmaj7|Abmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|Am7b5 D7b9|Gm7|C7|Fm7 Bb7|Ebmaj7|Bb7|Ebmaj7|Bb7|Ebmaj7|Cm7|Fm7 Bb7|Ebmaj7|Abmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|Am7b5 D7b9|Gm7|C7|Fm7 Bb7|Bbm7 Eb7|Abmaj7|Db7|Ebmaj7'},
-{id:'alright-okay-you-win',n:'Alright, Okay, You Win',c:'블루스',k:3,bpm:120,f:['AB',8],
- ch:'Eb6|Eb6|Ebm6|Eb6|Ab7|Ab7|Eb6|Eb6|Bb7|A7 Ab7|Eb6|Bb7|Eb6|Eb6|Ebm6|Eb6|Ab7|Ab7|Eb6|Eb6|Fm7 Bb7|Eb7|Abmaj7|Bb7|Eb6|Eb6|Ebm6|Eb6|Ab7|Ab7|Eb6|Bb7'},
-{id:'always',n:'Always',c:'스윙',k:7,bpm:130,f:['AABA',8],
- ch:'Gmaj7|F#m7b5 B7|Em7|A7|Dmaj7|Bm7|Em7 A7|Dmaj7|Gmaj7|F#m7b5 B7|Em7|A7|Am7|D7|Gmaj7|Dm7 G7|Cmaj7|A7|Dm7|G7|Gmaj7|E7|Am7|D7|Gmaj7|F#m7b5 B7|Em7|A7|Dmaj7|Bm7|Em7 A7|Dm7 G7'},
-{id:'apple-honey',n:'Apple Honey',c:'블루스',k:10,bpm:150,f:['AB',8],
- ch:'Bb6|Eb7|Bb6|Bb6|Eb7|Eb7|Bb6|F7|Bb6|Eb7|Bb6|Bb6|Eb7|Eb7|Bb6|Bb6|Dm7b5 G7b9|Cm7 F7|Bb6|Bb6|Eb7|Eb7|Bb6|Bb6|F7|F7|Bb6|G7|Cm7|F7|Bb6|F7'},
-{id:'april-in-paris',n:'April In Paris',c:'스윙',k:3,bpm:130,f:['AABA',8],
- ch:'Ebmaj7|Ab7|Ebmaj7|Gm7 C7|Fm7|Bb7|Ebmaj7|Cm7 F7|Ebmaj7|Ab7|Ebmaj7|Gm7 C7|Fm7|Bb7|Ebmaj7|Fm7 Bb7|Abmaj7|Db7|Gb7|B7|Ebmaj7|Ab7|Dbm7 Gb7|Fm7 Bb7|Ebmaj7|Ab7|Ebmaj7|Gm7 C7|Fm7|Bb7|Ebmaj7|Fm7 Bb7'},
-{id:'autumn-in-new-york',n:'Autumn In New York',c:'발라드',k:5,bpm:90,f:['ABAC',8],
- ch:'Fmaj7|D7b9|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Fmaj7|D7b9|Gm7|C7|Fmaj7|Bbmaj7|Am7b5 D7b9|Gm7 C7|Bbmaj7|Eb7|Abmaj7|Dbmaj7|Gbmaj7|B7|Ebmaj7|Am7b5 D7b9|Gm7|C7|Fmaj7|D7|Gm7|C7|Fmaj7|Gm7 C7'},
-{id:'bessies-blues',n:"Bessie's Blues",c:'블루스',k:10,bpm:150,f:['AB',8],
- ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Ebm7|Bb7|Bb7|F7|Cm7 F7|Bb7|F7|Bb7|Eb7|Bb7|Bb7|Eb7|Ebm7|Bb7|Bb7|F7|Cm7 F7|Bb7|Bb7'},
-{id:'bewitched',n:'Bewitched',c:'스윙',k:0,bpm:120,f:['ABAC',8],
- ch:'Cmaj7|Em7b5 A7|Dm7|G7|Cmaj7|Bm7b5 E7|Am7|D7|Dm7|G7|Cmaj7|Am7 D7|Dm7|G7|Em7 A7|Dm7 G7|Cmaj7|Em7b5 A7|Dm7|G7|Cmaj7|Bm7b5 E7|Am7|D7|D7b9|G7|Cmaj7|A7|Dm7|G7|Cmaj7|Dm7 G7'},
-{id:'black-coffee',n:'Black Coffee',c:'발라드',k:0,bpm:85,f:['AB',8],
- ch:'Cm7|Fm7|Cm7|Cm7|Ab7|G7b9|Cm7|Cm7|Fm7|Bb7|Eb7|Ab7|G7b9|C7b9|Fm7|G7b9|Cm7|Fm7|Cm7|Cm7|Ab7|G7b9|Cm7|Cm7|Fm7|Bb7|Eb7|Ab7|G7b9|C7b9|Fm7|G7b9'},
-{id:'blue-room',n:'The Blue Room',c:'스윙',k:10,bpm:140,f:['AABA',8],
- ch:'Bb6|G7|Cm7|F7|Bb6|G7|Cm7 F7|Bb6|Bb6|G7|Cm7|F7|Bb6|G7|Cm7 F7|Bb6|D7|G7|C7|F7|Bb6|G7|Cm7 F7|Bb6|Bb6|G7|Cm7|F7|Bb6|G7|Cm7 F7|Bb6'},
-{id:'boplicity',n:'Boplicity (Be Bop Lives)',c:'스윙',k:5,bpm:120,f:['AABA',8],
- ch:'Fmaj7|Ebmaj7|Abmaj7|Gm7 C7|Fm7|Bb7|Ebmaj7|Am7b5 D7b9|Fmaj7|Ebmaj7|Abmaj7|Gm7 C7|Fm7|Bb7|Ebmaj7|Fm7 Bb7|Abmaj7|Db7|Gb7|B7|Ebmaj7|Ab7|Dbm7 Gb7|Fm7 Bb7|Fmaj7|Ebmaj7|Abmaj7|Gm7 C7|Fm7|Bb7|Ebmaj7|Fm7 Bb7'},
-{id:'broadway',n:'Broadway',c:'스윙',k:10,bpm:140,f:['AABA',8],
- ch:'Bb6|Cm7 F7|Bb6 G7|Cm7 F7|F6|F6|F7|F7|Bb6|Cm7 F7|Bb6 G7|Cm7 F7|F6|F6|F7|Bb7|Bb6|Cm7 F7|Bb6 G7|Cm7 F7|F6|F6|F7|F7|Bb6|Cm7 F7|Bb6 G7|Cm7 F7|F6|Bb7|Bb6|F7'},
-{id:'but-beautiful',n:'But Beautiful',c:'발라드',k:7,bpm:85,f:['ABAC',8],
- ch:'Gmaj7|Bm7b5 E7|Am7 D7|Gmaj7|Bm7 E7|Am7 D7|Bm7b5 E7|Am7 D7|Cm7|F7|Bbmaj7|Ebmaj7|Am7|D7|Gmaj7|Em7 A7|Gmaj7|Bm7b5 E7|Am7 D7|Gmaj7|Bm7 E7|Am7 D7|Bm7b5 E7|Am7 D7|Cm7|F7|Bbmaj7|Ebmaj7|Am7|D7|Gmaj7|Dm7 G7'},
-{id:'cest-si-bon',n:"C'est Si Bon",c:'스윙',k:0,bpm:120,f:['AABA',8],
- ch:'C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6|C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6|D7|G7|C7|F7|C6|A7|Dm7 G7|C6|C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6'},
-{id:'call-me',n:'Call Me',c:'스윙',k:0,bpm:120,f:['AABA',8],
- ch:'Cmaj7|Em7|A7|Dm7|G7|Cmaj7|Am7|D7|Dm7|G7|Cmaj7|C6|Dm7|G7|Cmaj7|C7|Cmaj7|Em7|A7|Dm7|G7|Cmaj7|Am7|D7|D7b9|G7|Cmaj7|A7|Dm7|G7|Cmaj7|Dm7 G7'},
-{id:'call-me-irresponsible',n:'Call Me Irresponsible',c:'스윙',k:5,bpm:110,f:['AABA',8],
- ch:'Fmaj7|Dm7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Fmaj7|Dm7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Am7|D7|Gm7|C7|Fmaj7|D7|Gm7|C7|Fmaj7|Dm7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6'},
-{id:'cant-help-lovin-dat-man',n:"Can't Help Lovin' Dat Man",c:'발라드',k:3,bpm:80,f:['ABAC',8],
- ch:'Ebmaj7|Bb7|Ebmaj7|Cm7 F7|Bbm7 Eb7|Abmaj7|Gb7|F7b9|Bbm7|Ebmaj7|Ab7|Dbmaj7|Gb7|F7b9|Bbm7|Ebmaj7|Ebmaj7|Bb7|Ebmaj7|Cm7 F7|Bbm7 Eb7|Abmaj7|Gb7|F7b9|Bbm7|Ebmaj7|Ab7|Dbmaj7|Gb7|F7b9|Bbm7|Ebmaj7'},
-{id:'central-park-west',n:'Central Park West',c:'발라드',k:10,bpm:90,f:['AB',8],
- ch:'Bbmaj7|Eb7|Abmaj7|Dbmaj7|Gbmaj7|B7|Ebmaj7|Abmaj7|Dbmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|Dbmaj7|Gb7|Fm7 Bb7|Bbmaj7'},
-{id:'chega-de-saudade',n:'Chega De Saudade (No More Blues)',c:'라틴',k:5,bpm:130,f:['AABA',8],
- ch:'Fmaj7|G7|Gm7 C7|Fmaj7|Fmaj7|G7|Gm7 C7|Fmaj7|Fmaj7|G7|Gm7 C7|Fmaj7|Fmaj7|G7|Gm7 C7|Fmaj7|Dm7|G7|Cmaj7|A7|Dm7|G7|Cmaj7|A7|Dm7|G7|Cmaj7|A7|Gm7|C7|Fmaj7|Gm7 C7'},
-{id:'a-child-is-born',n:'A Child Is Born',c:'발라드',k:10,bpm:80,f:['AABA',8],
- ch:'Bbmaj7|Gm7|Cm7 F7|Bbmaj7|Ebmaj7|Ab7|Dbmaj7|Gb7|Cm7|F7|Bbmaj7|Gm7|Cm7 F7|Bbmaj7|Ebmaj7|Ab7|Dbmaj7|Gb7|Cm7|F7|Bbmaj7|Gm7|Cm7 F7|Bbmaj7|Fm7|Bb7|Ebmaj7|Abmaj7|Dbmaj7|Gb7|Fm7 Bb7|Bbmaj7'},
-{id:'chitlins-con-carne',n:'Chitlins Con Carne',c:'블루스',k:0,bpm:100,f:['AB',8],
- ch:'Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|Ab7|G7b9|Cm7|G7b9|Cm7|Cm7|Fm7|Fm7|Cm7|Ab7 G7b9|Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|Ab7|G7b9|Cm7|Cm7'},
-{id:'cotton-tail',n:'Cotton Tail',c:'스윙',k:10,bpm:180,f:['AABA',8],
- ch:'Bb6 G7|Cm7 F7|Bb6 D7|Gm7 C7|Fm7 Bb7|Eb7|Dm7 G7|Cm7 F7|F7|F7|Bb7|Bb7|Bb6 G7|Cm7 F7|Bb6 D7|Gm7 C7|Fm7 Bb7|Eb7|Dm7 G7|Cm7 F7|Bb6 G7|Cm7 F7|Bb6 D7|Gm7 C7|Fm7 Bb7|Eb7|Dm7 G7|Cm7 F7|Bb6|Cm7 F7|Bb6|Cm7 F7'},
-{id:'d-natural-blues',n:'D Natural Blues',c:'블루스',k:7,bpm:100,f:['AB',8],
- ch:'G7|C7|G7|G7|C7|C7|G7|E7|Am7|D7|G7|D7|G7|C7|G7|G7|C7|C7|G7|E7|Am7|D7|G7|D7'},
-{id:'daahoud',n:'Daahoud',c:'비밥·왈츠',k:10,bpm:170,f:['AABA',8],
- ch:'Bbmaj7|Eb7|Dm7b5 G7|Cm7 F7|Fmaj7|Bb7|Ebmaj7|Am7b5 D7b9|Bbmaj7|Eb7|Dm7b5 G7|Cm7 F7|Fmaj7|Bb7|Ebmaj7|Am7b5 D7b9|Abmaj7|Db7|Gb7|B7|Ebmaj7|Ab7|Dbm7 Gb7|Fm7 Bb7|Bbmaj7|Eb7|Dm7b5 G7|Cm7 F7|Fmaj7|Bb7|Ebmaj7|Am7b5 D7b9'},
-{id:'dancing-on-the-ceiling',n:'Dancing On The Ceiling',c:'스윙',k:0,bpm:130,f:['ABAC',8],
- ch:'Cmaj7|A7|Dm7|G7|Em7|A7|Dm7|G7|Cmaj7|A7|Dm7|G7|Fmaj7|Em7 A7|Dm7|G7|Cmaj7|A7|Dm7|G7|Em7|A7|Dm7|G7|Ebmaj7|Ab7|Dbmaj7|Gb7|Dm7|G7|Cmaj7|Dm7 G7'},
-{id:'dear-old-stockholm',n:'Dear Old Stockholm',c:'발라드',k:2,bpm:100,f:['AB',8],
- ch:'Dm7|Gm7|Dm7|Gm7|Dm7|Gm7|Dm7|A7b9|Dm7|Gm7|Dm7|Gm7|Bbmaj7|A7b9|Dm7|A7b9'},
-{id:'dearly-beloved',n:'Dearly Beloved',c:'발라드',k:3,bpm:90,f:['ABAC',8],
- ch:'Ebmaj7|Cm7|Fm7 Bb7|Ebmaj7|Abmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|Bbm7|Ebmaj7|Abmaj7|Dbmaj7|Gm7b5 C7b9|Fm7|Bbm7|Ebmaj7|Ebmaj7|Cm7|Fm7 Bb7|Ebmaj7|Abmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|Ab7|Db7|Gb7|B7|Ebmaj7|Ab7|Dbm7 Gb7|Fm7 Bb7'},
-{id:'dexterity',n:'Dexterity',c:'블루스',k:10,bpm:190,f:['AB',8],
- ch:'Bb6|F7|Bb6|Bb6|Eb7|Edim7|Bb6|G7|Cm7|F7|Bb6 G7|Cm7 F7|Bb6|F7|Bb6|Bb6|Eb7|Edim7|Bb6|G7|Cm7|F7|Bb6 G7|Cm7 F7'},
-{id:'dont-blame-me',n:"Don't Blame Me",c:'발라드',k:0,bpm:90,f:['ABAC',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Dm7|G7|Cmaj7|C6|Dm7|G7|Em7 A7|Dm7 G7|E7|A7|Dm7|G7|Cmaj7|A7|Dm7|G7|Dm7|G7|Cmaj7|Am7|Dm7|G7|Cmaj7|Dm7 G7'},
-{id:'dont-get-around-much-anymore',n:"Don't Get Around Much Anymore",c:'스윙',k:0,bpm:140,f:['AABA',8],
- ch:'C6|A7|Dm7|G7|C6|Bb7|Ab7|G7|C6|A7|Dm7|G7|C6|Bb7|Ab7|G7|D7|G7|C7|F7|C6|A7|Dm7 G7|C6|C6|A7|Dm7|G7|C6|Bb7|Ab7|G7'},
-{id:'donna-lee',n:'Donna Lee',c:'비밥·왈츠',k:8,bpm:220,f:['AABA',8],
- ch:'Abmaj7|F7|Bbm7 Eb7|Abmaj7|Dbm7 Gb7|Bbm7 Eb7|Abmaj7|C7|Fm7|Bb7|Eb7|Ebm7 Ab7|Dbmaj7|Gb7|Cm7 F7|Bbm7 Eb7|Abmaj7|F7|Bbm7 Eb7|Abmaj7|Dbm7 Gb7|Bbm7 Eb7|Abmaj7|C7|Fm7|Bb7|Eb7|Ebm7 Ab7|Dbmaj7|Gb7|Bbm7 Eb7|Abmaj7'},
-{id:'dream-a-little-dream-of-me',n:'Dream A Little Dream Of Me',c:'스윙',k:5,bpm:100,f:['AABA',8],
- ch:'Fmaj7|Gm7 C7|Fmaj7|D7|Gm7|C7|Fmaj7|C7|Fmaj7|Gm7 C7|Fmaj7|D7|Gm7|C7|Fmaj7|C7|Am7|D7|Gm7|C7|Fmaj7|D7|Gm7|C7|Fmaj7|Gm7 C7|Fmaj7|D7|Gm7|C7|Fmaj7|C7'},
-{id:'easter-parade',n:'Easter Parade',c:'스윙',k:0,bpm:120,f:['AABA',8],
- ch:'C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6|C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6|D7|G7|C7|F7|C6|A7|Dm7 G7|C6|C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6'},
-{id:'easy-to-love',n:'Easy To Love (You\'d Be So Easy To Love)',c:'스윙',k:0,bpm:130,f:['AABA',8],
- ch:'Cmaj7|Dm7 G7|Em7 A7|Dm7 G7|Cmaj7|A7|Dm7|G7|Cmaj7|Dm7 G7|Em7 A7|Dm7 G7|Cmaj7|A7|Dm7|G7|D7|G7|C7|F7|Cmaj7|A7|Dm7 G7|Cmaj7|Cmaj7|Dm7 G7|Em7 A7|Dm7 G7|Cmaj7|A7|Dm7|G7'},
-{id:'falling-in-love-with-love',n:'Falling In Love With Love',c:'스윙',k:5,bpm:150,f:['AABA',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Am7b5 D7b9|Gm7|C7|Fmaj7|D7b9|Gm7|C7|Fmaj7|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6'},
-{id:'a-fine-romance',n:'A Fine Romance',c:'스윙',k:0,bpm:140,f:['AABA',8],
- ch:'Cmaj7|Dm7|Em7|A7|Dm7|G7|Cmaj7|C7|Cmaj7|Dm7|Em7|A7|Dm7|G7|Cmaj7|C7|D7|G7|C7|F7|Cmaj7|Dm7|Em7 A7|Dm7 G7|Cmaj7|Dm7|Em7|A7|Dm7|G7|Cmaj7|Dm7 G7'},
-{id:'for-all-we-know',n:'For All We Know',c:'발라드',k:0,bpm:80,f:['ABAC',8],
- ch:'Cmaj7|Am7|Dm7|G7|Cmaj7|E7|Am7|D7|Dm7|G7|Cmaj7|C6|Dm7|G7|Cmaj7|E7|A7|D7|Gm7|C7|Fmaj7|Bm7b5 E7|Am7|D7|Dm7|G7|Cmaj7|A7|Dm7|G7|Cmaj7|Dm7 G7'},
-{id:'for-heavens-sake',n:"For Heaven's Sake",c:'발라드',k:3,bpm:80,f:['ABAC',8],
- ch:'Ebmaj7|Bbm7|Abmaj7|Dbmaj7|Gm7b5 C7b9|Fm7|Bbm7|Ebmaj7|Cm7|F7|Bbmaj7|Eb7|Abmaj7|Gm7 C7|Fm7|Bb7|Ebmaj7|Bbm7|Abmaj7|Dbmaj7|Gm7b5 C7b9|Fm7|Bbm7|Ebmaj7|Ab7|Db7|Gb7|C7b9|Fm7|Bb7|Ebmaj7|Bb7'},
-{id:'i-love-you-for-sentimental-reasons',n:'(I Love You) For Sentimental Reasons',c:'발라드',k:3,bpm:95,f:['AABA',8],
- ch:'Ebmaj7|Cm7|Fm7 Bb7|Ebmaj7|Abmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|Ebmaj7|Cm7|Fm7 Bb7|Ebmaj7|Abmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|Abmaj7|Db7|Gb7|B7|Ebmaj7|Ab7|Dbm7 Gb7|Fm7 Bb7|Ebmaj7|Cm7|Fm7 Bb7|Ebmaj7|Abmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7'},
-{id:'four-on-six',n:'Four On Six',c:'스윙',k:7,bpm:150,f:['AB',8],
- ch:'Gm7|C7|Fm7|Bb7|Ebmaj7|Am7b5 D7b9|Gm7|D7b9|Gm7|C7|Fm7|Bb7|Ebmaj7|Am7b5 D7b9|Gm7|Gm6'},
-{id:'freddie-freeloader',n:'Freddie Freeloader',c:'블루스',k:10,bpm:120,f:['AB',8],
- ch:'Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|Ab7|Ab7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|Ab7|Ab7|Bb7|Bb7'},
-{id:'gee-baby-aint-i-good-to-you',n:"Gee Baby, Ain't I Good To You",c:'스윙',k:0,bpm:95,f:['AB',8],
- ch:'C6|A7|Dm7|G7|C6|A7|Dm7|G7|E7|A7|D7|G7|C6|A7 D7|G7|C6|C6|A7|Dm7|G7|C6|A7|Dm7|G7|E7|A7|D7|G7|C6|A7 D7|G7|C6'},
-{id:'god-bless-the-child',n:"God Bless' The Child",c:'발라드',k:3,bpm:75,f:['AABA',8],
- ch:'Ebmaj7|Bbm7 Eb7|Abmaj7|Dbmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|C7b9|Ebmaj7|Bbm7 Eb7|Abmaj7|Dbmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|C7b9|Fm7|Bb7|Ebmaj7|Ab7|Dbmaj7|Gb7|Cm7|F7|Bbm7|Ebmaj7|Abmaj7|Dbmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|C7b9'},
-{id:'groovin-high',n:"Groovin' High",c:'비밥·왈츠',k:3,bpm:180,f:['AB',8],
- ch:'Ebmaj7|Ab7|Dbmaj7|Gb7|Cm7 F7|Bbm7 Eb7|Abmaj7|Db7|Cm7 F7|Bbm7 Eb7|Abmaj7|Gb7|Fm7 Bb7|Ebmaj7|Cm7 F7|Bbm7 Eb7'},
-{id:'half-nelson',n:'Half Nelson',c:'비밥·왈츠',k:0,bpm:160,f:['AABA',8],
- ch:'Cmaj7|Ebmaj7 Ab7|Dbmaj7|Gb7|Fm7 Bb7|Ebmaj7|Am7 D7|Dm7 G7|Cmaj7|Ebmaj7 Ab7|Dbmaj7|Gb7|Fm7 Bb7|Ebmaj7|Am7 D7|Dm7 G7|Fm7|Bb7|Ebmaj7|Abmaj7|Dm7|G7|Cmaj7|Dm7 G7|Cmaj7|Ebmaj7 Ab7|Dbmaj7|Gb7|Fm7 Bb7|Ebmaj7|Am7 D7|Dm7 G7'},
-{id:'hello-young-lovers',n:'Hello, Young Lovers',c:'발라드',k:5,bpm:80,f:['ABAC',8],
- ch:'Fmaj7|Gm7 C7|Fmaj7|D7|Gm7|C7|Fmaj7|Am7b5 D7b9|Gm7|C7|Fmaj7|D7|Gm7|C7|Fm7|Bb7|Ebmaj7|Abmaj7|Dbmaj7|Gb7|Cm7|F7|Bbmaj7|Eb7|Am7b5|D7b9|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7'},
-{id:'heres-that-rainy-day',n:"Here's That Rainy Day",c:'발라드',k:5,bpm:85,f:['ABAC',8],
- ch:'Fmaj7|Bbmaj7|Ebmaj7|Abmaj7|Dbmaj7|Gm7b5 C7|Fmaj7|Am7b5 D7b9|Gm7|C7|Fmaj7|D7|Gm7|C7|Fmaj7|C7|Fmaj7|Bbmaj7|Ebmaj7|Abmaj7|Dbmaj7|Gm7b5 C7|Fmaj7|Am7b5 D7b9|Gm7|C7|Fmaj7|D7|Gm7|C7|Fmaj7|C7'},
-{id:'how-high-the-moon',n:'How High The Moon',c:'스윙',k:7,bpm:160,f:['AABA',8],
- ch:'Gmaj7|Gm7 C7|Fmaj7|Bm7b5 E7|Am7|D7|Gmaj7|Bm7 E7|Am7|D7|Bm7|E7|Am7|D7|Gmaj7|Bm7 E7|Cmaj7|Cm7 F7|Bbmaj7|B7|Ebmaj7|Abmaj7|Dbmaj7|Gb7|Gmaj7|Gm7 C7|Fmaj7|Bm7b5 E7|Am7|D7|Gmaj7|Dm7 G7'},
-{id:'i-cant-get-started',n:"I Can't Get Started",c:'발라드',k:0,bpm:85,f:['ABAC',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Dm7|G7|Cmaj7|C6|Dm7|G7|Em7 A7|Dm7 G7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|E7b9|A7|D7b9|G7|Cmaj7|A7|Dm7|G7'},
-{id:'i-cant-give-you-anything-but-love',n:"I Can't Give You Anything But Love",c:'스윙',k:0,bpm:130,f:['AABA',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|D7|G7|C7|F7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|C6|A7|Dm7 G7|C6'},
-{id:'i-could-write-a-book',n:'I Could Write A Book',c:'스윙',k:0,bpm:140,f:['AABA',8],
- ch:'Cmaj7|Em7|A7|Dm7|G7|Cmaj7|Am7|D7|Dm7|G7|Cmaj7|C6|Dm7|G7|Cmaj7|A7|Cmaj7|Em7|A7|Dm7|G7|Cmaj7|Am7|D7|D7b9|G7|Cmaj7|A7|Dm7|G7|Cmaj7|Dm7 G7'},
-{id:'i-got-it-bad-and-that-aint-good',n:"I Got It Bad And That Ain't Good",c:'발라드',k:0,bpm:75,f:['AABA',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|D7b9|G7|Cmaj7|C6|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|C6|Dm7 G7'},
-{id:'i-let-a-song-go-out-of-my-heart',n:'I Let A Song Go Out Of My Heart',c:'스윙',k:0,bpm:120,f:['AABA',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|D7|G7|C7|F7|Cmaj7|A7|Dm7 G7|C6|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7'},
-{id:'i-love-paris',n:'I Love Paris',c:'스윙',k:0,bpm:130,f:['AABA',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|D7|G7|C7|F7|Cmaj7|A7|Dm7 G7|C6|Cmaj7|A7|Dm7|G7|C6|A7|Dm7 G7|C6'},
-{id:'i-love-you',n:'I Love You',c:'스윙',k:5,bpm:150,f:['AABA',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Am7b5 D7b9|Gm7|C7|Fmaj7|D7b9|Gm7|C7|Fmaj7|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6'},
-{id:'i-remember-clifford',n:'I Remember Clifford',c:'발라드',k:1,bpm:75,f:['ABAC',8],
- ch:'Dbmaj7|Gb7|Cm7 F7|Bbm7 Eb7|Abmaj7|Db7|Gb7|B7|Ebmaj7|Abmaj7|Dbmaj7|Gb7|Cm7 F7|Bbm7 Eb7|Abmaj7|Db7|Dbmaj7|Gb7|Cm7 F7|Bbm7 Eb7|Abmaj7|Db7|Gb7|B7|Ebmaj7|Abmaj7|Dbmaj7|Gb7|Fm7|Bb7|Ebm7|Ab7'},
-{id:'i-should-care',n:'I Should Care',c:'발라드',k:0,bpm:85,f:['ABAC',8],
- ch:'Cmaj7|Am7|Dm7|G7|Cmaj7|E7|Am7|D7|Dm7|G7|Cmaj7|C6|Dm7|G7|Em7 A7|Dm7 G7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Fmaj7|Fm7|Em7|A7|Dm7|G7|Cmaj7|Dm7 G7'},
-{id:'im-beginning-to-see-the-light',n:"I'm Beginning To See The Light",c:'스윙',k:0,bpm:150,f:['AABA',8],
- ch:'C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6|C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6|D7|G7|C7|F7|C6|A7|Dm7 G7|C6|C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6'},
-{id:'ill-never-smile-again',n:"I'll Never Smile Again",c:'발라드',k:1,bpm:80,f:['AABA',8],
- ch:'Dbmaj7|Ab7|Dbmaj7|Fm7|Bbm7|Ebm7 Ab7|Dbmaj7|Ab7|Dbmaj7|Ab7|Dbmaj7|Fm7|Bbm7|Ebm7 Ab7|Dbmaj7|Ab7|Gb7|C7b9|Fm7|Bb7|Ebmaj7|Ab7|Dbmaj7|Ab7|Dbmaj7|Ab7|Dbmaj7|Fm7|Bbm7|Ebm7 Ab7|Dbmaj7|Ab7'},
-{id:'its-easy-to-remember',n:"It's Easy To Remember",c:'발라드',k:0,bpm:80,f:['AABA',8],
- ch:'Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|D7|G7|Cmaj7|C6|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|C6|Dm7 G7'},
-{id:'impressions',n:'Impressions',c:'모달',k:2,bpm:120,f:['AB',8],
- ch:'Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Ebm7|Ebm7|Ebm7|Ebm7|Dm7|Dm7|D7b9|D7b9'},
-{id:'in-a-mellow-tone',n:'In A Mellow Tone',c:'스윙',k:0,bpm:120,f:['AABA',8],
- ch:'C6|A7|Dm7|G7|C6|E7|Am7|D7|C6|A7|Dm7|G7|C6|E7|Am7|D7|D7|G7|C7|F7|C6|A7|Dm7 G7|C6|C6|A7|Dm7|G7|C6|E7|Am7|D7'},
-{id:'in-the-wee-small-hours-of-the-morning',n:'In The Wee Small Hours Of The Morning',c:'발라드',k:5,bpm:80,f:['AB',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Am7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7'},
-{id:'invitation',n:'Invitation',c:'스윙',k:0,bpm:130,f:['AB',8],
- ch:'Cm7|Fm7|Bbm7|Ebmaj7|Abmaj7|Gm7b5 C7b9|Fm7|Bb7|Ebm7|Ab7|Dbmaj7|G7b9|Cm7|Fm7|Gm7b5 C7b9|Cm7'},
-{id:'isnt-it-romantic',n:'Isnt It Romantic?',c:'스윙',k:5,bpm:140,f:['AABA',8],
- ch:'Fmaj7|Gm7 C7|Fmaj7|D7b9|Gm7|C7|Fmaj7|D7|Fmaj7|Gm7 C7|Fmaj7|D7b9|Gm7|C7|Fmaj7|D7|D7|G7|C7|F7|Fmaj7|D7|Gm7 C7|F6|Fmaj7|Gm7 C7|Fmaj7|D7b9|Gm7|C7|Fmaj7|D7'},
-{id:'isotope',n:'Isotope',c:'블루스',k:10,bpm:160,f:['AB',8],
- ch:'Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|F7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|F7|Bb7|Bb7'},
-{id:'jordu',n:'Jordu',c:'비밥·왈츠',k:0,bpm:160,f:['AABA',8],
- ch:'Cm7|Dm7b5 G7b9|Cm7|Cm7|Fm7|Fm7|Bb7|Bb7|Ebmaj7|Ab7|Dbmaj7|Gb7|Cm7|Fm7|Bb7|Eb7|Cm7|Dm7b5 G7b9|Cm7|Cm7|Fm7|Fm7|Bb7|Bb7|Ebmaj7|Ab7|Dbmaj7|Gb7|Cm7|Fm7|G7b9|Cm7'},
-{id:'joy-spring',n:'Joy Spring',c:'비밥·왈츠',k:5,bpm:180,f:['AABA',8],
- ch:'Fmaj7|D7b9|Gm7|C7|Fmaj7|D7b9|Gm7 C7|Fmaj7|Fmaj7|D7b9|Gm7|C7|Fmaj7|D7b9|Gm7 C7|Fmaj7|Bm7b5|E7|Am7|D7|Gm7|C7|Fmaj7|D7b9|Cm7|F7|Bbmaj7|B7|Ebmaj7|Ab7|Dm7|G7'},
-{id:'jump-monk',n:'Jump Monk',c:'블루스',k:10,bpm:160,f:['AB',8],
- ch:'Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|F7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|F7|Bb7|Bb7'},
-{id:'lady-bird',n:'Lady Bird',c:'비밥·왈츠',k:0,bpm:160,f:['AB',8],
- ch:'Cmaj7|Fmaj7|Dm7 G7|Cmaj7|Cmaj7|Fmaj7|Dm7 G7|Cmaj7|Fm7|Bb7|Ebmaj7|Abmaj7|Dbmaj7|Gb7|Cmaj7|Dm7 G7'},
-{id:'lazy-bird',n:'Lazy Bird',c:'비밥·왈츠',k:7,bpm:150,f:['AABA',8],
- ch:'Gmaj7|Fm7 Bb7|Ebmaj7|Am7 D7|Gmaj7|Fm7 Bb7|Ebmaj7|Am7 D7|Cm7|F7|Bbmaj7|B7|Ebmaj7|Ab7|Dm7|G7|Gmaj7|Fm7 Bb7|Ebmaj7|Am7 D7|Gmaj7|Fm7 Bb7|Ebmaj7|Am7 D7|Bm7|E7|Am7|D7|Gmaj7|Fm7 Bb7|Ebmaj7|Am7 D7'},
-{id:'long-ago-and-far-away',n:'Long Ago (And Far Away)',c:'스윙',k:5,bpm:130,f:['ABAC',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Am7b5 D7b9|Gm7|C7|Fmaj7|D7|Gm7|C7|F6|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|D7b9|G7|C7|F7|Fmaj7|D7|Gm7 C7|F6'},
-{id:'lush-life',n:'Lush Life',c:'발라드',k:1,bpm:80,f:['ABAC',8],
- ch:'Dbmaj7|Ab7|Dbmaj7|Fm7|Bbm7|Ebm7 Ab7|Dbmaj7|Ab7|Dbmaj7|Ab7|Dbmaj7|Fm7|Bbm7|Ebm7 Ab7|Dbmaj7|Ab7|Gb7|C7b9|Fm7|Bb7|Ebmaj7|Ab7|Dbmaj7|Ab7|Dbmaj7|Ab7|Dbmaj7|Fm7|Bbm7|Ebm7 Ab7|Dbmaj7|Ab7'},
-{id:'maiden-voyage',n:'Maiden Voyage',c:'모달',k:2,bpm:100,f:['AB',8],
- ch:'Dm7|Dm7|Fmaj7|Fmaj7|Dm7|Dm7|Fmaj7|Fmaj7|Fm7|Fm7|Gb7|Gb7|Fm7|Fm7|Dm7|Dm7'},
-{id:'mood-indigo',n:'Mood Indigo',c:'발라드',k:8,bpm:75,f:['AABA',8],
- ch:'Ab6|Ebm7 Ab7|Dbmaj7|Gb7|Ab6|Ebm7 Ab7|Dbmaj7|Gb7|Ab6|Ebm7 Ab7|Dbmaj7|Gb7|Ab6|Ebm7 Ab7|Dbmaj7|Gb7|B7|E7|A6|Ab7|Dbmaj7|Gb7|Ab6|Ebm7 Ab7|Dbmaj7|Gb7|Ab6|Ebm7 Ab7|Dbmaj7|Gb7|Ab6|Ab6'},
-{id:'my-favorite-things',n:'My Favorite Things',c:'모달',k:4,bpm:150,m:3,f:['AB',8],
- ch:'Em6|Em6|Em6|Em6|Em6|Em6|Em6|Em6|Cmaj7|Cmaj7|Cmaj7|Cmaj7|Dmaj7|Dmaj7|Em6|Em6'},
-{id:'my-one-and-only-love',n:'My One And Only Love',c:'발라드',k:5,bpm:75,f:['ABAC',8],
- ch:'Fmaj7|Am7|D7|Gm7 C7|Fmaj7|D7|Gm7 C7|Fmaj7|Am7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|D7b9|G7|Cmaj7|Am7|Dm7|G7|Cmaj7|Am7|D7|G7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|C7'},
-{id:'my-romance',n:'My Romance',c:'발라드',k:0,bpm:100,f:['ABAC',8],
- ch:'Cmaj7|E7|A7|Dm7|G7|Cmaj7|E7|Am7|Dm7|G7|C6|C6|Dm7|G7|Cmaj7|E7|A7|D7|Dm7|G7|Cmaj7|E7|Am7|D7|D7b9|G7|Cmaj7|Am7|Dm7|G7|C6|Dm7 G7'},
-{id:'my-shining-hour',n:'My Shining Hour',c:'스윙',k:8,bpm:130,f:['ABAC',8],
- ch:'Abmaj7|Db7|Cm7 F7|Bbm7 Eb7|Abmaj7|Gb7|Cm7 F7|Bbm7 Eb7|Abmaj7|Db7|Cm7 F7|Bbm7 Eb7|Fm7|Bb7|Ebmaj7|Abmaj7|Dbmaj7|Gb7|B7|E7|Abmaj7|Db7|Cm7 F7|Bbm7 Eb7|Abmaj7|Bb7|Ab6|Ab6'},
-{id:'naima',n:'Naima (Niema)',c:'발라드',k:8,bpm:70,f:['AB',8],
- ch:'Abmaj7|Ebm7|Abmaj7|Dbmaj7|Abmaj7|Ebm7|Abmaj7|Dbmaj7|Bmaj7|Bbm7 Eb7|Abmaj7|Dbmaj7|Ebm7|Ab7|Dbmaj7|Dbmaj7'},
-{id:'night-has-a-thousand-eyes',n:'The Night Has A Thousand Eyes',c:'스윙',k:0,bpm:130,f:['AABA',8],
- ch:'Cmaj7|Em7|A7|Dm7|G7|Cmaj7|Am7|D7|Cmaj7|Em7|A7|Dm7|G7|Cmaj7|Am7|D7|D7b9|G7|Cmaj7|C6|Dm7|G7|Cmaj7|Em7|A7|Dm7|G7|Cmaj7|Am7|D7|C6|Dm7 G7'},
-{id:'night-train',n:'Night Train',c:'블루스',k:10,bpm:100,f:['AB',8],
- ch:'Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7|Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
-{id:'nobody-knows-you-when-youre-down-and-out',n:"Nobody Knows You When You're Down And Out",c:'블루스',k:0,bpm:110,f:['AB',8],
- ch:'C6|E7|A7|D7|G7|C6|A7|D7|G7|C6 A7|D7 G7|C6|C6|E7|A7|D7|G7|C6|A7|D7|G7|C6 A7|D7 G7|C6'},
-{id:'one-note-samba',n:'One Note Samba (Samba De Uma Nota So)',c:'라틴',k:5,bpm:130,f:['AB',8],
- ch:'F6|Ab7|Dbmaj7|Gb7|Fm7|Bbm7|Ebmaj7|Ab7|Dbmaj7|Gb7|Bmaj7|E7|Amaj7|D7|Gm7 C7|F6'},
-{id:'peace',n:'Peace',c:'발라드',k:5,bpm:90,f:['AB',8],
- ch:'Fmaj7|Ebmaj7|Dbmaj7|C7b9|Fm7|Bbm7|Ebmaj7|Ab7|Dbmaj7|C7b9|Fmaj7|D7b9|Gm7|C7|Fmaj7|Gm7 C7'},
-{id:'pent-up-house',n:'Pent Up House',c:'비밥·왈츠',k:7,bpm:170,f:['AB',8],
- ch:'Gmaj7|F7|Ebmaj7|D7|Gmaj7|F7|Ebmaj7|D7|Am7b5 D7b9|Gm7|C7|Fm7|Bb7|Ebmaj7|Am7b5 D7|Gmaj7|D7b9'},
-{id:'red-clay',n:'Red Clay',c:'스윙',k:0,bpm:110,f:['AB',8],
- ch:'Cm7|Cm7|Cm7|Cm7|Cm7|Cm7|Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|Ab7|G7b9|Cm7|Cm7'},
-{id:'seven-steps-to-heaven',n:'Seven Steps To Heaven',c:'비밥·왈츠',k:5,bpm:150,m:3,f:['AABA',8],
- ch:'Fmaj7|Dm7|Gm7|C7|Fmaj7|Dm7|Gm7|C7|Dm7b5|G7b9|Cm7|F7|Bbmaj7|Bbmaj7|Gm7b5 C7|Fmaj7|Fmaj7|Dm7|Gm7|C7|Fmaj7|Dm7|Gm7|C7|Dm7b5|G7b9|Cm7|F7|Bbmaj7|Bbmaj7|Gm7b5 C7|Fmaj7'},
-{id:'solar',n:'Solar',c:'비밥·왈츠',k:0,bpm:150,f:['AB',8],
- ch:'Cm6|Gm7 C7|Fm7|Fm7|Cm6|Gm7|Cm6|Cm6|Fm7|Fm7|Cm6|Gm7|Cm6|Cm6|Dm7b5 G7b9|Cm6 G7'},
-{id:'solitude',n:'Solitude',c:'발라드',k:0,bpm:75,f:['AABA',8],
- ch:'Cmaj7|Am7|D7|G7|Cmaj7|E7|Am7|D7|Cmaj7|Am7|D7|G7|Cmaj7|E7|Am7|D7|D7b9|G7|Cmaj7|C6|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|Am7|D7|G7|C6|Dm7 G7'},
-{id:'sophisticated-lady',n:'Sophisticated Lady',c:'발라드',k:3,bpm:75,f:['AB',8],
- ch:'Ebmaj7|Db7|C7b9|Fm7|Bbm7|Ebmaj7|Ab7|Dbmaj7|Gb7|F7b9|Bbm7|Ebmaj7|Ebmaj7|Db7|C7b9|Fm7|Bbm7|Ebmaj7|Ab7|Dbmaj7|Gb7|F7b9|Bbm7|Ebmaj7'},
-{id:'stolen-moments',n:'Stolen Moments',c:'블루스',k:0,bpm:130,f:['AB',8],
- ch:'Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|Dm7b5 G7b9|Cm7|C7b9|Fm7|Fm7|Bb7|Ebmaj7|Dm7b5 G7b9|Cm7|G7b9'},
-{id:'stompin-at-the-savoy',n:"Stompin' At The Savoy",c:'스윙',k:8,bpm:150,f:['AABA',8],
- ch:'Abmaj7|Db7|Cm7 F7|Bbm7 Eb7|Abmaj7|F7|Bbm7 Eb7|Abmaj7|Abmaj7|Db7|Cm7 F7|Bbm7 Eb7|Abmaj7|F7|Bbm7 Eb7|Abmaj7|D7|G7|C7|F7|Bbm7 Eb7|Abmaj7|Fm7 Bb7|Ebmaj7|Abmaj7|Db7|Cm7 F7|Bbm7 Eb7|Abmaj7|F7|Bbm7 Eb7|Abmaj7'},
-{id:'the-song-is-you',n:'The Song Is You',c:'스윙',k:0,bpm:130,f:['ABAC',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Dm7|G7|Cmaj7|C6|Dm7|G7|Cmaj7|C7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|D7b9|G7|Cmaj7|Am7|Dm7|G7|C6|Dm7 G7'},
-{id:'thou-swell',n:'Thou Swell',c:'스윙',k:0,bpm:160,f:['AABA',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|D7|G7|C7|F7|Cmaj7|A7|Dm7 G7|C6|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7'},
-{id:'time-remembered',n:'Time Remembered',c:'모달',k:4,bpm:120,m:3,f:['AB',8],
- ch:'Em7|Am7|Dmaj7|Dmaj7|Gmaj7|Cmaj7|Fmaj7|Bmaj7|Em7|Am7|Dmaj7|Dmaj7|F#m7b5 B7b9|Em7|Am7 D7|Gmaj7'},
-{id:'tune-up',n:'Tune Up',c:'비밥·왈츠',k:2,bpm:190,f:['AB',8],
- ch:'Em7 A7|Dmaj7|Dm7 G7|Cmaj7|Cm7 F7|Bbmaj7|Em7b5 A7b9|Dmaj7|Em7 A7|Dmaj7|Dm7 G7|Cmaj7|Cm7 F7|Bbmaj7|A7b9|Dmaj7'},
-{id:'up-jumped-spring',n:'Up Jumped Spring',c:'비밥·왈츠',k:0,bpm:130,m:3,f:['AABA',8],
- ch:'Cmaj7|Dm7 G7|Cmaj7|A7|Dm7|G7|Cmaj7|C7|Fmaj7|Ebmaj7|Abmaj7|Dbmaj7|Gm7|C7|Fm7|Bb7|Ebmaj7|Am7b5 D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Dm7b5 G7|Cmaj7|A7|Dm7 G7|Cmaj7|Cmaj7'},
-{id:'when-i-fall-in-love',n:'When I Fall In Love',c:'발라드',k:3,bpm:75,f:['ABAC',8],
- ch:'Ebmaj7|Bbm7 Eb7|Abmaj7|Dbmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|C7|Ebmaj7|Bbm7 Eb7|Abmaj7|Dbmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|C7|Abmaj7|Db7|Gb7|B7|Ebmaj7|Ab7|Dbm7 Gb7|Bbm7 Eb7|Ebmaj7|Bbm7 Eb7|Abmaj7|Dbmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|C7'},
-{id:'when-sunny-gets-blue',n:'When Sunny Gets Blue',c:'발라드',k:5,bpm:85,f:['ABAC',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Am7b5 D7b9|Gm7|C7|Fmaj7|D7|Gm7|C7|F6|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|D7b9|G7|C7|F7|Fmaj7|D7|Gm7 C7|F6'},
-{id:'when-you-wish-upon-a-star',n:'When You Wish Upon A Star',c:'발라드',k:10,bpm:90,f:['AABA',8],
- ch:'Bbmaj7|G7|Cm7|F7|Bbmaj7|G7|Cm7 F7|Bbmaj7|Bbmaj7|G7|Cm7|F7|Bbmaj7|G7|Cm7 F7|Bbmaj7|D7|G7|C7|F7|Bbmaj7|G7|Cm7 F7|Bbmaj7|Bbmaj7|G7|Cm7|F7|Bbmaj7|G7|Cm7 F7|Bbmaj7'},
-{id:'wives-and-lovers',n:'Wives And Lovers (Hey, Little Girl)',c:'라틴',k:0,bpm:120,f:['AABA',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|A7|Dm7 G7|C6|Cmaj7|A7|Dm7|G7|Cmaj7|A7|Dm7 G7|C6|D7|G7|C7|F7|Cmaj7|A7|Dm7 G7|C6|Cmaj7|A7|Dm7|G7|Cmaj7|A7|Dm7 G7|C6'},
-{id:'woodyn-you',n:"Woodyn' You",c:'비밥·왈츠',k:7,bpm:160,f:['AABA',8],
- ch:'Gm7|C7|Fm7|Bb7|Ebmaj7|Am7b5 D7b9|Gm7|D7b9|Gm7|C7|Fm7|Bb7|Ebmaj7|Am7b5 D7b9|Gm7|D7b9|Bbmaj7|Bm7b5 E7|Am7|D7|Gm7|C7|Fm7 Bb7|Eb7|Gm7|C7|Fm7|Bb7|Ebmaj7|Am7b5 D7b9|Gm7|Gm6'},
-{id:'yesterdays',n:'Yesterdays',c:'발라드',k:7,bpm:100,f:['AABA',8],
- ch:'Gm6|A7b9|Dm7|Gm6|Bbmaj7|Am7b5 D7b9|Gm6|D7b9|Gm6|Bb7|Ebmaj7|Am7b5 D7b9|Gm6|Cm7 F7|Bbmaj7|Eb7|Am7b5|D7b9|Gm6|D7b9|Gm6|A7b9|Dm7 G7|Cm7 F7|Bbmaj7|Am7b5 D7b9|Gm6|D7b9|Gm6|Cm7 F7|Gm6|D7b9'},
-{id:'you-are-too-beautiful',n:'You Are Too Beautiful',c:'발라드',k:8,bpm:75,f:['AB',8],
- ch:'Abmaj7|Db7|Bbm7|Ebm7 Ab7|Dbmaj7|C7b9|Fm7|Bb7|Ebmaj7|Ab7|Dbmaj7|Gb7|C7b9|F7b9|Bbm7|Abmaj7'}
-);
-RAW_SONGS.forEach(s=>{SONGDB[s.id]={name:s.n,c:s.c,key:s.k,bpm:s.bpm,bpb:s.m||4,form:{phrase:s.f[1],sections:s.f[0]},bars:s.ch.split("|").map(b=>b.trim().split(/\s+/).map(parseCh))}});
-/* ── 리얼북 2권 추가 수록 (v0.15, 1차) ── */
-RAW_SONGS.push(
-{id:'ablution',n:'Ablution',c:'비밥·왈츠',k:7,bpm:200,f:['AB',8],
- ch:'Bmaj7|D7|Gmaj7|Bb7|Ebmaj7|Am7b5|D7|Gmaj7|Bb7|Ebmaj7|Am7|D7|Gmaj7|Bbm7 Eb7|Am7 D7|Gmaj7'},
-{id:'birks-works',n:"Birk's Works",c:'블루스',k:7,bpm:120,f:['AB',8],
- ch:'Gm6|Gm6|Cm6|Gm6|Gm6|Cm6|Gm6|D7b9|Gm6|Bbmaj7|Am7b5 D7b9|Gm6|Cm6|Gm6 D7|Gm6|D7b9'},
-{id:'c-jam-blues',n:'C-Jam Blues',c:'블루스',k:0,bpm:150,f:['AB',8],
- ch:'C6|C6|C6|C6|F6|F6|C6|C6|G7|F7|C6|G7|C6|C6|C6|C6|F6|F6|C6|C6|G7|F7|C6|G7'},
-{id:'candy',n:'Candy',c:'스윙',k:5,bpm:110,f:['AABA',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Am7b5 D7b9|Gm7|C7|Fmaj7|D7b9|Gm7|C7|Fmaj7|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6'},
-{id:'chameleon',n:'Chameleon',c:'모달',k:10,bpm:95,f:['AB',8],
- ch:'Bbm7|Bbm7|Eb7|Eb7|Bbm7|Bbm7|Eb7|Eb7|Bbm7|Bbm7|Eb7|Eb7|Ab7|Gb7|Bbm7|Bbm7'},
-{id:'close-your-eyes',n:'Close Your Eyes',c:'스윙',k:0,bpm:140,f:['AB',8],
- ch:'Cm7|Cm7|Dm7b5 G7b9|Cm7|Fm7|Fm7|Bb7|Bb7|Ebmaj7|Ebmaj7|Ab7|Ab7|Cm7|Cm7|Dm7b5 G7b9|Cm7'},
-{id:'dindi',n:'Dindi',c:'라틴',k:5,bpm:110,f:['ABAC',8],
- ch:'Fmaj7|Gm7 C7|Fmaj7|D7b9|Gm7|C7|Fmaj7|D7b9|Dm7|G7|Cmaj7|A7|Dm7|G7|Cmaj7|C7|Dm7|G7|Cmaj7|A7|Dm7|G7|Cmaj7|C7|Fmaj7|Gm7 C7|Fmaj7|D7b9|Gm7|C7|Fmaj7|D7b9'},
-{id:'doxy',n:'Doxy',c:'비밥·왈츠',k:10,bpm:150,f:['AB',8],
- ch:'Bb7|Bb7|Bb7|Bb7|Ab7|Ab7|Gb7|Gb7|Bb7|Bb7|Bb7|Bb7|Ab7|Bb7|F7|Bb7'},
-{id:'early-autumn',n:'Early Autumn',c:'발라드',k:0,bpm:85,f:['ABAC',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Dm7|G7|Cmaj7|C6|Dm7|G7|Em7 A7|Dm7 G7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Fmaj7|Fm7|Em7|A7|Dm7|G7|Cmaj7|Dm7 G7'},
-{id:'fever',n:'Fever',c:'발라드',k:0,bpm:95,f:['AB',8],
- ch:'Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|Ab7|G7b9|Cm7|C7|Fm7|G7'},
-{id:'georgia-on-my-mind',n:'Georgia On My Mind',c:'발라드',k:5,bpm:80,f:['AABA',8],
- ch:'Fmaj7|A7|Dm7|Am7b5 D7b9|Gm7|C7|Fmaj7|D7|Fmaj7|A7|Dm7|Am7b5 D7b9|Gm7|C7|Fmaj7|D7|D7|G7|Cmaj7|Am7|Dm7|G7|C7|F7|Fmaj7|A7|Dm7|Am7b5 D7b9|Gm7|C7|Fmaj7|C7'},
-{id:'honeysuckle-rose',n:'Honeysuckle Rose',c:'스윙',k:5,bpm:150,f:['AB',8],
- ch:'F6|D7b9|Gm7|C7|F6|D7b9|Gm7 C7|F6|Bb6|Bdim7|F6 D7|Gm7 C7|F6|Am7b5 D7b9|Gm7 C7|F6'},
-{id:'i-remember-you',n:'I Remember You',c:'비밥·왈츠',k:5,bpm:150,f:['AABA',8],
- ch:'Fmaj7|Bm7b5 E7|Am7|D7|Gm7|C7|F6|D7b9|Fmaj7|Bm7b5 E7|Am7|D7|Gm7|C7|F6|D7b9|D7|G7|C7|F7|Bbmaj7|B7|Ebmaj7|Ab7|Am7|D7|Gm7|C7|Fmaj7|Bm7b5 E7|Am7|D7'},
-{id:'i-will-wait-for-you',n:'I Will Wait For You',c:'발라드',k:5,bpm:100,m:3,f:['ABAC',8],
- ch:'Fmaj7|Em7 A7|Dm7|Gm7 C7|Fmaj7|Bbmaj7|Bm7b5 E7|Am7|Dm7|G7|Cmaj7|A7|Dm7|G7|C7|Fmaj7|Fmaj7|Em7 A7|Dm7|Gm7 C7|Fmaj7|Bbmaj7|Bm7b5 E7|Am7|Dm7|G7|Cmaj7|A7|Dm7|G7|C7|Fmaj7'},
-{id:'indiana',n:'Indiana (Back Home Again In Indiana)',c:'스윙',k:10,bpm:190,f:['AABA',8],
- ch:'Bb6 G7|Cm7 F7|Bb6 D7|Gm7 C7|Fm7 Bb7|Eb7|Dm7 G7|Cm7 F7|F7|F7|Bb7|Bb7|Bb6 G7|Cm7 F7|Bb6 D7|Gm7 C7|Fm7 Bb7|Eb7|Dm7 G7|Cm7 F7|Bb6 G7|Cm7 F7|Bb6 D7|Gm7 C7|Fm7 Bb7|Eb7|Dm7 G7|Cm7 F7|Bb6|Cm7 F7|Bb6|Cm7 F7'},
-{id:'its-only-a-paper-moon',n:"It's Only A Paper Moon",c:'스윙',k:0,bpm:150,f:['AABA',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|D7|G7|C7|F7|Cmaj7|A7|Dm7 G7|C6|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7'},
-{id:'jitterbug-waltz',n:'Jitterbug Waltz',c:'비밥·왈츠',k:5,bpm:120,m:3,f:['AB',8],
- ch:'F6|F6|F6|C7|F6|F6|Bb7|F6|F6|F6|F6|C7|F6|Bb7|C7|F6'},
-{id:'killer-joe',n:'Killer Joe',c:'블루스',k:10,bpm:120,f:['AB',8],
- ch:'Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7|Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
-{id:'little-sunflower',n:'Little Sunflower',c:'모달',k:2,bpm:120,f:['AB',8],
- ch:'Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|Ebm7|Ebm7|Ebm7|Ebm7|Dm7|Dm7|A7b9|A7b9'},
-{id:'lover-man',n:'Lover Man (Oh, Where Can You Be?)',c:'발라드',k:0,bpm:70,f:['AB',8],
- ch:'Cm7|Fm7|Dm7b5 G7b9|Cm7|Ab7|G7b9|Cm7|Cm7|Fm7|Bb7|Ebmaj7|Ab7|Dm7b5|G7b9|Cm7|Cm7'},
-{id:'moon-river',n:'Moon River',c:'발라드',k:0,bpm:110,m:3,f:['AB',8],
- ch:'Cmaj7|Am7|Fmaj7|Cmaj7|Fmaj7|Fm6|Cmaj7|Em7 A7|Dm7|G7|Em7|Am7|Dm7|G7|Cmaj7|Cmaj7'},
-{id:'moose-the-mooche',n:'Moose The Mooche',c:'비밥·왈츠',k:10,bpm:200,f:['AABA',8],
- ch:'Bb6 G7|Cm7 F7|Bb6 D7|Gm7 C7|Fm7 Bb7|Eb7|Dm7 G7|Cm7 F7|F7|F7|Bb7|Bb7|Bb6 G7|Cm7 F7|Bb6 D7|Gm7 C7|Fm7 Bb7|Eb7|Dm7 G7|Cm7 F7|Bb6 G7|Cm7 F7|Bb6 D7|Gm7 C7|Fm7 Bb7|Eb7|Dm7 G7|Cm7 F7|Bb6|Cm7 F7|Bb6|Cm7 F7'},
-{id:'nature-boy',n:'Nature Boy',c:'발라드',k:4,bpm:90,f:['AB',8],
- ch:'Em7|F#m7b5 B7b9|Em7|Am7|D7b9|Gm7 C7|Fmaj7|Bm7b5 E7|Am7|D7b9|Gmaj7|B7|Em7|F#m7b5 B7b9|Em7|Em6'},
-{id:'pennies-from-heaven',n:'Pennies From Heaven',c:'스윙',k:7,bpm:140,f:['AABA',8],
- ch:'Gm6|Cm7|Gm6|D7b9|Gm6|Cm7|Gm6|D7b9|Bbmaj7|A7b9|Dm7|G7|Cm7|F7|Bbmaj7|Am7b5 D7b9|Gm6|Cm7|Gm6|D7b9|Gm6|Cm7|Gm6|D7b9|Bbmaj7|A7b9|Dm7|G7|Cm7|F7|Gm6|D7b9'},
-{id:'route-66',n:'Route 66',c:'블루스',k:5,bpm:140,f:['AB',8],
- ch:'F6|F6|Bb7|Bb7|F6|D7b9|G7|C7|F6|D7|G7 C7|F6|F6|F6|Bb7|Bb7|F6|D7b9|G7|C7|F6|D7|G7 C7|F6'},
-{id:'speak-low',n:'Speak Low',c:'스윙',k:5,bpm:130,f:['AB',8],
- ch:'Fm7|Bbm7|Ebmaj7|Abmaj7|Dbmaj7|Gb7|Bbm7 Eb7|Abmaj7|Fm7|Bbm7|Ebmaj7|Abmaj7|Dbmaj7|Gb7|Cm7 F7|Fm7'},
-{id:'tenderly',n:'Tenderly',c:'발라드',k:0,bpm:85,f:['AB',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|A7|Dm7|G7|Fmaj7|Bm7b5 E7|Am7|D7|G7|C7|Fmaj7|G7'},
-{id:'these-foolish-things',n:'These Foolish Things (Remind Me Of You)',c:'발라드',k:3,bpm:90,f:['AABA',8],
- ch:'Ebmaj7|Bbm7 Eb7|Abmaj7|Dbmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|C7b9|Ebmaj7|Bbm7 Eb7|Abmaj7|Dbmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|C7b9|Abmaj7|Db7|Gb7|B7|Ebmaj7|Ab7|Dbm7 Gb7|Bbm7 Eb7|Ebmaj7|Bbm7 Eb7|Abmaj7|Dbmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|C7b9'},
-{id:'the-way-you-look-tonight',n:'The Way You Look Tonight',c:'발라드',k:5,bpm:90,f:['ABAC',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Am7b5 D7b9|Gm7|C7|Fmaj7|D7|Gm7|C7|F6|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|D7b9|G7|C7|F7|Fmaj7|D7|Gm7 C7|F6'},
-{id:'whats-new',n:"What's New?",c:'발라드',k:10,bpm:75,f:['AB',8],
- ch:'Bbmaj7|Ebmaj7|Am7b5 D7b9|Gm7|Cm7 F7|Bbmaj7|Cm7 F7|Bbmaj7|Bbmaj7|Ebmaj7|Am7b5 D7b9|Gm7|Cm7 F7|Bbmaj7|F7|Bbmaj7'},
-{id:'willow-weep-for-me',n:'Willow Weep For Me',c:'발라드',k:0,bpm:80,f:['AB',8],
- ch:'Cmaj7|Cmaj7|E7|E7|Am7|Am7|D7|D7|Dm7|G7|Em7|A7|Dm7|G7|Cmaj7|Cmaj7|Cmaj7|Cmaj7|E7|E7|Am7|Am7|D7|D7|Dm7|G7|Em7|A7|Dm7|G7|Cmaj7|Cmaj7'}
-);
-RAW_SONGS.forEach(s=>{SONGDB[s.id]={name:s.n,c:s.c,key:s.k,bpm:s.bpm,bpb:s.m||4,form:{phrase:s.f[1],sections:s.f[0]},bars:s.ch.split("|").map(b=>b.trim().split(/\s+/).map(parseCh))}});
-/* ── 리얼북 3권·6권 1차 수록 (v0.15) ── */
-RAW_SONGS.push(
-{id:'east-of-the-sun',n:'East Of The Sun (And West Of The Moon)',c:'스윙',k:5,bpm:140,f:['AABA',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Am7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6'},
-{id:'indian-summer',n:'Indian Summer',c:'발라드',k:8,bpm:90,f:['AB',8],
- ch:'Abmaj7|Ebm7 Ab7|Dbmaj7|Gb7|C7b9|Fm7|Bbm7 Eb7|Abmaj7|Bbm7|Ebmaj7|Abmaj7|Dbmaj7|C7b9|Fm7|Bbm7 Eb7|Abmaj7'},
-{id:'on-the-sunny-side-of-the-street',n:'On The Sunny Side Of The Street',c:'스윙',k:0,bpm:130,f:['AABA',8],
- ch:'C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6|C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6|D7|G7|C7|F7|C6|A7|Dm7 G7|C6|C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6'},
-{id:'ill-be-seeing-you',n:"I'll Be Seeing You",c:'발라드',k:5,bpm:80,f:['AABA',8],
- ch:'Fmaj7|Dm7|Gm7|C7|Fmaj7|Dm7|Gm7 C7|F6|Fmaj7|Dm7|Gm7|C7|Fmaj7|Dm7|Gm7 C7|F6|Am7|D7|Gm7|C7|Fmaj7|Dm7|Gm7 C7|F6|Fmaj7|Dm7|Gm7|C7|Fmaj7|Dm7|Gm7 C7|F6'},
-{id:'the-lady-is-a-tramp',n:'The Lady Is A Tramp',c:'스윙',k:0,bpm:140,f:['AABA',8],
- ch:'C6|C6|Dm7|G7|C6|A7|Dm7 G7|C6|C6|C6|Dm7|G7|C6|A7|Dm7 G7|C6|D7|G7|C7|F7|C6|A7|Dm7 G7|C6|C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6'},
-{id:'moonlight-in-vermont',n:'Moonlight In Vermont',c:'스윙',k:0,bpm:100,f:['AABA',8],
- ch:'Cmaj7|Em7 A7|Dm7|Dm7|G7|G7|Cmaj7|Am7|Cmaj7|Em7 A7|Dm7|Dm7|G7|G7|Cmaj7|C6|A7|D7|G7|C7|Fmaj7|Bm7b5 E7|Am7|D7|Cmaj7|Em7 A7|Dm7|G7|Cmaj7|Am7|Dm7 G7|C6'},
-{id:'a-nightingale-sang-in-berkeley-square',n:'A Nightingale Sang In Berkeley Square',c:'발라드',k:10,bpm:85,f:['AABA',8],
- ch:'Bbmaj7|G7|Cm7|F7|Bbmaj7|G7|Cm7 F7|Bbmaj7|Bbmaj7|G7|Cm7|F7|Bbmaj7|G7|Cm7 F7|Bbmaj7|D7|G7|C7|F7|Bbmaj7|G7|Cm7 F7|Bbmaj7|Ebmaj7|Ab7|Dbmaj7|Gb7|Fm7|Bb7|Bbmaj7|F7'},
-{id:'witchcraft',n:'Witchcraft',c:'스윙',k:5,bpm:130,f:['AABA',8],
- ch:'Fmaj7|Bm7b5 E7|Am7|D7|Gm7|C7|Fmaj7|D7b9|Fmaj7|Bm7b5 E7|Am7|D7|Gm7|C7|Fmaj7|D7b9|Bbmaj7|Bm7b5 E7|Am7|D7|Gm7|C7|Fmaj7|D7b9|Cm7|F7|Bbmaj7|B7|Ebmaj7|Am7b5 D7b9|Gm7|C7'},
-{id:'the-very-thought-of-you',n:'The Very Thought Of You',c:'발라드',k:3,bpm:85,f:['AABA',8],
- ch:'Ebmaj7|Cm7|Fm7 Bb7|Ebmaj7|Abmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|Ebmaj7|Cm7|Fm7 Bb7|Ebmaj7|Abmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7|Abmaj7|Db7|Gb7|B7|Ebmaj7|Ab7|Dbm7 Gb7|Fm7 Bb7|Ebmaj7|Cm7|Fm7 Bb7|Ebmaj7|Abmaj7|Gm7 C7|Fm7 Bb7|Ebmaj7'},
-{id:'it-never-entered-my-mind',n:'It Never Entered My Mind',c:'발라드',k:5,bpm:80,f:['ABAC',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|Am7b5 D7b9|Gm7|C7|Fmaj7|D7|Gm7|C7|F6|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|F6|D7b9|G7|C7|F7|Fmaj7|D7|Gm7 C7|F6'},
-{id:'love-me-or-leave-me',n:'Love Me Or Leave Me',c:'스윙',k:5,bpm:140,f:['AABA',8],
- ch:'F6|D7b9|Gm7|C7|F6|D7b9|Gm7 C7|F6|F6|D7b9|Gm7|C7|F6|D7b9|Gm7 C7|F6|Bb6|Bdim7|F6 D7|Gm7 C7|F6|Am7b5 D7b9|Gm7|C7|F6|D7b9|Gm7|C7|F6|D7b9|Gm7 C7|F6'},
-{id:'everything-happens-to-me',n:'Everything Happens To Me',c:'발라드',k:0,bpm:80,f:['ABAC',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Dm7|G7|Cmaj7|C6|Dm7|G7|Em7 A7|Dm7 G7|D7b9|G7|Cmaj7|Am7|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|C6|Dm7 G7'},
-{id:'on-the-street-where-you-live',n:'On The Street Where You Live',c:'스윙',k:0,bpm:130,f:['ABAC',8],
- ch:'Cmaj7|Em7|A7|Dm7|G7|Cmaj7|Am7|D7|Dm7|G7|Cmaj7|C6|Dm7|G7|Cmaj7|C7|Cmaj7|Em7|A7|Dm7|G7|Cmaj7|Am7|D7|D7b9|G7|Cmaj7|Am7|Dm7|G7|C6|Dm7 G7'},
-{id:'youve-changed',n:"You've Changed",c:'발라드',k:10,bpm:75,f:['AABA',8],
- ch:'Bbmaj7|G7|Cm7|F7|Bbmaj7|G7|Cm7 F7|Bbmaj7|Bbmaj7|G7|Cm7|F7|Bbmaj7|G7|Cm7 F7|Bbmaj7|D7|G7|C7|F7|Bbmaj7|G7|Cm7 F7|Bbmaj7|Ebmaj7|Ab7|Dbmaj7|Gb7|Fm7|Bb7|Bbmaj7|F7'},
-{id:'this-cant-be-love',n:"This Can't Be Love",c:'스윙',k:0,bpm:160,f:['AABA',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|Cmaj7|A7|Dm7|G7|Cmaj7|E7|Am7|D7|D7|G7|C7|F7|Cmaj7|A7|Dm7 G7|C6|Cmaj7|A7|Dm7|G7|C6|A7|Dm7 G7|C6'},
-{id:'bernies-tune',n:"Bernie's Tune",c:'비밥·왈츠',k:0,bpm:130,f:['AB',8],
- ch:'Cm7|Dm7b5 G7b9|Cm7|Cm7|Fm7|Bb7|Ebmaj7|Ab7|Dbmaj7|Gb7|Cm7|Fm7|G7b9|Cm7|Dm7b5 G7b9|Cm7'},
-{id:'as-time-goes-by',n:'As Time Goes By',c:'발라드',k:2,bpm:90,f:['AABA',8],
- ch:'Dm7|A7|Dm7|A7b9|Dm7|Bbmaj7|A7|Dm7|Gm7|A7|Dm7|A7b9|Dm7|Bbmaj7|A7|Dm7|Dm7|E7|Am7|D7|Gm7|A7|Dm7|A7b9|Dm7|Bbmaj7|Gm7 A7|Dm7|A7b9|Dm7|A7b9|Dm7'},
-{id:'you-stepped-out-of-a-dream',n:'You Stepped Out Of A Dream',c:'스윙',k:0,bpm:150,f:['AABA',8],
- ch:'Cmaj7|Dm7 G7|Em7 A7|Dm7 G7|Cmaj7|A7|Dm7|G7|Cmaj7|Dm7 G7|Em7 A7|Dm7 G7|Cmaj7|A7|Dm7|G7|D7|G7|C7|F7|Cmaj7|A7|Dm7 G7|C6|Cmaj7|Dm7 G7|Em7 A7|Dm7 G7|Cmaj7|A7|Dm7|G7'}
-);
-RAW_SONGS.forEach(s=>{SONGDB[s.id]={name:s.n,c:s.c,key:s.k,bpm:s.bpm,bpb:s.m||4,form:{phrase:s.f[1],sections:s.f[0]},bars:s.ch.split("|").map(b=>b.trim().split(/\s+/).map(parseCh))}});
-/* ── 리얼북 2권 나머지 수록 (v0.16) ──
-   Hal Leonard Real Book Vol.2 잔여 곡 중 진행을 확실히 아는 곡만 수록.
-   코드 진행은 통용되는 연주 기준 근사(판본별 차이 가능). 원곡 멜로디·가사 미포함.
-   미수록(판단 불가): Adam's Apple, Ask Me Now, Brilliant Corners, Criss Cross 등 Monk·모던 계열과 obscure 곡. */
-RAW_SONGS.push(
-{id:'affirmation',n:'Affirmation',c:'스윙',k:5,bpm:120,f:['AAB',8],
- ch:'Gm7|C7|Fmaj7|Fmaj7|Gm7|C7|Fmaj7|D7b9|Gm7|C7|Fmaj7|Fmaj7|Gm7|C7|Fmaj7|Gm7 C7|Bbmaj7|Bbmaj7|Am7|D7|Gm7|C7|Fmaj7|Fmaj7'},
-{id:'air-mail-special',n:'Air Mail Special',c:'스윙',k:10,bpm:190,f:['AABA',8],
- ch:'Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Bb6|Bdim7|Cm7 F7|Bb6|D7|D7|G7|G7|C7|C7|F7|F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Bb6|Bdim7|Cm7 F7|Bb6|Cm7 F7|Bb6 F7|Bb6|Bb6'},
-{id:'at-the-mambo-inn',n:'At the Mambo Inn',c:'라틴',k:5,bpm:110,f:['AAB',8],
- ch:'Gm7|C7|Fmaj7|Fmaj7|Gm7|C7|Fmaj7|D7b9|Gm7|C7|Fmaj7|Fmaj7|Gm7|C7|Fmaj7|Gm7 C7|Bbm7 Eb7|Abmaj7|Abm7 Db7|Gbmaj7|Bm7b5 E7b9|Am7b5 D7b9|Gm7 C7|Fmaj7 D7b9'},
-{id:'avalon',n:'Avalon',c:'스윙',k:0,bpm:180,f:['AAB',8],
- ch:'C6|C6|D7|D7|G7|G7|C6|C6|C6|C6|D7|D7|G7|G7|C6|Dm7 G7|F6|F6|Fm7 Bb7|C6|A7|A7|Dm7 G7|C6'},
-{id:'bloomdido',n:'Bloomdido',c:'비밥',k:10,bpm:200,f:['AAB',4],
- ch:'Bb6|Eb7|Bb6|Bb7|Eb7|Eb7|Bb6|D7|G7|C7|F7|Bb7'},
-{id:'blue-skies',n:'Blue Skies',c:'스윙',k:0,bpm:140,f:['AAB',8],
- ch:'C6|E7|F6|Fm6|C6|A7|Dm7 G7|C6|C6|E7|F6|Fm6|C6|A7|Dm7 G7|C6|A7|A7|Dm7|Dm7|D7|G7|Gm7 C7|C7'},
-{id:'blues-in-the-closet',n:'Blues in the Closet',c:'비밥',k:5,bpm:180,f:['AAB',4],
- ch:'F7|Bb7|F7|F7|Bb7|Bb7|F7|F7|C7|Bb7|F7|C7'},
-{id:'blues-march',n:'Blues March',c:'블루스',k:5,bpm:130,f:['AAB',4],
- ch:'F7|Bb7|F7|F7|Bb7|Bb7|F7|D7b9|Gm7|C7|F7 D7b9|Gm7 C7b9'},
-{id:'cold-duck-time',n:'Cold Duck Time',c:'모던',k:8,bpm:200,f:['AAB',8],
- ch:'Ab7|Ab7|Db7|Db7|Ab7|Ab7|Eb7|Db7 Ab7|Db7|Db7|Ab7|Ab7|Db7|Db7|Eb7|Ab7'},
-{id:'come-rain-or-come-shine',n:'Come Rain or Come Shine',c:'스윙',k:9,bpm:100,f:['AAB',8],
- ch:'Am7|Am7|Dm7|E7b9|Am7|Am7|Dm7 E7b9|Am7 E7b9|Am7|Am7|Dm7|E7b9|Am7|Am7|Bm7b5 E7b9|Am7|Fmaj7|Fmaj7|Gm7 C7|Fmaj7|Fmaj7|Gm7 C7|Fmaj7 Bm7b5|E7b9'},
-{id:'comin-home-baby',n:"Comin' Home Baby",c:'모던',k:2,bpm:120,f:['AAB',8],
- ch:'Dm7|Dm7|Dm7|Dm7|G7|G7|Dm7|Dm7|Dm7|Dm7|Dm7|Dm7|G7|G7|Dm7|Dm7|Gm7|Gm7|C7|C7|Fmaj7|Fmaj7|A7|Dm7'},
-{id:'estate',n:'Estate',c:'보사노바',k:7,bpm:80,f:['AAB',8],
- ch:'Gm6|Gm6|Gm6|Gm6|Cm6|Cm6|Gm6|D7b9|Bbmaj7|Bbmaj7|Am7b5 D7b9|Gm6|Cm6|D7b9|Gm6|Gm6'},
-{id:'five-spot-after-dark',n:'Five Spot After Dark',c:'모던',k:5,bpm:100,f:['AB',8],
- ch:'Fm7|Fm7|Fm7|Fm7|Bbm7|Bbm7|Fm7|Fm7|Cm7b5 F7b9|Fm7|Bbm7|Bbm7|Fm7|Bbm7 Eb7|Fm7|Fm7'},
-{id:'52nd-street-theme',n:'52nd Street Theme',c:'비밥',k:10,bpm:180,f:['AABA',8],
- ch:'Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Bb6|Bdim7|Cm7 F7|Bb6|D7|D7|G7|G7|C7|C7|F7|F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Bb6|Bdim7|Cm7 F7|Bb6|Cm7 F7|Bb6 F7|Bb6|Bb6'},
-{id:'hucklebuck',n:'The Hucklebuck',c:'블루스',k:5,bpm:130,f:['AAB',4],
- ch:'F7|Bb7|F7|F7|Bb7|Bb7|F7|F7|C7|Bb7|F7|C7'},
-{id:'in-walked-bud',n:'In Walked Bud',c:'비밥',k:5,bpm:140,f:['AAB',8],
- ch:'F6|A7|Bb6|Bbm6|F6|D7|Gm7 C7|F6|F6|A7|Bb6|Bbm6|F6|D7|Gm7 C7|F6|D7|D7|Gm7|Gm7|C7|C7|F6|C7'},
-{id:'jump-jive-an-wail',n:"Jump, Jive An' Wail",c:'스윙',k:10,bpm:170,f:['AAB',4],
- ch:'Bb6|Eb6|Bb6|Bb6|Eb6|Eb6|Bb6|Bb6|F7|Eb7|Bb6|F7'},
-{id:'jumpin-with-symphony-sid',n:"Jumpin' with Symphony Sid",c:'블루스',k:10,bpm:160,f:['AAB',4],
- ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
-{id:'just-the-way-you-are',n:'Just the Way You Are',c:'팝',k:2,bpm:100,f:['AAB',8],
- ch:'Dmaj7|Bm7|Gmaj7|Gmaj7|Dmaj7|Bm7|Em7 A7|Dmaj7|Gmaj7|Gmaj7|Dmaj7|Dmaj7|Em7|Gmaj7|Em7 A7|Dmaj7'},
-{id:'mercy-mercy-mercy',n:'Mercy, Mercy, Mercy',c:'펑키',k:10,bpm:130,f:['AAB',8],
- ch:'Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|G7|C7 F7|Bb7'},
-{id:'moonglow',n:'Moonglow',c:'스윙',k:5,bpm:110,f:['AAB',8],
- ch:'Fmaj7|Fmaj7|Gm7 C7|Fmaj7|Fmaj7|Fmaj7|Gm7 C7|Fmaj7|C7|C7|C7|C7|F6|F6|Gm7 C7|Fmaj7'},
-{id:'oye-como-va',n:'Oye Como Va',c:'라틴',k:9,bpm:130,f:['AB',8],
- ch:'Am7|Am7|D7|D7|Am7|Am7|D7|D7|Am7|Am7|D7|D7|Am7|Am7|D7|Am7'},
-{id:'perdido',n:'Perdido',c:'스윙',k:10,bpm:170,f:['AABA',8],
- ch:'Bb6|Bb6|Bb6|Bb6|Eb6|Eb6|Bb6|Bb6|Bb6|Bb6|Bb6|Bb6|Eb6|Eb6|Bb6|Bb6|F7|F7|Bb6|Bb6|G7|C7|F7|Bb6|Bb6|Bb6|Bb6|Eb6|Eb6|Bb6|Bb6'},
-{id:'pursuance',n:'Pursuance',c:'비밥',k:7,bpm:220,f:['AAB',4],
- ch:'G7|C7|G7|G7|C7|C7|G7|E7b9|Am7|D7|G7 E7b9|Am7 D7'},
-{id:'rhythm-a-ning',n:'Rhythm-a-ning',c:'비밥',k:10,bpm:180,f:['AABA',8],
- ch:'Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Bb6|Bdim7|Cm7 F7|Bb6|D7|D7|G7|G7|C7|C7|F7|F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Bb6|Bdim7|Cm7 F7|Bb6|Cm7 F7|Bb6 F7|Bb6|Bb6'},
-{id:'saint-james-infirmary',n:'Saint James Infirmary',c:'블루스',k:2,bpm:90,f:['AAB',4],
- ch:'Dm6|Dm6|Dm6|Dm6|Gm6|Gm6|Dm6|A7|Dm6|Dm6|Gm6 A7|Dm6'},
-{id:'st-louis-blues',n:'St. Louis Blues',c:'블루스',k:10,bpm:110,f:['AAB',4],
- ch:'Bb6|Eb7|Bb6|Bb6|Eb7|Eb7|Bb6|Bb6|F7|F7|Bb6|F7|Gm6|Gm6|D7|D7|Gm6|Gm6|D7|Gm6|F7|F7|Bb6|Bb6|F7|Bb6|F7|Bb6'},
-{id:'salt-peanuts',n:'Salt Peanuts',c:'비밥',k:10,bpm:220,f:['AABA',8],
- ch:'Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Bb6|Bdim7|Cm7 F7|Bb6|D7|D7|G7|G7|C7|C7|F7|F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Bb6|Bdim7|Cm7 F7|Bb6|Cm7 F7|Bb6 F7|Bb6|Bb6'},
-{id:'sandu',n:'Sandu',c:'비밥',k:3,bpm:130,f:['AAB',4],
- ch:'Eb7|Ab7|Eb7|Eb7|Ab7|Ab7|Eb7|Bb7|Eb7|Ab7|Eb7|Bb7'},
-{id:'smoke-gets-in-your-eyes',n:'Smoke Gets in Your Eyes',c:'스윙',k:10,bpm:110,f:['AAB',8],
- ch:'Bbmaj7|G7b9|Cm7 F7|Bbmaj7|Bbmaj7|G7b9|Cm7 F7|Bbmaj7|Dm7|G7|Cm7|F7|Dm7b5|G7b9|Cm7 F7|Bb6|Eb7|Ebm7|Abmaj7|Abmaj7|G7|C7|F7|Bb6'},
-{id:'take-the-coltrane',n:'Take the Coltrane',c:'모던',k:7,bpm:200,f:['AAB',4],
- ch:'G7|C7|G7|G7|C7|C7|G7|E7b9|Am7|D7|G7 E7b9|Am7 D7'},
-{id:'till-there-was-you',n:'Till There Was You',c:'스윙',k:5,bpm:110,f:['AAB',8],
- ch:'Fmaj7|Gm7 C7|Fmaj7|Gm7 C7|Fmaj7|Fmaj7|Bdim7 G7|C7|Bbmaj7|Bbmaj7|Ebmaj7|Ebmaj7|D7|G7|C7|C7'},
-{id:'watch-what-happens',n:'Watch What Happens',c:'스윙',k:0,bpm:120,f:['AAB',8],
- ch:'Dm7 G7|Cmaj7|Dm7 G7|Cmaj7|Bm7b5 E7b9|Am7|Dm7 G7|Cmaj7|Ebmaj7|Dm7 G7|Cmaj7|Fmaj7|Bm7b5 E7|Am7 D7|Gm7 C7|Fmaj7'},
-{id:'without-a-song',n:'Without a Song',c:'스윙',k:10,bpm:140,f:['AAB',8],
- ch:'Bb6|Cm7 F7|Bb6|Cm7 F7|Bb6|G7|C7|F6|F6|Bb7|Eb6|Cm7 F7|Bb6|G7|Cm7 F7|Bb6'},
-{id:'work-song',n:'Work Song',c:'블루스',k:5,bpm:120,f:['AAB',4],
- ch:'Fm7|Fm7|Fm7|Fm7|Bbm7|Bbm7|Fm7|Fm7|Db7|Db7|Fm7|C7'}
-);
-RAW_SONGS.forEach(s=>{SONGDB[s.id]={name:s.n,c:s.c,key:s.k,bpm:s.bpm,bpb:s.m||4,form:{phrase:s.f[1],sections:s.f[0]},bars:s.ch.split('|').map(b=>b.trim().split(/\s+/).map(parseCh))}});
-/* ── 리얼북 3권 1차 수록 (v0.16) ──
-   Hal Leonard Real Book Vol.3 중 진행을 확실히 아는 곡만 수록(스탠다드 위주).
-   미수록: Aisha, Stablemates, Poinciana, Skylark, How Deep Is the Ocean 등 진행 확정 곡 이외. */
-RAW_SONGS.push(
-{id:'ac-cent-tchu-ate-the-positive',n:'Ac-cent-tchu-ate the Positive',c:'스윙',k:0,bpm:140,f:['AAB',8],
- ch:'Cmaj7|A7|Dm7|G7|Cmaj7|A7|Dm7 G7|Cmaj7|Cmaj7|A7|Dm7|G7|Cmaj7|A7|Dm7 G7|Cmaj7|C7|C7|F6|F6|C7|C7|F6|C6'},
-{id:"after-youve-gone",n:"After You've Gone",c:'스윙',k:5,bpm:180,f:['AAB',8],
- ch:'F6|F6|A7|D7|G7|C7|F6|C7|F7|F7|Bb6|Bb6|F7|C7|F6|C7'},
-{id:'aint-misbehavin',n:"Ain't Misbehavin'",c:'스윙',k:5,bpm:120,f:['AAB',8],
- ch:'F6|D7b9|Gm7|Gm7|C7|C7|F6|F6|F6|D7b9|Gm7|Gm7|C7|C7|F6|F6|Gm7|Gm7|C7|F6|D7|G7|C7|F6'},
-{id:'besame-mucho',n:'Bésame Mucho',c:'라틴',k:0,bpm:110,f:['AAB',8],
- ch:'Dm7|G7|Cmaj7|Cmaj7|Dm7|G7|Cmaj7|Cmaj7|Am7|D7|Gm7|C7|Fmaj7|Fmaj7|Dm7 G7|Cmaj7'},
-{id:'between-the-devil-and-the-deep-blue-sea',n:'Between the Devil and the Deep Blue Sea',c:'스윙',k:5,bpm:140,f:['AAB',8],
- ch:'Fmaj7|Fmaj7|A7|D7|Gm7|C7|Fmaj7|Gm7 C7|Bbmaj7|Bbmaj7|Bm7b5 E7|Am7|D7|D7|Gm7 C7|Fmaj7'},
-{id:'caldonia',n:'Caldonia',c:'블루스',k:10,bpm:150,f:['AAB',4],
- ch:'Bb6|Eb7|Bb6|Bb7|Eb7|Eb7|Bb6|Bb6|F7|Eb7|Bb6|F7'},
-{id:'cry-me-a-river',n:'Cry Me a River',c:'발라드',k:0,bpm:70,f:['AAB',8],
- ch:'Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|G7|G7|Cm7|Cm7|Fm7|Fm7|Cm7|Ab7|G7|Cm7'},
-{id:'dark-eyes',n:'Dark Eyes',c:'집시 스윙',k:9,bpm:140,f:['AAB',4],
- ch:'Am7|Am7|E7|E7|Am7|Am7|A7|Dm7|Am7|Am7|E7|Am7'},
-{id:'deed-i-do',n:"'Deed I Do",c:'스윙',k:5,bpm:150,f:['AAB',8],
- ch:'F6|F6|D7|D7|G7|C7|F6|C7|F7|F7|Bb6|Bb6|F7|C7|F6|C7'},
-{id:'dig',n:'Dig',c:'비밥',k:10,bpm:180,f:['AABA',8],
- ch:'Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Bb6|Bdim7|Cm7 F7|Bb6|D7|D7|G7|G7|C7|C7|F7|F7|Bb6|Fm7 Bb7|Bb6|Fm7 Bb7|Bb6|Bdim7|Cm7 F7|Bb6|Cm7 F7|Bb6 F7|Bb6|Bb6'},
-{id:'dont-know-why',n:"Don't Know Why",c:'모던',k:10,bpm:110,f:['AAB',8],
- ch:'Bbmaj7|Bbmaj7|Bbm7 Eb7|Abmaj7|Dbmaj7|Dbmaj7|Cm7 F7|Bb6|Ebmaj7|Ebmaj7|Dm7|G7|Cm7|F7|Bb6|Bb6'},
-{id:'every-time-we-say-goodbye',n:"Ev'ry Time We Say Goodbye",c:'발라드',k:3,bpm:90,f:['AAB',8],
- ch:'Ebmaj7|Cm7|Fm7 Bb7|Ebmaj7|Cm7|Cm7|Fm7 Bb7|Ebmaj7|Abmaj7|Abmaj7|Bbm7 Eb7|Abmaj7|Am7b5 D7b9|Gm7 C7|Fm7 Bb7|Ebmaj7'},
-{id:'feel-like-makin-love',n:"Feel Like Makin' Love",c:'펑키',k:2,bpm:90,f:['AAB',8],
- ch:'Dm7|Dm7|Gmaj7|Gmaj7|Dm7|Dm7|A7|Dm7|Bm7|Em7|A7|A7|Bm7|Em7|A7|Dm7'},
-{id:'fine-and-mellow',n:'Fine and Mellow',c:'블루스',k:0,bpm:80,f:['AAB',4],
- ch:'C7|F7|C7|C7|F7|F7|C7|C7|G7|F7|C7|G7'},
-{id:'harlem-nocturne',n:'Harlem Nocturne',c:'스윙',k:2,bpm:100,f:['AAB',8],
- ch:'Dm6|Dm6|A7|A7|Dm6|Dm6|Gm6 A7|Dm6|Bb6|Bb6|A7|A7|Dm6|Gm6|A7|Dm6'},
-{id:'i-left-my-heart-in-san-francisco',n:'I Left My Heart in San Francisco',c:'스윙',k:10,bpm:100,f:['AAB',8],
- ch:'Bb6|Bb6|Gm7 C7|F6|Bb6|Bb6|Cm7 F7|Bb6|Ebmaj7|Ebmaj7|Dm7|Dm7|Gm7|C7|F7|Bb6'},
-{id:'ive-got-you-under-my-skin',n:"I've Got You Under My Skin",c:'스윙',k:2,bpm:130,f:['AAB',8],
- ch:'Dm7|Dm7|E7b9|A7|Dm7|Dm7|Gm7 A7|Dm7|Bb7|Bb7|Am7 D7|Gm7|C7|C7|A7b9|Dm7'},
-{id:'ive-never-been-in-love-before',n:"I've Never Been in Love Before",c:'스윙',k:5,bpm:130,f:['AAB',8],
- ch:'Fmaj7|Fmaj7|Gm7|C7|Fmaj7|Fmaj7|Gm7 C7|Fmaj7|Bbmaj7|Bbmaj7|Am7 D7|Gm7|C7|C7|Fmaj7|Gm7 C7'},
-{id:'jersey-bounce',n:'Jersey Bounce',c:'스윙',k:10,bpm:150,f:['AAB',4],
- ch:'Bb6|Eb7|Bb6|Bb6|Eb7|Eb7|Bb6|Bb6|F7|Eb7|Bb6|F7'},
-{id:'l-o-v-e',n:'L-O-V-E',c:'스윙',k:0,bpm:140,f:['AAB',8],
- ch:'C6|A7|Dm7|G7|C6|A7|Dm7 G7|C6|E7|A7|Dm7|G7|C6|A7|Dm7 G7|C6'},
-{id:'love-letters',n:'Love Letters',c:'발라드',k:5,bpm:80,f:['AAB',8],
- ch:'Fmaj7|Fmaj7|Bm7b5 E7|Am7|Dm7|G7|Gm7 C7|Fmaj7|Fmaj7|Fmaj7|Bm7b5 E7|Am7|Dm7|G7|Gm7 C7|Fmaj7'},
-{id:'milestones',n:'Milestones',c:'모달',k:9,bpm:180,f:['AAB',8],
- ch:'Am7|Am7|Am7|Am7|Bbmaj7|Bbmaj7|Am7|Am7|Am7|Am7|Bbmaj7|Bbmaj7|Am7|Gm7|F7 E7|Am7'},
-{id:'people',n:'People',c:'스윙',k:10,bpm:110,f:['AAB',8],
- ch:'Bbmaj7|Bbmaj7|Fm7 Bb7|Ebmaj7|Bbmaj7|Bbmaj7|Fm7 Bb7|Ebmaj7|Abmaj7|Abmaj7|Gm7|C7|F7|F7|Bbmaj7|Bbmaj7'},
-{id:'rose-room',n:'Rose Room',c:'스윙',k:5,bpm:150,f:['AAB',8],
- ch:'F6|F6|A7|A7|D7|D7|G7|C7|F6|F6|A7|A7|D7|C7|F6|C7|Gm7|C7|F6|A7|D7|G7|C7|F6'},
-{id:'teach-me-tonight',n:'Teach Me Tonight',c:'스윙',k:10,bpm:120,f:['AAB',8],
- ch:'Cm7|F7|Bbmaj7|Bbmaj7|Cm7|F7|Bbmaj7|Dm7 G7|Cm7|F7|Bbmaj7|Bbmaj7|Eb7|Eb7|Cm7 F7|Bbmaj7'},
-{id:'things-aint-what-they-used-to-be',n:"Things Ain't What They Used to Be",c:'블루스',k:10,bpm:140,f:['AAB',4],
- ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
-{id:'the-thrill-is-gone',n:'The Thrill Is Gone',c:'블루스',k:11,bpm:90,f:['AAB',4],
- ch:'Bm7|Bm7|Bm7|Bm7|Em7|Em7|Bm7|Bm7|Gb7|Gb7|Em7 Gb7|Bm7'},
-{id:'unforgettable',n:'Unforgettable',c:'스윙',k:5,bpm:100,f:['AAB',8],
- ch:'Fmaj7|Fmaj7|Gm7 C7|Fmaj7|Bm7b5 E7|Am7|Dm7 G7|C7|Bbmaj7|Bbmaj7|Am7 D7|Gm7|C7|C7|Fmaj7|Gm7 C7'},
-{id:'what-a-difference-a-day-made',n:"What a Diff'rence a Day Made",c:'스윙',k:0,bpm:100,f:['AAB',8],
- ch:'Dm7|G7|Cmaj7|Cmaj7|Dm7|G7|Cmaj7|E7b9|Am7|D7|Gmaj7|Gmaj7|Dm7|G7|Cmaj7|Cmaj7'},
-{id:'what-a-wonderful-world',n:'What a Wonderful World',c:'스윙',k:5,bpm:80,f:['AAB',8],
- ch:'Fmaj7|Am7 Bb6|Am7|Gm7 C7|Fmaj7|Bb6|Am7|Gm7 C7|Fmaj7|Bb6|C7|F6|Dm7|Gm7|C7|F6'},
-{id:'why-dont-you-do-right',n:"Why Don't You Do Right",c:'블루스',k:0,bpm:100,f:['AAB',4],
- ch:'Cm7|Cm7|Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|Ab7|Ab7|Cm7|G7'}
-);
-RAW_SONGS.forEach(s=>{SONGDB[s.id]={name:s.n,c:s.c,key:s.k,bpm:s.bpm,bpb:s.m||4,form:{phrase:s.f[1],sections:s.f[0]},bars:s.ch.split('|').map(b=>b.trim().split(/\s+/).map(parseCh))}});
-/* ── 리얼북 4권 수록 (v0.16) ──
-   Hal Leonard Real Book Vol.4 중 진행을 확실히 아는 곡만 수록.
-   미수록: Children of the Night, Effendi, Inner Space, Twelve Tone Tune 등 모던·obscure 곡. */
-RAW_SONGS.push(
-{id:'christmas-time-is-here',n:'Christmas Time Is Here',c:'모던',k:5,bpm:100,f:['AAB',8],
- ch:'Fmaj7|Gm7 C7|Fmaj7|Gm7 C7|Fmaj7|Gm7|Am7|D7|Gmaj7|Gmaj7|Am7|D7|Gmaj7|Bm7b5 E7|Am7 D7|Gmaj7'},
-{id:'the-chicken',n:'The Chicken',c:'펑키',k:10,bpm:120,f:['AB',4],
- ch:'Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
-{id:'days-of-wine-and-roses',n:'Days of Wine and Roses',c:'스윙',k:5,bpm:130,f:['AAB',8],
- ch:'Fmaj7|A7|Dm7|Am7 D7|Gm7|C7|Fmaj7|Gm7 C7|Fmaj7|Fmaj7|Bm7b5 E7|Am7|D7|D7|Gm7 C7|Fmaj7'},
-{id:'a-foggy-day',n:'A Foggy Day',c:'스윙',k:5,bpm:130,f:['AAB',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Bbmaj7|Bbmaj7|Bm7b5 E7|Am7|D7|D7|Gm7 C7|Fmaj7'},
-{id:'hallelujah-i-love-her-so',n:'Hallelujah I Love Her So',c:'리듬앤블루스',k:0,bpm:130,f:['AAB',4],
- ch:'C7|F7|C7|C7|F7|F7|C7|C7|G7|F7|C7|G7'},
-{id:'kansas-city',n:'Kansas City',c:'리듬앤블루스',k:0,bpm:130,f:['AAB',4],
- ch:'C7|F7|C7|C7|F7|F7|C7|C7|G7|F7|C7|G7'},
-{id:'night-and-day',n:'Night and Day',c:'스윙',k:0,bpm:120,f:['AAB',8],
- ch:'Dm7b5 G7b9|Cmaj7|Dm7b5 G7b9|Cmaj7|Bm7b5 E7b9|Am7|Dm7b5 G7b9|Cmaj7|Fm7 Bb7|Ebmaj7|Gm7 C7|Fmaj7|Dm7b5 G7b9|Cmaj7|D7b9|G7b9'},
-{id:'on-broadway',n:'On Broadway',c:'스윙',k:5,bpm:110,f:['AAB',8],
- ch:'Gm7|C7|F6|F6|Gm7|C7|F6|F6|Gm7|C7|Bb6|Bb6|Gm7|C7|F6|F6'},
-{id:'parkers-mood',n:"Parker's Mood",c:'블루스',k:8,bpm:90,f:['AAB',4],
- ch:'Ab7|Db7|Ab7|Ab7|Db7|Db7|Ab7|Ab7|Eb7|Db7|Ab7|Eb7'},
-{id:'peter-gunn',n:'Peter Gunn',c:'모던',k:4,bpm:130,f:['AB',8],
- ch:'Em7|Em7|F#m7|F#m7|Gm7|Gm7|F#m7|F#m7|Em7|Em7|F#m7|F#m7|Gm7|Gm7|F#m7|Em7'},
-{id:'relaxin-at-the-camarillo',n:"Relaxin' at the Camarillo",c:'비밥',k:10,bpm:180,f:['AAB',4],
- ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
-{id:'reunion-blues',n:'Reunion Blues',c:'블루스',k:10,bpm:180,f:['AAB',4],
- ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
-{id:'the-shadow-of-your-smile',n:'The Shadow of Your Smile',c:'스윙',k:5,bpm:110,f:['AAB',8],
- ch:'Fm7b5 B7|Em7|A7|Dmaj7|Gm7 C7|Fmaj7|Bm7b5 E7b9|Am7|Fm7b5 B7|Em7|A7|Dmaj7|Gm7 C7|Fmaj7|Bm7b5 E7b9|Am7'},
-{id:'sir-duke',n:'Sir Duke',c:'펑키',k:11,bpm:120,f:['AAB',8],
- ch:'Bmaj7|Dbm7|Ebm7 Gb7|Bmaj7|Bmaj7|Dbm7|Ebm7 Gb7|Bmaj7|Emaj7|Ebm7|Abm7 Db7|F#maj7|Bmaj7|Dbm7|Ebm7 Gb7|Bmaj7'},
-{id:'smile',n:'Smile',c:'발라드',k:0,bpm:100,f:['AAB',8],
- ch:'Cmaj7|E7b9|Am7|D7|Gmaj7|B7b9|Em7|A7|Dm7|G7|Cmaj7|Cmaj7|Dm7|G7|Cmaj7|C6'},
-{id:'sunny',n:'Sunny',c:'펑키',k:9,bpm:110,f:['AAB',8],
- ch:'Am7|Am7|Am7|Am7|Dm7|Dm7|Am7|Am7|Gm7 C7|Fmaj7|E7b9|E7b9|Am7|Am7|Fmaj7|Am7'},
-{id:'sway',n:'Sway',c:'라틴',k:2,bpm:110,f:['AAB',8],
- ch:'Dm6|Dm6|Gm6|A7|Dm6|Dm6|A7|Dm6|Bb6|A7|Dm6|A7|Dm6|Gm6|A7|Dm6'},
-{id:'stuffy',n:'Stuffy',c:'비밥',k:10,bpm:180,f:['AAB',4],
- ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'}
-);
-RAW_SONGS.forEach(s=>{SONGDB[s.id]={name:s.n,c:s.c,key:s.k,bpm:s.bpm,bpb:s.m||4,form:{phrase:s.f[1],sections:s.f[0]},bars:s.ch.split('|').map(b=>b.trim().split(/\s+/).map(parseCh))}});
-/* ── 리얼북 5권 수록 (v0.16) ──
-   Hal Leonard Real Book Vol.5 중 진행을 확실히 아는 곡만 수록.
-   미수록: At Last, Send In the Clowns, Over the Rainbow, Star Eyes 등 진행 확정 곡 이외. */
-RAW_SONGS.push(
-{id:'almost-like-being-in-love',n:'Almost Like Being in Love',c:'스윙',k:10,bpm:140,f:['AAB',8],
- ch:'Bb6|Bb6|Cm7 F7|Bb6|C7|C7|F6|D7|Gm7|C7|F6|D7|Gm7|C7|F6|Bb6'},
-{id:'crazy-rhythm',n:'Crazy Rhythm',c:'스윙',k:0,bpm:180,f:['AAB',8],
- ch:'C6|C6|A7|D7|G7|G7|C6|C6|C7|C7|F6|F6|A7|D7|G7|C7'},
-{id:'every-breath-you-take',n:'Every Breath You Take',c:'모던',k:7,bpm:110,f:['AAB',8],
- ch:'Gm7|Gm7|Ebmaj7|Ebmaj7|Fm7|Bb7|Gm7|Gm7|Am7|D7|Gm7|C7|Fmaj7|Fmaj7|Cm7 F7|Gm7'},
-{id:'goodbye-pork-pie-hat',n:'Goodbye Pork Pie Hat',c:'발라드',k:7,bpm:70,f:['AB',4],
- ch:'Gm7|Gm7|Gm7|Gm7|Cm7|Cm7|Gm7|Gm7|Ab7|Ab7|Gm7|Gm7|Am7b5 D7b9|Gm7|Cm7 D7b9|Gm7'},
-{id:'i-get-a-kick-out-of-you',n:'I Get a Kick Out of You',c:'스윙',k:10,bpm:140,f:['AAB',8],
- ch:'Bbmaj7|Bbmaj7|Fm7 Bb7|Ebmaj7|Bbmaj7|Bbmaj7|Cm7 F7|Bbmaj7|C7|C7|Fmaj7|Fmaj7|Dm7b5 G7|Cm7 F7|Bbmaj7|Cm7 F7'},
-{id:'im-in-the-mood-for-love',n:"I'm in the Mood for Love",c:'발라드',k:5,bpm:100,f:['AAB',8],
- ch:'Fmaj7|Fmaj7|Bm7b5 E7|Am7|D7|D7|Gm7 C7|Fmaj7|Bbmaj7|Bbmaj7|Ebmaj7|Ebmaj7|C7|Fmaj7|Gm7 C7|Fmaj7'},
-{id:'in-your-own-sweet-way',n:'In Your Own Sweet Way',c:'모던',k:10,bpm:110,f:['AAB',8],
- ch:'Bbmaj7|Bbmaj7|Fm7 Bb7|Ebmaj7|Bbmaj7|Bbmaj7|Am7b5 D7|Gm7 C7|Ebmaj7|Ebmaj7|Dm7|G7|Cm7|F7|Bbmaj7|Bbmaj7'},
-{id:'love-is-here-to-stay',n:'Love Is Here to Stay',c:'스윙',k:5,bpm:120,f:['AAB',8],
- ch:'Gm7|C7|Fmaj7|Fmaj7|D7|G7|Cmaj7|Cmaj7|Bbmaj7|Bbmaj7|Bm7b5 E7|Am7|D7|D7|Gm7 C7|Fmaj7'},
-{id:'moondance',n:'Moondance',c:'모던',k:9,bpm:130,f:['AAB',8],
- ch:'Am7|Am7|Bm7|Bm7|Am7|Am7|Fmaj7|Fmaj7|Cmaj7|Cmaj7|Am7|Am7|Bm7|Em7|Am7|Am7'},
-{id:'oh-lady-be-good',n:'Oh, Lady Be Good!',c:'스윙',k:7,bpm:160,f:['AAB',8],
- ch:'G6|B7|Em7|A7|D7|G7|C7 D7|G6|G6|B7|Em7|A7|D7|G7|C7 D7|G6'},
-{id:'one-oclock-jump',n:"One O'Clock Jump",c:'스윙',k:10,bpm:180,f:['AAB',4],
- ch:'Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|F7|Eb7|Bb7|F7'},
-{id:'tequila',n:'Tequila',c:'라틴',k:2,bpm:120,f:['AAB',4],
- ch:'D7|D7|D7|D7|G7|G7|D7|D7|A7|A7|D7|A7'},
-/* ═══ v0.26 추가 곡 (사용자 요청 — 리얼북 계열 표준 진행) ═══ */
-{id:'it-had-to-be-you',n:"It Had to Be You",c:'스윙',k:5,bpm:130,f:['AABA',8],
- ch:'G6|Bm7b5 E7|Am7|D7|Gmaj7|Bm7b5 E7|Am7 D7|Gmaj7 Bm7b5 E7|C6|F#m7b5 B7|Em7|A7|Cm6|D7|Gmaj7 D7|G6 Bm7b5 E7'},
-{id:'as-long-as-i-live',n:'As Long As I Live',c:'스윙',k:9,bpm:150,f:['AABA',8],
- ch:'Am7b5 D7b9|Gm6|Am7b5 D7b9|Gm6|Bm7b5 E7b9|Am7b5 D7b9|Gm6|D7b9|Cm7 F7|Bbmaj7|Cm7 F7|Bbmaj7|Am7b5 D7b9|Gm6|Am7b5 D7b9|Gm6'},
-{id:"i-ve-heard-that-song-before",n:"I've Heard That Song Before",c:'스윙',k:5,bpm:130,f:['AABA',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7|C7|Fmaj7|Fmaj7|D7|D7|Gm7|Gm7|C7|C7|Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7|C7|Gm7|C7|Fmaj7|D7|Gm7 C7|Fmaj7|Gm7 C7|Fmaj7'},
-{id:'slow-cookin',n:"Slow Cookin'",c:'블루스',k:2,bpm:100,f:['AAB',4],
- ch:'D7|G7|D7|D7|G7|G7|D7|D7|A7|G7|D7|D7|D7|G7|D7 A7|D7'},
-{id:'no-moon-at-all',n:'No Moon at All',c:'발라드',k:2,bpm:80,f:['ABAC',8],
- ch:'Dm7b5|G7b9|Cm7|Cm7|Dm7b5|G7b9|Cm7|Fm7 Bb7|Ebmaj7|Dm7b5 G7b9|Cm7|A7|Dm7b5|G7b9|Cm7|Cm7|Ab7|G7b9|Cm7|Cm7|Dm7b5|G7b9|Cm7|Fm7 Bb7|Ebmaj7|Dm7b5 G7b9|Cm7|A7|Dm7b5|G7b9|Cm7|Cm7'},
-{id:'vem-vet',n:'Vem Vet',c:'발라드',k:0,bpm:85,f:['ABAC',8],
- ch:'Cmaj7|B7|Em7|A7|Dm7|G7|Cmaj7|Cmaj7|Cmaj7|B7|Em7|A7|Dm7|G7|Cmaj7|Cmaj7|Dm7|Dm7|G7|G7|Cmaj7|A7|Dm7|G7|Cmaj7|B7|Em7|A7|Dm7|G7|Cmaj7|Cmaj7'},
-{id:'midnight-dejavu',n:'Midnight Dejavu (Deja vu)',c:'발라드',k:2,bpm:90,f:['AB',8],
- ch:'Dm7|G7|Cmaj7|Am7|Dm7|G7|Cmaj7|A7|Dm7|G7|Cmaj7|Am7|Dm7|G7|Cmaj7|Cmaj7'},
-{id:'my-baby-just-cares-for-me',n:'My Baby Just Cares for Me',c:'스윙',k:5,bpm:135,f:['ABAC',8],
- ch:'F6|D7|Gm7|C7|F6|D7|Gm7 C7|F6|A7|D7|Gm7|C7|F6|C7|F6|F6|F6|D7|Gm7|C7|F6|D7|Gm7 C7|F6|Bbmaj7|Bbmaj7|Am7|D7|Gm7|C7|F6|F6'},
-{id:"i-m-gonna-sit-right-down-and-write-myself-a-letter",n:"I'm Gonna Sit Right Down and Write Myself a Letter",c:'스윙',k:2,bpm:140,f:['ABAC',8],
- ch:'Fmaj7|D7|Gm7|C7|Fmaj7|D7|Gm7|C7|Gm7|C7|Fmaj7|D7|Gm7|C7|Fmaj7|Fmaj7|Bbmaj7|G7|Cmaj7|A7|Dm7|G7|C7|C7|Fmaj7|D7|Gm7|C7|Gm7|C7|Fmaj7|Fmaj7'}
-);
-RAW_SONGS.forEach(s=>{SONGDB[s.id]={name:s.n,c:s.c,key:s.k,bpm:s.bpm,bpb:s.m||4,form:{phrase:s.f[1],sections:s.f[0]},bars:s.ch.split('|').map(b=>b.trim().split(/\s+/).map(parseCh))}});
 
 </script>
 
@@ -3584,8 +3020,8 @@ const GRP={'스윙':'미디엄/업템포 스윙','블루스':'블루스 & 리듬
 const cur={noteColors:'off',selProg:'blue-bossa',trUser:0,selDiff:2,selInst:'wind',selTrans:0,useLicks:true,useGroups:true,style:'all',tone:'clarinet',topic:'auto',themeOn:false,themeCh:'first',feel:'auto',solo:null,abc:'',audio:null,saved:[],view:'solo',playSolo:true,chorus:2};
 
 /* ── 곡 선택 박스 + 검색 ── */
-const SONG_MARK={ok:'✓ ',form:'✓ ',practice:'✓ ',partial:'△ ',wrong:'✕ ',unknown:'? '};
-const SONG_STATUS_LABEL={ok:'✓ 코드 진행 확인됨',form:'✓ 형식 확인(블루스·리듬 체인지 등 공통 진행)',practice:'✓ 연습용 진행',partial:'△ 일부 다름 — 원곡과 부분적으로 다른 진행',wrong:'✕ 원곡과 다른 진행 — 수정 전까지 원곡 연습용으로 쓰지 마세요',unknown:'? 미확인 — 원곡과 다를 수 있음'};
+const SONG_MARK={ok:'✓ ',form:'✓ ',practice:'✓ ',rb:'◆ ',rbq:'◇ ',partial:'△ ',wrong:'✕ ',unknown:'? '};
+const SONG_STATUS_LABEL={ok:'✓ 코드 진행 확인됨',form:'✓ 형식 확인(블루스·리듬 체인지 등 공통 진행)',practice:'✓ 연습용 진행',partial:'△ 일부 다름 — 원곡과 부분적으로 다른 진행',wrong:'✕ 원곡과 다른 진행 — 수정 전까지 원곡 연습용으로 쓰지 마세요',unknown:'? 미확인 — 원곡과 다를 수 있음',rb:'◆ 리얼북 기준 새 코드집(v0.37) — 연주자 확인 전',rbq:'◇ 새 코드집(v0.37) — 일부 마디 확인 필요'};
 const songSel=$('#songSel');
 (function(){
   /* v0.27.1 곡 목록 — 장르 옵트그룹 완전 제거, 알파벳 순 단일 목록 */
@@ -3599,7 +3035,7 @@ const songSel=$('#songSel');
     });
 })();
 /* v0.36 곡 데이터 검증 상태 — 목록 앞 기호와 선택한 곡 안내 */
-function songOkLevel(st){return st==='ok'||st==='form'||st==='practice'}
+function songOkLevel(st){return st==='ok'||st==='form'||st==='practice'||st==='rb'}   /* v0.37 「확인 필요 곡 숨기기」: rbq·일부 다름·틀림·미확인을 숨긴다 */
 function filterSongs(){
   const q=$('#songSearch').value.trim().toLowerCase(),only=$('#onlyOk').checked;let vis=0;
   [...songSel.querySelectorAll('option')].forEach(o=>{
@@ -3615,8 +3051,9 @@ function updSongStatus(){
   const el=$('#songStatus');if(!el)return;
   const st=(typeof SONG_STATUS!=='undefined'&&SONG_STATUS[cur.selProg])||{s:'unknown',n:'',a:[]};
   el.className='songstatus st-'+st.s;
-  el.innerHTML='<b>'+SONG_STATUS_LABEL[st.s]+'</b>'+(st.n?' — '+st.n:'')+(st.a&&st.a.length&&!songOkLevel(st.s)?'<span class="auto"> · 자동 검사: '+st.a.join(' / ')+'</span>':'')+
-    (songOkLevel(st.s)?'':' <span class="ask">원곡 진행을 아시면 💬 피드백으로 알려 주세요.</span>');
+  const bad=st.s==='partial'||st.s==='wrong'||st.s==='unknown';
+  el.innerHTML='<b>'+(SONG_STATUS_LABEL[st.s]||st.s)+'</b>'+(st.n?' — '+st.n:'')+(st.a&&st.a.length&&bad?'<span class="auto"> · 자동 검사: '+st.a.join(' / ')+'</span>':'')+
+    (bad?' <span class="ask">원곡 진행을 아시면 💬 피드백으로 알려 주세요.</span>':(st.s==='rb'||st.s==='rbq')?' <span class="ask">원곡과 다른 곳을 찾으시면 💬 피드백으로 알려 주세요.</span>':'');
 }
 
 /* ── 아티스트 스타일 박스 ── */
@@ -4267,7 +3704,7 @@ function popAct(act){
 /* ── 피드백: 입력창 → GitHub 이슈(곡·설정 자동 첨부) 또는 내용 복사 ── */
 function fbInfo(){
   const so=songSel.selectedOptions&&songSel.selectedOptions[0]?songSel.selectedOptions[0].textContent:'-';
-  return ['버전: v0.36.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
+  return ['버전: v0.37.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
 }
 $('#btnFeedback').onclick=()=>{$('#fbModal').style.display='flex';$('#fbText').focus();$('#fbMsg').textContent=''};
 $('#fbClose').onclick=()=>{$('#fbModal').style.display='none'};
@@ -4346,7 +3783,7 @@ function soloMusicXml({solos,title='Solo',bpb,bpm=120,writtenTranspose=0,octaveS
     durationCache.set(cacheKey,dp[units]);
     return dp[units];
   }
-  const kinds={maj7:'major-seventh','6':'major-sixth',m7:'minor-seventh',m9:'minor-ninth',m6:'minor-sixth','7':'dominant','9':'dominant-ninth','7b9':'dominant-ninth','7#9':'dominant-ninth',m7b5:'half-diminished',dim7:'diminished-seventh'};
+  const kinds={maj7:'major-seventh','6':'major-sixth',m7:'minor-seventh',m9:'minor-ninth',m6:'minor-sixth','7':'dominant','9':'dominant-ninth','7b9':'dominant-ninth','7#9':'dominant-ninth',m7b5:'half-diminished',dim7:'diminished-seventh','7sus4':'suspended-fourth',mmaj7:'major-minor','7#11':'dominant','maj7#11':'major-seventh'};
   let out='<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1"><work><work-title>'+esc(title)+'</work-title></work><identification><creator type="composer">Jazz Solo Generator</creator></identification><part-list><score-part id="P1"><part-name>Solo</part-name></score-part></part-list><part id="P1">\n';
   const size=bpb*24,shift=writtenTranspose+octaveShift;
   let measure=0;
@@ -4393,6 +3830,9 @@ function soloMusicXml({solos,title='Solo',bpb,bpm=120,writtenTranspose=0,octaveS
         const offset=i?(bpb===5?72:48):0;
         if(offset>=size)throw new Error('Harmony outside measure');
         out+='<harmony><root><root-step>'+p.step+'</root-step>'+(p.alter?'<root-alter>'+p.alter+'</root-alter>':'')+'</root><kind>'+kind+'</kind>';
+        const deg=(v,a,t)=>'<degree><degree-value>'+v+'</degree-value><degree-alter>'+a+'</degree-alter><degree-type>'+t+'</degree-type></degree>';
+        if(ch.type==='7sus4')out+=deg(7,-1,'add');
+        if(ch.type==='7#11'||ch.type==='maj7#11')out+=deg(11,1,'add');
         if(ch.type==='7b9'||ch.type==='7#9')out+='<degree><degree-value>9</degree-value><degree-alter>'+(ch.type==='7b9'?-1:1)+'</degree-alter><degree-type>alter</degree-type></degree>';
         out+='<offset sound="yes">'+offset+'</offset></harmony>\n';
       });

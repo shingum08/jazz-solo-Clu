@@ -173,6 +173,10 @@ function voicingFor(ch,prevV){
     domalt:[[4,8,10,13],[10,13,16,20]],hdim:[[3,6,10,12],[10,12,15,18]],dim:[[3,6,9,12],[9,12,15,18]]};
   if(t==='6')sets.maj=[[4,7,9,14],[9,14,16,19]];
   if(t==='m6')sets.min=[[3,7,9,14],[9,14,15,19]];
+  if(t==='7sus4')sets.dom=[[5,7,10,14],[10,14,17,19]];      /* v0.37 3음 없이 */
+  if(t==='mmaj7')sets.min=[[3,7,11,14],[11,14,15,19]];
+  if(t==='7#11')sets.dom=[[4,6,10,14],[10,14,16,18]];
+  if(t==='maj7#11')sets.maj=[[4,6,11,14],[11,14,16,18]];
   let best=null;
   for(const form of sets[cls]||sets.maj){
     for(let base=48;base<=62;base++){

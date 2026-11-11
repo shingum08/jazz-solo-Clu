@@ -22,7 +22,12 @@ const CHORD_TYPES = {
   '9':    {iv:[0,4,7,10],   scale:[0,2,4,5,7,9,10],   sname:'믹솔리디안'},
   '7b9':  {iv:[0,4,7,10],   scale:[0,1,4,5,7,8,10],   sname:'하모닉 마이너 5모드(♭9·♭13)'},
   '7#9':  {iv:[0,4,7,10],   scale:[0,1,3,4,6,8,10],   sname:'얼터드(♭9·♯9·♭13)'},
-  'm9':   {iv:[0,3,7,10,14],scale:[0,2,3,5,7,9,10],   sname:'도리안'}
+  'm9':   {iv:[0,3,7,10,14],scale:[0,2,3,5,7,9,10],   sname:'도리안'},
+  /* v0.37 리얼북 코드집용 */
+  '7sus4':  {iv:[0,5,7,10],  scale:[0,2,5,7,9,10],     sname:'믹솔리디안 sus4(3음 없음)'},
+  'mmaj7':  {iv:[0,3,7,11],  scale:[0,2,3,5,7,9,11],   sname:'멜로딕 마이너'},
+  '7#11':   {iv:[0,4,7,10],  scale:[0,2,4,6,7,9,10],   sname:'리디안 ♭7'},
+  'maj7#11':{iv:[0,4,7,11],  scale:[0,2,4,6,7,9,11],   sname:'리디안(♯11)'}
 };
 /* v0.21 반주 스타일(feel) — 곡 분류·템포로 자동 판별. 반주 리듬과 솔로 성격(코드톤 비중·리듬 밀도)에 함께 쓰인다 */
 const LATIN_IDS=['spain','a-night-in-tunisia','caravan','st-thomas','afro-blue','at-the-mambo-inn','oye-como-va','sway','tequila'];
@@ -103,7 +108,7 @@ const FEEL_PROFILE={
 };
 /* v0.20 마디의 '메인 음' — 코드톤 + 코드에 맞는 펜타토닉(강박·긴 음은 여기서 고른다) */
 const PENTA_REL={maj:[0,2,4,7,9],min:[0,2,3,5,7,10],dom:[0,2,4,7,9,10],domalt:[0,4,7,10],hdim:[0,3,5,6,10],dim:[0,3,6,9]};
-const TYPE_CLS={'maj7':'maj','6':'maj','m7':'min','m9':'min','m6':'min','7':'dom','9':'dom','7b9':'domalt','7#9':'domalt','m7b5':'hdim','dim7':'dim'};
+const TYPE_CLS={'maj7':'maj','6':'maj','m7':'min','m9':'min','m6':'min','7':'dom','9':'dom','7b9':'domalt','7#9':'domalt','m7b5':'hdim','dim7':'dim','7sus4':'dom','mmaj7':'min','7#11':'dom','maj7#11':'maj'};
 
 /* 진행: o = 조의 으뜸음에서 반음 거리, t = 코드 종류. 한 마디에 코드 1~2개. (v0.11과 동일) */
 const PROGS = {
@@ -193,7 +198,7 @@ function chordToneMidis(rootPc,type,lo,hi){
 /* ── ① 화성 분석 ───────────────────────────────────────────────
    마디 → 코드 구간(segment). 각 구간에 기능·스케일·코드톤·가이드톤·텐션을 배정한다. */
 const CHORD_NAME=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
-const SUF={maj7:'maj7',m7:'m7',m9:'m9','7':'7',m7b5:'m7♭5',dim7:'dim7','6':'6',m6:'m6','9':'9','7b9':'7♭9','7#9':'7♯9'};
+const SUF={maj7:'maj7',m7:'m7',m9:'m9','7':'7',m7b5:'m7♭5',dim7:'dim7','6':'6',m6:'m6','9':'9','7b9':'7♭9','7#9':'7♯9','7sus4':'7sus4',mmaj7:'m(maj7)','7#11':'7♯11','maj7#11':'maj7♯11'};
 const CHORD_NAME_S=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
 let SPELL_SHARP=false;
 /* 곡이 단조로 끝나는지(마지막 코드가 으뜸음 마이너) */
@@ -248,7 +253,9 @@ function analyzeHarmony(bars,keyPc,bpb){
     const cls0=TYPE_CLS[s.type];
     const toNext=mod12(nx.root-s.root);
     let cls=cls0,scale=CHORD_TYPES[s.type].scale.slice(),fn='',tens=[],sname=CHORD_TYPES[s.type].sname;
-    if(cls0==='dom'){
+    if(s.type==='7sus4'){fn=toNext===5?'Ⅴsus4':'sus4 도미넌트';tens=[2,9]}   /* v0.37 고유 스케일 유지 */
+    else if(s.type==='7#11'){fn=toNext===11?'트라이톤 대리(♭Ⅱ7)':'리디안 도미넌트';tens=[2,6,9]}
+    else if(cls0==='dom'){
       if(toNext===5&&(TYPE_CLS[nx.type]==='min'||TYPE_CLS[nx.type]==='hdim')){
         cls='domalt';scale=[0,1,4,5,7,8,10];tens=[1,8];fn='Ⅴ→단조';sname='하모닉 마이너 5모드(♭9·♭13)';
       }else if(toNext===5){
@@ -266,14 +273,15 @@ function analyzeHarmony(bars,keyPc,bpb){
         scale=[0,2,4,6,7,9,11];fn='Ⅳ(리디안)';sname='리디안(♯11)';tens=[2,6,9];
       }else{fn=resolved?'Ⅰ(해결)':'장조 토닉';tens=[2,9];}
     }else if(cls0==='min'){
-      if(toNext===5&&TYPE_CLS[nx.type]&&TYPE_CLS[nx.type].startsWith('dom')){fn='Ⅱ';scale=[0,2,3,5,7,9,10];sname='도리안';tens=[2,5]}
+      if(s.type==='mmaj7'){fn='ⅰ(마이너 메이저7)';tens=[2,9]}
+      else if(toNext===5&&TYPE_CLS[nx.type]&&TYPE_CLS[nx.type].startsWith('dom')){fn='Ⅱ';scale=[0,2,3,5,7,9,10];sname='도리안';tens=[2,5]}
       else if(s.type==='m6'||mod12(s.root-keyPc)===0){fn='ⅰ(토닉 마이너)';scale=[0,2,3,5,7,9,11];sname='멜로딕 마이너';tens=[2,9]}
       else{fn='마이너';tens=[2,5]}
     }else if(cls0==='hdim'){fn=toNext===5?'ⅱø(단조 Ⅱ)':'하프디미니시';tens=[5]}
     else if(cls0==='dim'){fn='경과 디미니시';tens=[2,5,8,11]}
     s.cls=cls;s.scale=scale;s.fn=fn;s.tens=tens;s.sname=sname;
     s.ct=CHORD_TYPES[s.type].iv.slice();
-    s.guide=s.ct.filter(iv=>iv===3||iv===4||iv===10||iv===11||(s.type==='6'&&iv===9)||(s.type==='m6'&&iv===9));
+    s.guide=s.ct.filter(iv=>iv===3||iv===4||iv===10||iv===11||(s.type==='6'&&iv===9)||(s.type==='m6'&&iv===9)||(s.type==='7sus4'&&iv===5));
     s.label=chordSymbol(s.root,s.type)+(fn?' · '+fn:'')+' · '+sname;
   });
   return merged;
@@ -1082,7 +1090,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       for(let m=tgt-1;m<=tgt+1;m++){
         if(m<LO||m>HI||!allow(m,times[k])||!matOK(sg,m,e0.ph))continue;
         if(Math.abs(m-ms[k-1])>MAXLEAP)continue;
-        const okp=heavy?isMain(sg,m):(inScale(sg,m)||isCT(sg,m));
+        const okp=heavy?(opts.ctAlign!==false?isCT(sg,m):isMain(sg,m)):(inScale(sg,m)||isCT(sg,m));   /* v0.37 정박은 코드톤 */
         if(!okp)continue;
         const sc=Math.abs(m-tgt)*2+(isCT(sg,m)?-0.5:0);
         if(!best||sc<best.sc)best={m,sc};
@@ -1143,7 +1151,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       if(src.every(x=>x&&x.trip&&x.midi!==null)&&dst.every(x=>x&&x.trip&&x.rep)&&dst.every((x,q)=>!forced.has(i+q))){
         const sg=segs[segAt(e.t)],sgS=segs[segAt(src[0].t)];
         if(Math.abs(src[2].midi-src[0].midi)<=MAXLEAP&&src.every(x=>(inScale(sg,x.midi)||isCT(sg,x.midi))&&(inScale(sgS,x.midi)||isCT(sgS,x.midi))&&allow(x.midi,e.t)&&matOK(sg,x.midi,e.ph))){
-          src.forEach((x,q)=>{forced.set(i+q,{m:x.midi,kind:'trep'});motifLock.add(i+q)});
+          src.forEach((x,q)=>{forced.set(i+q,{m:x.midi,kind:'trep'});motifLock.add(i+q);x.trepSrc=true});
           tag(Math.floor(e.t/TPB),'셋잇단 반복(6연음 느낌)');
         }
       }
@@ -1276,6 +1284,81 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         c.push(x);
       }
       if(c.length){e.midi=nearest(c,e.midi);stats.chromFix=(stats.chromFix||0)+1}
+    }
+  }
+  /* v0.37 코드톤 정렬 — 코드톤 라인 원칙을 모든 솔로에 적용(두호 님 피드백).
+     프레이즈마다 원래 음에서 크게 벗어나지 않는 범위(±5반음)에서 동적 계획법으로 다시 맞춘다:
+     · 정박(박 머리·긴 음·코드 경계를 넘는 음) = 코드톤 · 약박 = 스케일/코드톤
+     · 반음 경과음은 바로 다음 음으로 반음 해결될 때만 · 코드가 바뀌는 정박은 3·7음 우선
+     인용(헤드)·하이라이트 장치·셋잇단 반복(원본 포함)·반전 도약·코드톤 라인·모티프 음은 고정(모티프는 생성 때 정박 코드톤으로 맞춘다). */
+  if(opts.ctAlign!==false&&topic!=='gt'){
+    const PIN=new Set(['quote','dev','trep','disp','ctl','motif']);
+    const snd=[];events.forEach((e,i)=>{if(e.midi!==null)snd.push(i)});
+    let lastFixed=null,q0=0;
+    while(q0<snd.length){
+      let q1=q0;while(q1+1<snd.length&&events[snd[q1+1]].ph===events[snd[q0]].ph)q1++;
+      const idx=snd.slice(q0,q1+1),n=idx.length;
+      const info=idx.map((i,q)=>{
+        const e=events[i],f=forced.get(i),sg=segs[segAt(e.t)];
+        const s2=segs[segAt(Math.min(TOT-1,e.t+e.d-1))],cross=s2!==sg?s2:null;
+        const strong=e.t%6===0||e.d>=6||!!cross;
+        const pe=q>0?events[idx[q-1]]:null;
+        const change=strong&&(q===0?sg.t0===e.t:segAt(pe.t)!==segAt(e.t));
+        const nx=q+1<n?events[idx[q+1]]:null;
+        const pin=e.quote||e.hlx||e.trepSrc||(f&&PIN.has(f.kind)&&f.m===e.midi);
+        const motif=f&&f.kind==='motif';
+        const cands=[];
+        if(pin)cands.push(e.midi);
+        else for(let x=Math.max(LO,e.midi-5);x<=Math.min(HI,e.midi+5);x++)if(allow(x,e.t))cands.push(x);
+        return {e,sg,cross,strong,change,contig:!!nx&&nx.t===e.t+e.d,pin,motif,cands,last:q===n-1,gap:pe?e.t-(pe.t+pe.d):99};
+      });
+      const ok=(I,m)=>{
+        if(I.pin)return true;
+        if(I.strong||I.last){if(!isCT(I.sg,m))return false;if(I.cross&&!isCT(I.cross,m))return false;return true}
+        if(inScale(I.sg,m)||isCT(I.sg,m))return true;
+        return I.contig&&I.e.d<=3;
+      };
+      const chromQ=(I,m)=>!I.pin&&!inScale(I.sg,m)&&!isCT(I.sg,m);
+      const leapOK=(Ia,a,Ib,b)=>{const d=Math.abs(b-a);if(d<=MAXLEAP)return true;if(Ia.pin&&Ib.pin)return true;return !!Ib.e.disp&&b-a>0&&b-a<=12&&Ib.pin};
+      const INF=1e9;
+      let cost=info[0].cands.map(m=>{
+        const I=info[0];if(!ok(I,m))return INF;
+        if(lastFixed!==null&&!I.pin&&Math.abs(m-lastFixed)>MAXLEAP)return INF;
+        let c=Math.abs(m-I.e.midi)*(I.motif?2.5:1);
+        if(I.change&&!isGuide(I.sg,m))c+=4;
+        return c;
+      });
+      const back=[];
+      for(let q=1;q<n;q++){
+        const I=info[q],P=info[q-1],nc=[],bk=[];
+        I.cands.forEach((m,b)=>{
+          let best=INF,arg=-1;
+          if(ok(I,m)){
+            const base=Math.abs(m-I.e.midi)*(I.motif?2.5:1)+(I.change&&!isGuide(I.sg,m)?4:0);
+            P.cands.forEach((pm,a)=>{
+              const pc=cost[a];if(pc>=INF)return;
+              if(!leapOK(P,pm,I,m))return;
+              const ab=Math.abs(m-pm);
+              if(chromQ(P,pm)&&(ab!==1||I.gap>0))return;   /* 반음 경과음은 바로 반음으로 해결 */
+              let t=0;if(ab===0&&I.gap<6&&!(I.pin&&P.pin))t+=2;
+              const v=pc+base+t;if(v<best){best=v;arg=a}
+            });
+          }
+          nc.push(best);bk.push(arg);
+        });
+        cost=nc;back.push(bk);
+      }
+      if(q1+1<snd.length){
+        const ne=events[snd[q1+1]];
+        const L=info[n-1];if(!L.pin)cost=cost.map((c,b)=>Math.abs(L.cands[b]-ne.midi)>MAXLEAP?INF:c);   /* 다음 프레이즈 첫 음(원래 음)까지 도약 한도 — 다음 프레이즈가 늘 풀 수 있게 */
+      }
+      let bi=-1,bc=INF;cost.forEach((c,b)=>{if(c<bc){bc=c;bi=b}});
+      if(bi>=0){
+        const ms=new Array(n);
+        for(let q=n-1;q>=0;q--){ms[q]=info[q].cands[bi];if(q>0)bi=back[q-1][bi]}
+        ms.forEach((m,q)=>{const e=info[q].e;if(e.midi!==m){e.midi=m;stats.ctAlign=(stats.ctAlign||0)+1}});
+      }else stats.ctAlignFail=(stats.ctAlignFail||0)+1;
+      lastFixed=events[idx[n-1]].midi;q0=q1+1;
     }
   }
   /* ── ⑦ 마디 분할 · 붙임줄 · 표기용 길이 정리 ── */

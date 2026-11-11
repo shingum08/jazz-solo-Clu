@@ -5,7 +5,7 @@
    종료 코드: 재현율 상승이 없거나 생존율/위반이 임계 미만이면 1 */
 const {loadEngine}=require('./lib_load.js');
 const E=loadEngine();
-const SONGS=['autumn-leaves','all-of-me','blue-monk','oleo','giant-steps','blue-bossa','four','soul-eyes','crazy-rhythm','scrapple-from-the-apple','blues12','so-what'].filter(id=>E.SONGDB[id]);
+const SONGS=['autumn-leaves','all-of-me','blue-monk','oleo','giant-steps','blue-bossa','stella-by-starlight','solar','take-the-a-train','lady-bird','blues12','so-what'].filter(id=>E.SONGDB[id]);
 const SEEDS=+(process.argv.find(a=>/^\d+$/.test(a))||15);
 function phrasesOf(solo){
   const TPB=solo.bpb*6,flat=[];let pvTie=false;
