@@ -11,7 +11,7 @@
    섹션·프레이즈가 '-'이면 비정형 곡: 프레이즈는 8(8로 안 나누어지면 4), 섹션은 A를 프레이즈 수만큼 채운다.
    책 곡(b 필드 있음)은 매번 입력 파일로 통째로 교체하고, 책에 없는 기존 곡은 그대로 둔다(상태도 유지). */
 'use strict';
-const fs=require('fs'),path=require('path'),{loadEngine,root}=require('./lib_load.js');
+const fs=require('fs'),path=require('path'),{loadEngine,root}=require('./lib_load.js'),{pubNote}=require('./lib_pub.js');
 const CH_RE=/^([A-G])([b#]?)(maj7#11|maj7|mmaj7|m7b5|m7|m6|m9|dim7|7sus4|7b9|7#9|7#11|7|6|9)$/;
 const SRC=path.join(root,'tools/data/realbook_chords.txt');
 const REV_OLD=path.join(root,'tools/data/song_review_v037.json'),REV=path.join(root,'tools/data/song_review_v038.json');
@@ -51,19 +51,19 @@ function parseSrc(){
 
 const q=s=>"'"+String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'";
 function songJs(s){
-  return '{id:'+q(s.id)+',n:'+q(s.n)+',c:'+q(s.c)+',k:'+s.k+',bpm:'+s.bpm+((s.m&&s.m!==4)?',m:'+s.m:'')+',f:['+q(s.f[0])+','+s.f[1]+']'+(s.b?',b:'+q(s.b):'')+','+
-    (s.x?'\n x:'+q(s.x)+',':'')+'\n ch:'+q(s.ch)+'}';
+  /* v0.42.1 앱 파일에는 출처(권·쪽)를 싣지 않는다 — b는 「악보 대조 곡」 표시(1)만, 메모는 pubNote를 거친다. 원본은 tools/data에 */
+  const x=pubNote(s.x);
+  return '{id:'+q(s.id)+',n:'+q(s.n)+',c:'+q(s.c)+',k:'+s.k+',bpm:'+s.bpm+((s.m&&s.m!==4)?',m:'+s.m:'')+',f:['+q(s.f[0])+','+s.f[1]+']'+(s.b?',b:1':'')+','+
+    (x?'\n x:'+q(x)+',':'')+'\n ch:'+q(s.ch)+'}';
 }
-const HEAD=`/* ── 곡 데이터베이스 v0.38 ─────────────────────────────────────────
-   v0.38: 리얼북 1~3권(사용자가 준 스캔본)을 한 장씩 보며 옮긴 코드 진행으로 바꿨다 — b 필드(권·쪽)가 있는 곡.
-   이 파일은 tools/rb_import.js 산출물이다. 책 곡을 고치려면 tools/data/realbook_chords.txt를 고치고 다시 돌린다.
-   책에 없거나(또는 판독이 애매해 보류한) 기존 곡은 v0.37 데이터와 상태를 그대로 둔다. v0.37 판은 claude/checkpoint-2 브랜치.
-   수록 원칙 (기획안 7장 법적 프레임 준수):
-   · 코드 진행만 수록 — 원곡 멜로디·가사 없음. 판본(리얼북 판·연주자별 악보)에 따라 세부가 다를 수 있다.
+const HEAD=`/* ── 곡 데이터베이스 v0.42.1 ─────────────────────────────────────────
+   이 파일은 tools/rb_import.js 산출물이다. 고치려면 tools/data/realbook_chords.txt를 고치고 다시 돌린다.
+   b:1 = 출판 리드시트와 한 마디씩 대조해 옮긴 곡(출처·쪽은 개발 자료에만). b가 없는 곡은 공통 형식·이전 판 데이터.
+   수록 원칙:
+   · 코드 진행만 수록 — 원곡 멜로디·가사 없음. 판본·연주자에 따라 세부가 다를 수 있다.
    · ch 문법: '|' = 마디 구분, ' ' = 한 마디 여러 코드(2개=반마디씩, 3개 이상=박을 고르게).
      maj7·m7·7·m7b5·7b9·7#9·6·m6·9·m9·dim7·7sus4·mmaj7·7#11·maj7#11 만 사용.
-   · k = 원곡 조(으뜸음 pc, C=0) · bpm = 기본 템포 · m = 박자(기본 4/4) · f = [형식, 프레이즈 마디수] · c = 분류
-     b = 리얼북 권·쪽 · x = 메모(표기 변환·근사·확인 필요)
+   · k = 원곡 조(으뜸음 pc, C=0) · bpm = 기본 템포 · m = 박자(기본 4/4) · f = [형식, 프레이즈 마디수] · c = 분류 · x = 메모
    · 정렬: 곡 이름 알파벳 순 */
 'use strict';
 

@@ -2,6 +2,7 @@
    node tools/song_audit.js            → engine/song_status.js 갱신 + 요약 출력
    node tools/song_audit.js --csv out  → 검증 시트용 CSV
    곡 데이터 자체는 고치지 않는다(출처 없이 고치면 또 틀린 데이터를 만들 수 있으므로). */
+const {pubNote}=require('./lib_pub.js');
 const fs=require('fs'),path=require('path'),{loadEngine,root}=require('./lib_load.js');
 const E=loadEngine();
 const N=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
@@ -28,11 +29,11 @@ for(const r of E.RAW_SONGS.concat(PRACTICE.map(id=>({id,n:E.SONGDB[id].name,k:E.
     auto.push('형식 '+s.form.sections+'×'+s.form.phrase+'='+want+'마디인데 '+s.bars.length+'마디');
   }
   const rv=PRACTICE.includes(id)?['practice','앱 연습용 진행']:review[id]||['unknown',''];
-  out[id]={s:rv[0],n:rv[1]||'',a:auto};
+  out[id]={s:rv[0],n:pubNote(rv[1]||''),a:auto};   /* v0.42.1 앱 문구에는 책 이름·쪽 없이 */
   rows.push({id,name:s.name,key:N[s.key],meter:(s.bpb||4)+'/4',form:s.form.sections+'·'+s.form.phrase,bars:s.bars.length,status:rv[0],note:rv[1]||'',auto:auto.join(' / '),chords:s.bars.map(b=>b.map(c=>N[c.root]+c.type).join(' ')).join(' | ')});
 }
 const js='/* v0.36 곡 데이터 검증 상태 — tools/song_audit.js 산출물(손으로 고치지 말 것. 판정 변경은 tools/data/song_review_v038.json)\n'+
- '   s: ok(아는 진행과 일치) · form(공통 형식으로는 맞음) · rb(v0.37 새로 작성, 연주자 확인 전) · rbq(새로 작성, 일부 마디 확인 필요) · book(v0.38 리얼북 악보 대조) · bookq(악보 대조, 일부 확인 필요) · practice(앱 연습용)\n'+
+ '   s: ok(아는 진행과 일치) · form(공통 형식으로는 맞음) · rb(v0.37 새로 작성, 연주자 확인 전) · rbq(새로 작성, 일부 마디 확인 필요) · book(v0.38 악보 대조) · bookq(악보 대조, 일부 확인 필요) · practice(앱 연습용)\n'+
  '   n: 메모 · a: 자동 검사 경고 · v: 연주자 확인(검증 시트 반영 시) */\nconst SONG_STATUS='+JSON.stringify(out)+';\n';
 fs.writeFileSync(path.join(root,'engine/song_status.js'),js);
 const cnt={};rows.forEach(r=>cnt[r.status]=(cnt[r.status]||0)+1);
