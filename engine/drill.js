@@ -69,9 +69,9 @@ function drillGuideLine(bars,bpb,wt,ceil,floor){
   const GM={maj7:[4,11],'6':[4,9],m7:[3,10],m9:[3,10],m6:[3,9],'7':[4,10],'9':[4,10],'7b9':[4,10],'7#9':[4,10],m7b5:[3,10],dim7:[3,9],'7sus4':[5,10],mmaj7:[3,11],'7#11':[4,10],'maj7#11':[4,11]};
   const slots=[];
   bars.forEach((bar,b)=>{
-    const lens=bar.length===1?[bpb]:[Math.ceil(bpb/2),Math.floor(bpb/2)];
+    const st=chordBeats(bar.length,bpb),lens=st.map((x,i)=>(i+1<st.length?st[i+1]:bpb)-x);
     let t=0;
-    bar.slice(0,2).forEach((c,ci)=>{
+    bar.forEach((c,ci)=>{
       let rem=lens[ci]*6;
       while(rem>0){const d=Math.min(12,rem);slots.push({b,t,d,c,root:mod12(c.root+wt),gs:GM[c.type]||[4,10],first:rem===lens[ci]*6});t+=d;rem-=d}
     });

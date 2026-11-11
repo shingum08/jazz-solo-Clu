@@ -119,7 +119,7 @@ function bassLine(solo,seed){
   const rng=mulberry32((seed||1)*31+7);
   const N=m=>{while(m<40)m+=12;while(m>55)m-=12;return m};
   const beats=[];
-  solo.bars.forEach(bar=>{for(let k=0;k<BPB;k++){const ch=bar.chords[(k>=Math.ceil(BPB/2)&&bar.chords.length>1)?1:0];beats.push(ch)}});
+  solo.bars.forEach(bar=>{for(let k=0;k<BPB;k++)beats.push(chordAtBeat(bar.chords,k,BPB))});
   const out=[];let prev=N(beats[0].root+40);
   for(let i=0;i<beats.length;i++){
     const ch=beats[i],nx=beats[(i+1)%beats.length];
@@ -146,7 +146,7 @@ function bassLine(solo,seed){
 /* v0.21 스타일별 베이스 — [박 위치, 음(근음 기준 반음), 길이(박)] 패턴. 근음은 워킹 베이스와 같은 음역 */
 function bassPattern(feel,bar,bpb,walk){
   const R=c=>{let m=c.root+36;while(m<36)m+=12;while(m>47)m-=12;return m};
-  const c0=bar.chords[0],c1=bar.chords[bar.chords.length>1?1:0];
+  const c0=bar.chords[0],c1=chordAtBeat(bar.chords,Math.ceil(bpb/2),bpb);
   const fifth=c=>R(c)+((CHORD_TYPES[c.type].iv.includes(6)&&!CHORD_TYPES[c.type].iv.includes(7))?6:7);
   const half=Math.ceil(bpb/2);
   if(feel==='swing'||bpb!==4&&feel!=='bossa')return walk.map((m,k)=>[k,m,0.92]);
@@ -278,7 +278,7 @@ function playAllInner(acIn,banksIn,feelIn){
         const BS=(when,len,m,vel)=>{if(bassB)playSample(ac,rb,bassB,when,len,m,0.75*vel,0.08);else bass(ac,rb,when,len,m,vel)};
         if(feel!=='swing'){
           const cp=compPattern(feel,bpb,rng,sw);
-          if(cp)cp.forEach(([bt,l])=>{const ch=bar.chords[(bt>=bpb/2&&bar.chords.length>1)?1:0];const v=voicingFor(ch,prevV);prevV=v;
+          if(cp)cp.forEach(([bt,l])=>{const ch=chordAtBeat(bar.chords,bt,bpb);const v=voicingFor(ch,prevV);prevV=v;
             const bAbs=Math.floor(bt),fr=bt-bAbs;const off=fr===0?0:(Math.abs(fr-0.5)<0.01?sw:fr);
             PH(barStart+(bAbs+off)*spb,l*spb,v,feel==='ballad'?0.1:0.11)});
           bassPattern(feel,bar,bpb,bl[bi]).forEach(([bt,m,l],k)=>{const bAbs=Math.floor(bt),fr=bt-bAbs;const off=fr===0?0:(Math.abs(fr-0.5)<0.01?sw:fr);BS(barStart+(bAbs+off)*spb,l*spb,m,k===0?1:0.85)});
@@ -288,12 +288,13 @@ function playAllInner(acIn,banksIn,feelIn){
         const pat=COMP[Math.floor(rng()*COMP.length)];
         pat.forEach(bt=>{
           const beatAbs=bt%bpb;
-          const ch=bar.chords[(beatAbs>=bpb/2&&bar.chords.length>1)?1:0];
+          const ch=chordAtBeat(bar.chords,beatAbs,bpb);
           const v=voicingFor(ch,prevV);prevV=v;
           const len=(bt%1===0?0.9:0.55)*spb;
           PH(barStart+tickToBeat(Math.round(beatAbs*6),sw)*spb,len,v,0.12);
         });
-        if(bar.chords.length>1&&!pat.some(bt=>bt>=bpb/2)){const v=voicingFor(bar.chords[1],prevV);prevV=v;PH(barStart+tickToBeat(Math.ceil(bpb/2)*6,sw)*spb,0.8*spb,v,0.11)}
+        {const st=chordBeats(bar.chords.length,bpb);   /* 컴핑이 닿지 않는 코드도 한 번은 울린다 */
+          for(let i=1;i<st.length;i++){const e=i+1<st.length?st[i+1]:bpb;if(!pat.some(bt=>bt%bpb>=st[i]&&bt%bpb<e)){const v=voicingFor(bar.chords[i],prevV);prevV=v;PH(barStart+tickToBeat(st[i]*6,sw)*spb,0.8*spb*Math.min(2,e-st[i]),v,0.11)}}}
         bl[bi].forEach((m,k)=>BS(barStart+k*spb,0.92*spb,m,k===0?1:(k%2?0.8:0.9)));
         if(bpb===4){
           kick(ac,rb,barStart,0.25);

@@ -1,11 +1,11 @@
-/* v0.36 곡 데이터 점검 — 자동 검사 + 사람 판정(tools/data/song_review_v037.json, v0.37에서 곡 정리 후 갱신)을 합쳐 engine/song_status.js를 만든다.
+/* v0.36 곡 데이터 점검 — 자동 검사 + 사람 판정(tools/data/song_review_v038.json, v0.37에서 곡 정리 후 갱신)을 합쳐 engine/song_status.js를 만든다.
    node tools/song_audit.js            → engine/song_status.js 갱신 + 요약 출력
    node tools/song_audit.js --csv out  → 검증 시트용 CSV
    곡 데이터 자체는 고치지 않는다(출처 없이 고치면 또 틀린 데이터를 만들 수 있으므로). */
 const fs=require('fs'),path=require('path'),{loadEngine,root}=require('./lib_load.js');
 const E=loadEngine();
 const N=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
-const review=JSON.parse(fs.readFileSync(path.join(root,'tools/data/song_review_v037.json'),'utf8'));
+const review=JSON.parse(fs.readFileSync(path.join(root,'tools/data/song_review_v038.json'),'utf8'));
 const PRACTICE=['p251','blues12','m25'];
 const rel=(s,b)=>b.map(c=>((c.root-s.key+12)%12)+c.type).join(' ');
 const sig=(s,n)=>s.bars.slice(0,n||s.bars.length).map(b=>rel(s,b)).join('|');
@@ -24,14 +24,15 @@ for(const r of E.RAW_SONGS.concat(PRACTICE.map(id=>({id,n:E.SONGDB[id].name,k:E.
     const iiV=c=>c&&((c.root-s.key+12)%12===2||(c.root-s.key+12)%12===7);   /* ii·V로 시작/끝나는 곡 허용 */
     if(!tonicLike(first)&&!tonicLike(last)&&!tonicLike(lastB)&&!(iiV(first)&&(tonicLike(s.bars[2]&&s.bars[2][0])||tonicLike(s.bars[3]&&s.bars[3][0]))))auto.push('조 표기('+N[s.key]+')와 첫·끝 화음이 맞지 않음');
     const want=String(s.form.sections).length*s.form.phrase;
-    if(want&&want!==s.bars.length)auto.push('형식 '+s.form.sections+'×'+s.form.phrase+'='+want+'마디인데 '+s.bars.length+'마디');
+    if(want&&(s.bars.length<want||s.bars.length-want>=s.form.phrase))   /* 프레이즈보다 짧은 꼬리(태그)는 허용 */
+    auto.push('형식 '+s.form.sections+'×'+s.form.phrase+'='+want+'마디인데 '+s.bars.length+'마디');
   }
   const rv=PRACTICE.includes(id)?['practice','앱 연습용 진행']:review[id]||['unknown',''];
   out[id]={s:rv[0],n:rv[1]||'',a:auto};
   rows.push({id,name:s.name,key:N[s.key],meter:(s.bpb||4)+'/4',form:s.form.sections+'·'+s.form.phrase,bars:s.bars.length,status:rv[0],note:rv[1]||'',auto:auto.join(' / '),chords:s.bars.map(b=>b.map(c=>N[c.root]+c.type).join(' ')).join(' | ')});
 }
-const js='/* v0.36 곡 데이터 검증 상태 — tools/song_audit.js 산출물(손으로 고치지 말 것. 판정 변경은 tools/data/song_review_v037.json)\n'+
- '   s: ok(아는 진행과 일치) · form(공통 형식으로는 맞음) · rb(v0.37 새로 작성, 연주자 확인 전) · rbq(새로 작성, 일부 마디 확인 필요) · practice(앱 연습용)\n'+
+const js='/* v0.36 곡 데이터 검증 상태 — tools/song_audit.js 산출물(손으로 고치지 말 것. 판정 변경은 tools/data/song_review_v038.json)\n'+
+ '   s: ok(아는 진행과 일치) · form(공통 형식으로는 맞음) · rb(v0.37 새로 작성, 연주자 확인 전) · rbq(새로 작성, 일부 마디 확인 필요) · book(v0.38 리얼북 악보 대조) · bookq(악보 대조, 일부 확인 필요) · practice(앱 연습용)\n'+
  '   n: 메모 · a: 자동 검사 경고 · v: 연주자 확인(검증 시트 반영 시) */\nconst SONG_STATUS='+JSON.stringify(out)+';\n';
 fs.writeFileSync(path.join(root,'engine/song_status.js'),js);
 const cnt={};rows.forEach(r=>cnt[r.status]=(cnt[r.status]||0)+1);

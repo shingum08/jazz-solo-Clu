@@ -32,7 +32,7 @@ add('explicit triplet rests',{solos:[solo([bar([note(0,2,61,{trip:true}),note(2,
 add('engine ties across measures',{solos:[solo([bar([note(0,18,null),note(18,6,61,{tie:true})]),bar([note(0,3,61,{tie:true}),note(3,3,61),note(6,18,null)])])]}, {ties:2,carry:true});
 add('raw sustained event crossing measures',{solos:[solo([bar([note(0,18,null),note(18,12,64)]),bar([note(6,18,null)])])]}, {ties:1});
 add('invalid tie does not attach to different pitch or rest',{solos:[solo([bar([note(0,6,60,{tie:true}),note(6,6,62,{tie:true}),note(12,6,null),note(18,6,64,{tie:true})])])]}, {ties:0});
-for(const meter of [3,4,5,6,7])add('harmony meter '+meter,{bpb:meter,solos:[solo([bar([note(0,meter*6,null)],[{root:7,type:'7b9'},{root:0,type:'7#9'}])],meter)]},{offsets:[0,meter===5?72:48],degrees:[-1,1]});
+for(const meter of [3,4,5,6,7])add('harmony meter '+meter,{bpb:meter,solos:[solo([bar([note(0,meter*6,null)],[{root:7,type:'7b9'},{root:0,type:'7#9'}])],meter)]},{offsets:[0,Math.ceil(meter/2)*24],degrees:[-1,1]});
 add('all chord kinds',{solos:[solo(['maj7','6','m7','m9','m6','7','9','7b9','7#9','m7b5','dim7'].map(type=>bar([note(0,24,null)],[{root:0,type}])))]});
 add('multiple choruses reset ties',{solos:[solo([bar([note(0,24,60,{tie:true})])]),solo([bar([note(0,24,60)])])],title:'A & B <test> "한글"'},{ties:0,title:'A & B <test> "한글"'});
 add('accidental natural reset C',{solos:[solo([bar([note(0,6,66),note(6,6,65),note(12,6,65),note(18,6,66)]),bar([note(0,6,66),note(6,18,null)])])]},{accidentals:['sharp','natural',null,'sharp','sharp',null]});
@@ -69,12 +69,14 @@ for(const id of ids){
     const options={solos:[s],title:song.name,bpb:song.bpb||4,bpm:song.bpm,concertKey:song.key,minor:E.songIsMinor(song),writtenTranspose:wt,octaveShift:oct};
     /* expected harmony positions are checked independently against analyzeHarmony. */
     const harm=E.analyzeHarmony(E.barChords(song,song.key),song.key,song.bpb);
-    const expectedOffsets=s.bars.map((bar,bi)=>bar.chords.slice(0,2).map((ch,ci)=>{
-      const offset=ci?((song.bpb===5?3:2)*24):0,time=bi*(song.bpb||4)*6+offset/4;
+    /* v0.38 한 마디 N코드: 2개는 ceil(박/2)에서, 3개 이상은 박을 고르게 나눈 자리에서 바뀐다(엔진 chordBeats와 같은 규칙) */
+    const bpb=song.bpb||4,beatsOf=n=>n<=1?[0]:n===2?[0,Math.ceil(bpb/2)]:[...Array(n)].map((_,i)=>Math.round(i*bpb/n));
+    const expectedOffsets=s.bars.map((bar,bi)=>{const st=beatsOf(bar.chords.length);return bar.chords.map((ch,ci)=>{
+      const offset=st[ci]*24,time=bi*bpb*6+st[ci]*6;
       const segment=harm.filter(h=>h.t0<=time).pop();
       assert.equal(segment.root,ch.root);assert.equal(segment.type,ch.type);
       return offset;
-    }));
+    })});
     add(id+' difficulty '+diff,options,{expectedOffsets});generated++;
   }
 }
@@ -127,7 +129,7 @@ for case in json.load(sys.stdin):
   input_bars=[bar for so in opts['solos'] for bar in so['bars']]
   for mi,m in enumerate(ms):
    assert int(m.get('number'))==mi+1
-   harmonies=m.findall('harmony');chords=input_bars[mi].get('chords',[])[:2]
+   harmonies=m.findall('harmony');chords=input_bars[mi].get('chords',[])
    assert len(harmonies)==len(chords)
    for harmony,chord in zip(harmonies,chords):
     root=harmony.find('root')

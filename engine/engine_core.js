@@ -186,6 +186,10 @@ function pickW(rng,cands){
 function nearest(arr,x){return arr.reduce((a,c)=>Math.abs(c-x)<Math.abs(a-x)?c:a,arr[0])}
 function barChords(prog,keyPc){const off=(prog.key!==undefined&&keyPc!==undefined&&!isNaN(keyPc))?keyPc-prog.key:0;return prog.bars.map(bar=>bar.map(c=>'o' in c?{root:((keyPc+c.o)%12+12)%12,type:c.t}:{root:(((c.root+off)%12)+12)%12,type:c.type}))}
 const mod12=x=>((x%12)+12)%12;
+/* v0.38 한 마디 코드 여러 개 — 각 코드가 시작하는 박. 2개면 마디 절반(3/4는 3박째, 5/4는 4박째), 그 이상은 박 균등(4/4에 4개 = 한 박씩) */
+function chordBeats(n,bpb){bpb=bpb||4;if(n<=1)return [0];if(n===2)return [0,Math.ceil(bpb/2)];return [...Array(n)].map((_,i)=>Math.round(i*bpb/n))}
+function chordIdxAt(chords,beat,bpb){const st=chordBeats(chords.length,bpb);let k=0;for(let i=0;i<st.length;i++)if(beat>=st[i]-1e-9)k=i;return k}
+function chordAtBeat(chords,beat,bpb){return chords[chordIdxAt(chords,beat,bpb)]}
 
 function chordToneMidis(rootPc,type,lo,hi){
   const out=[];
@@ -237,11 +241,10 @@ function transposeSolo(solo,semis,inst,forceShift){
   return out;
 }
 function analyzeHarmony(bars,keyPc,bpb){
-  bpb=bpb||4;const TPB=bpb*6,splt=Math.ceil(bpb/2)*6;
+  bpb=bpb||4;const TPB=bpb*6;
   const segs=[];
-  bars.forEach((bar,b)=>{const off=b*TPB;
-    if(bar.length===1)segs.push({bar:b,t0:off,root:bar[0].root,type:bar[0].type});
-    else{segs.push({bar:b,t0:off,root:bar[0].root,type:bar[0].type});segs.push({bar:b,t0:off+splt,root:bar[1].root,type:bar[1].type});}
+  bars.forEach((bar,b)=>{const off=b*TPB,st=chordBeats(bar.length,bpb);
+    bar.forEach((c,i)=>segs.push({bar:b,t0:off+st[i]*6,root:c.root,type:c.type}));
   });
   const merged=[];
   for(const s of segs){
@@ -989,7 +992,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       if(ms){span.forEach((k,q)=>{forced.set(k,{m:ms[q],kind:'ctl'});motifLock.add(k)});stats.hl=(stats.hl||0)+1}
       return;
     }
-    const fail=()=>{const b=Math.floor(events[i].t/TPB),L=tagsAt[b];const q=L?L.indexOf(HL_LABEL[H.kind]):-1;if(q>=0)L.splice(q,1);return};
+    const fail=()=>{const b=Math.floor(H.s/BPB),L=tagsAt[b];   /* v0.38 이름표는 장치 시작 박의 마디에 붙어 있다 */const q=L?L.indexOf(HL_LABEL[H.kind]):-1;if(q>=0)L.splice(q,1);return};
     if(span.length<3||span.some(k=>motifLock.has(k)||(forced.has(k)&&!/^(target|pass)$/.test(forced.get(k).kind))))return fail();
     const tgt={};span.forEach(k=>{const f=forced.get(k);if(f&&f.kind==='target')tgt[k]=f.m;forced.delete(k)});   /* 접근음은 장치가 덮어쓰되, 코드 전환 타깃(가이드톤)은 지킨다 */
     const e0=events[i],seg0=segs[segAt(e0.t)],goal=Math.round(pitchGoal(e0.t));
@@ -998,17 +1001,19 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     if(H.kind==='perc'){
       let cur=null;const c=[];
       for(let m=LO;m<=HI;m++)if(isCT(seg0,m)&&isStable(seg0,m)&&Math.abs(m-goal)<=5&&(prevM===null||Math.abs(m-prevM)<=MAXLEAP))c.push({v:m,w:Math.exp(-Math.abs(m-goal)/2)});
-      if(!c.length)return;cur=pickW(rng,c);
+      if(!c.length)return fail();cur=pickW(rng,c);
       for(const k of span){const sg=segs[segAt(events[k].t)];if(tgt[k]!==undefined&&Math.abs(tgt[k]-cur)<=4)cur=tgt[k];else if(!(isCT(sg,cur)||inScale(sg,cur))){const ct=chordToneMidis(sg.root,sg.type,LO,HI).filter(x=>Math.abs(x-cur)<=3);if(ct.length)cur=nearest(ct,cur)}ms.push(cur)}
     }else if(H.kind==='pivot'){
       const c=[];
       for(let m=LO+2;m<=HI-5;m++)if(isCT(seg0,m)&&Math.abs(m-goal)<=5&&(prevM===null||Math.abs(m-prevM)<=MAXLEAP))c.push({v:m,w:Math.exp(-Math.abs(m-goal)/2)*(mod12(m-seg0.root)===0?0.7:1)});
-      if(!c.length)return;
+      if(!c.length)return fail();
       const P=pickW(rng,c),u1=scaleStep(seg0,P,1),u2=scaleStep(seg0,P,2);
       const pat=[P,u1,u2,P,u2,P,u1-1,u1];
       span.forEach((k,q)=>{const sg=segs[segAt(events[k].t)];let m=pat[q%8];if(q%8!==6&&!(inScale(sg,m)||isCT(sg,m)))m=fitTone(sg,m,events[k].t);ms.push(m)});
+      /* v0.38 한 마디에 코드가 여럿이면 중간 코드에서 축음(P)이 바뀔 수 있다 — 축음이 흔들리면 피벗이라 부를 수 없으니 장치를 접는다 */
+      if(ms.some((m,q)=>(q%8===0||q%8===3||q%8===5)&&m!==P)||ms.some((m,q)=>q%8===1&&m===P))return fail();
     }else if(H.kind==='hemiola'){
-      const start=fitTone(seg0,goal-(H.dir>0?3:-1),e0.t);if(start===null)return;
+      const start=fitTone(seg0,goal-(H.dir>0?3:-1),e0.t);if(start===null)return fail();
       const n=H.cells*3;let cs=start;
       for(let c=0;c<H.cells;c++){
         const k0=span[c*3];if(k0===undefined)break;
@@ -1021,7 +1026,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       /* 착지: 다음 음은 코드톤으로 */
       const kl=span[n];if(kl!==undefined){const sg=segs[segAt(events[kl].t)];const last=ms[ms.length-1];const ct=chordToneMidis(sg.root,sg.type,LO,HI).filter(x=>Math.abs(x-last)<=4&&x!==last);if(ct.length)ms.push(nearest(ct,last+H.dir))}
     }else if(H.kind==='trip'){
-      let m=fitTone(seg0,goal-(H.dir>0?4:-4),e0.t);if(m===null)return;let dir=H.dir;
+      let m=fitTone(seg0,goal-(H.dir>0?4:-4),e0.t);if(m===null)return fail();let dir=H.dir;
       for(const k of span){const sg=segs[segAt(events[k].t)];if(!(inScale(sg,m)||isCT(sg,m)))m=fitTone(sg,m,events[k].t);ms.push(m);let nx=scaleStep(sg,m,dir);if(nx<LO||nx>HI){dir=-dir;nx=scaleStep(sg,m,dir)}m=nx}
     }
     if(ms.length<3||ms.some(m=>m===null||!allow(m,0)))return fail();
@@ -1169,7 +1174,11 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     let m=null,f=forced.get(i);
     if(f&&(f.kind==='quote'||(f.kind==='disp'&&allow(f.m,e.t))||(f.kind==='dev'&&okNote(f.m,e.t,prevM))||(f.kind==='ctl'&&allow(f.m,e.t))||(okNote(f.m,e.t,prevM)&&matOK(seg,f.m,e.ph))))m=f.m;
     else{
-      if(f)forced.delete(i);
+      if(f){
+        /* v0.38 장치 음이 도약·음역 검사에서 밀려나면 음형이 깨진다 — 그 장치의 이름표도 뗀다(악보 표시와 실제 음형이 어긋나지 않게) */
+        if(f.kind==='dev'&&e.hl&&!e.hl.broken){e.hl.broken=true;const L=tagsAt[Math.floor(e.hl.s/BPB)],q=L?L.indexOf(HL_LABEL[e.hl.kind]):-1;if(q>=0)L.splice(q,1)}
+        forced.delete(i);
+      }
       if(!e.first&&!e.last&&tryCell(i)){const f2=forced.get(i);if(okNote(f2.m,e.t,prevM))m=f2.m}
       if(m===null){
         const mode=(e.last||(e.first&&e.d>=6))?'end':null;
@@ -1459,15 +1468,17 @@ function toAbc(solo,tempo,transpose,octShift){
   for(let b=0;b<solo.bars.length;b+=4){
     const chunk=solo.bars.slice(b,b+4).map(bar=>{
       const split=bar.notes.some(n=>n.ci!==undefined);   /* v0.29 연습 악보: 코드 기호를 그 코드가 시작하는 음 위에 */
-      let s=split?'':bar.chords.map(ch=>'"'+chordSymbol(ch.root+transpose,ch.type)+'"').join(' ')+' ';
+      let s=split?'':' ';
+      const cst=chordBeats(bar.chords.length,solo.bpb||4).map(x=>x*6);let cDone=0;   /* v0.38 코드 기호를 그 코드가 시작하는 자리의 음 위에 */
       let tripPos=0,cc=0;
       const exact={},letter={};   /* 마디 안 임시표 지속(ABC·기보 공통 규칙) */
       bar.notes.forEach((n,k)=>{
         if(n.ci!==undefined)cc=n.ci;
-        const ch=split?bar.chords[cc]:bar.chords[(n.t>=Math.ceil((solo.bpb||4)/2)*6&&bar.chords.length>1)?1:0];
+        const ch=split?bar.chords[cc]:chordAtBeat(bar.chords,n.t/6,solo.bpb||4);
         const scale=CHORD_TYPES[ch.type].scale;
         if(n.t%6===0&&k>0&&!n.trip&&!(bar.notes[k-1]&&bar.notes[k-1].trip))s+=' ';
         if(split&&n.ci!==undefined)s+='"'+chordSymbol(ch.root+transpose,ch.type)+'"';
+        if(!split)while(cDone<cst.length&&cst[cDone]<n.t+n.d){const c2=bar.chords[cDone];s+='"'+chordSymbol(c2.root+transpose,c2.type)+'"';cDone++}
         if(n.trip&&tripPos%3===0)s+='(3';
         if(n.midi===null)s+='z'+abcDur(n.d,!!n.trip);
         else{

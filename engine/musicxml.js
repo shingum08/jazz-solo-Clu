@@ -82,11 +82,11 @@ function soloMusicXml({solos,title='Solo',bpb,bpm=120,writtenTranspose=0,octaveS
       }
       /* analyzeHarmony 관례: 두 번째 코드는 5/4에서 3박 뒤, 그 외에는 2박 뒤. */
       /* 현재 엔진도 세 번째 이후 코드는 사용하지 않는다(일부 수록 진행에 존재). */
-      const chords=(bar.chords||[]).slice(0,2);
+      const chords=bar.chords||[],n=chords.length,cst=n<=1?[0]:n===2?[0,Math.ceil(bpb/2)]:chords.map((_,i)=>Math.round(i*bpb/n));   /* v0.38 한 마디 여러 코드(engine_core chordBeats와 같은 규칙 — 이 파일은 단독으로도 쓰인다) */
       chords.forEach((ch,i)=>{
         const p=spell(mod(ch.root+writtenTranspose)+60),kind=kinds[ch.type];
         if(!kind)throw new Error('Unsupported chord: '+ch.type);
-        const offset=i?(bpb===5?72:48):0;
+        const offset=cst[i]*24;
         if(offset>=size)throw new Error('Harmony outside measure');
         out+='<harmony><root><root-step>'+p.step+'</root-step>'+(p.alter?'<root-alter>'+p.alter+'</root-alter>':'')+'</root><kind>'+kind+'</kind>';
         const deg=(v,a,t)=>'<degree><degree-value>'+v+'</degree-value><degree-alter>'+a+'</degree-alter><degree-type>'+t+'</degree-type></degree>';

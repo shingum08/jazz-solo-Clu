@@ -1,3 +1,16 @@
+## v0.38.0 "Clu" (2026-11-11) — 리얼북 1~3권 악보 대조 코드집 · 한 마디 여러 코드
+
+- **리얼북 악보 대조**: 사용자가 준 리얼북 1·2·3권 스캔을 한 장씩 보며 **코드 진행만** 옮겼다(멜로디·가사 없음). 189곡 — 1권 99 · 2권 57 · 3권 33 / 스윙 90 · 발라드 52 · 라틴 23 · 블루스 13 · 펑크 11.
+  - v0.37의 49곡 중 **37곡을 책 판으로 교체**(조·형식이 책과 다르던 곡 포함, 예: Autumn Leaves는 책대로 E단조), **152곡 새로 추가**. 책에 없거나 보류한 기존 12곡(Au Privave · C Jam Blues · Cantaloupe Island · Fine and Mellow · Fly Me to the Moon · I Got Rhythm · Kansas City · One O'Clock Jump · Oye Como Va · Reunion Blues · The Hucklebuck · The Thrill Is Gone)은 그대로 둠. 결과 201곡 + 연습용 3.
+  - 새 상태 **■ 악보 대조 완료**(168곡)와 **□ 악보 대조 · 일부 확인 필요**(21곡). 확실하지 않은 마디는 고치지 않고 메모에 「확인 필요」로 남김. 「확인 필요 곡 숨기기」는 □도 숨긴다.
+  - 보류 9곡(넣지 않음): Here's That Rainy Day · Invitation · Sophisticated Lady · Summer Samba · I Thought About You · Jody Grind(판독 불확실), C Jam Blues(책에 코드 없음), Poinciana(반복 구조 불명확), Un Poco Loco(2/4 마디 섞임).
+  - 표기 규칙: 장3화음→6, 단3화음→m7, ø→m7b5, o→dim7, +7·alt→7♯9, 13→9, 6/9→6, 슬래시 베이스 생략(ii/V 꼴 Fm7/B♭·B♭/C는 B♭7sus4·C7sus4). 반복·엔딩·D.S./코다는 연주 순서대로 펼침. 괄호 대체 화음은 생략.
+  - 데이터 흐름: `tools/data/realbook_chords.txt`(입력) → `node tools/rb_import.js` → `engine/songs_part1.js` + `tools/data/song_review_v038.json`. 곡에 `b`(권·쪽) 필드 추가.
+- **한 마디 여러 코드**: 2개는 반마디씩, 3개 이상은 박을 고르게 나눔(3코드는 4개로 적어 2+1+1박). 화성 분석·반주(베이스·컴핑)·악보 코드 기호·MusicXML·가이드톤 드릴·코드 차트까지 반영. 3코드 이상 마디 163개.
+- **하이라이트 장치 이름표 정리**: 피벗 패턴이 마디 중간 코드 변화로 깨지거나, 장치 음이 도약 검사에서 밀려나거나, 후보가 없어 장치를 접을 때 이름표가 남던 문제 — 이제 이름표도 뗀다(태그와 실제 음형 일치 79% → 91%).
+- 화성 지표(test.js, 204곡): 강박 코드톤 97.1 → 97.6%, 전환 가이드톤 88.2 → 87.7%, 크로매틱 3.0%, 같은 음 반복 5.3 → 5.6%(6% 기준 안).
+- 곡 점검(`song_audit.js`): 프레이즈보다 짧은 꼬리(태그·턴어라운드)는 형식 경고에서 제외. `test_musicxml`은 한 마디 N코드 위치를 엔진 규칙대로 검사.
+
 ## v0.37.0 "Clu" (2026-11-11) — 코드톤 원칙 전면 적용 · 곡 데이터 정리와 새 코드집
 
 - **체크포인트 2**: 이 작업 직전 상태(v0.36.0, 커밋 `1451339`)를 `claude/checkpoint-2` 브랜치로 보존. 되돌리는 방법은 [CHECKPOINTS.md](CHECKPOINTS.md).
