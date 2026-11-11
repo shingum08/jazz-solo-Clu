@@ -1,0 +1,18 @@
+{
+  "name": "즉흥 악보 생성기 · Clu",
+  "short_name": "즉흥 악보",
+  "description": "리얼북 코드 진행 위에 매번 새로운 연습용 재즈 솔로를 만들고 반주와 함께 들려 주는 앱",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#10161f",
+  "theme_color": "#10161f",
+  "categories": ["music", "education"],
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

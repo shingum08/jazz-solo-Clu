@@ -31,4 +31,13 @@ if out.count(marker) != 1:
 xml=open(os.path.join(root,'engine','musicxml.js'),encoding='utf-8').read()
 out=out.replace(marker, '<script id="musicxml">\n'+xml+'\n</script>', 1)
 open(os.path.join(root,'index.html'),'w',encoding='utf-8').write(out)
-print('built index.html',len(out),'bytes')
+# v0.41 PWA — 매니페스트·서비스 워커·아이콘을 루트로(서비스 워커 캐시 이름에 버전을 찍어 새 버전 배포 시 옛 캐시를 지운다)
+import shutil
+ver=re.search(r'<title>[^<]*?v(\d+\.\d+\.\d+)',tpl).group(1)
+pwa=os.path.join(root,'app','pwa')
+shutil.copyfile(os.path.join(pwa,'manifest.webmanifest'),os.path.join(root,'manifest.webmanifest'))
+open(os.path.join(root,'sw.js'),'w',encoding='utf-8').write(open(os.path.join(pwa,'sw.js'),encoding='utf-8').read().replace('__VERSION__',ver))
+os.makedirs(os.path.join(root,'icons'),exist_ok=True)
+for f in os.listdir(os.path.join(pwa,'icons')):
+    shutil.copyfile(os.path.join(pwa,'icons',f),os.path.join(root,'icons',f))
+print('built index.html',len(out),'bytes · PWA v'+ver)
