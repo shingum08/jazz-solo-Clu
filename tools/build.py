@@ -30,14 +30,29 @@ if out.count(marker) != 1:
     raise RuntimeError('Expected exactly one MusicXML module marker')
 xml=open(os.path.join(root,'engine','musicxml.js'),encoding='utf-8').read()
 out=out.replace(marker, '<script id="musicxml">\n'+xml+'\n</script>', 1)
-open(os.path.join(root,'index.html'),'w',encoding='utf-8').write(out)
-# v0.41 PWA — 매니페스트·서비스 워커·아이콘을 루트로(서비스 워커 캐시 이름에 버전을 찍어 새 버전 배포 시 옛 캐시를 지운다)
-import shutil
+# v0.41.1 공개 빌드(GitHub에 올라가는 index.html)는 앱 기능(설치·오프라인·업데이트)을 끈다.
+#   python3 tools/build.py --app → dist/app/ 에 테스트용 앱 빌드(설치 가능) + dist/clu-app-v버전.zip (dist/는 커밋하지 않음)
+import sys, shutil, zipfile
 ver=re.search(r'<title>[^<]*?v(\d+\.\d+\.\d+)',tpl).group(1)
-pwa=os.path.join(root,'app','pwa')
-shutil.copyfile(os.path.join(pwa,'manifest.webmanifest'),os.path.join(root,'manifest.webmanifest'))
-open(os.path.join(root,'sw.js'),'w',encoding='utf-8').write(open(os.path.join(pwa,'sw.js'),encoding='utf-8').read().replace('__VERSION__',ver))
-os.makedirs(os.path.join(root,'icons'),exist_ok=True)
-for f in os.listdir(os.path.join(pwa,'icons')):
-    shutil.copyfile(os.path.join(pwa,'icons',f),os.path.join(root,'icons',f))
-print('built index.html',len(out),'bytes · PWA v'+ver)
+if '<!--__PWA_HEAD__-->' not in out or '/*__PWA_BUILD__*/false' not in out:
+    raise RuntimeError('PWA 마커가 없습니다(app/template.html)')
+pub=out.replace('<!--__PWA_HEAD__-->\n','').replace('<!--__PWA_HEAD__-->','')
+open(os.path.join(root,'index.html'),'w',encoding='utf-8').write(pub)
+print('built index.html',len(pub),'bytes (공개 빌드 · 앱 설치 꺼짐)')
+if '--app' in sys.argv:
+    pwa=os.path.join(root,'app','pwa'); dist=os.path.join(root,'dist','app')
+    shutil.rmtree(dist,ignore_errors=True); os.makedirs(os.path.join(dist,'icons'))
+    app=out.replace('<!--__PWA_HEAD__-->',open(os.path.join(pwa,'head.html'),encoding='utf-8').read().rstrip()).replace('/*__PWA_BUILD__*/false','true')
+    open(os.path.join(dist,'index.html'),'w',encoding='utf-8').write(app)
+    shutil.copyfile(os.path.join(pwa,'manifest.webmanifest'),os.path.join(dist,'manifest.webmanifest'))
+    open(os.path.join(dist,'sw.js'),'w',encoding='utf-8').write(open(os.path.join(pwa,'sw.js'),encoding='utf-8').read().replace('__VERSION__',ver))
+    for f in os.listdir(os.path.join(pwa,'icons')):
+        shutil.copyfile(os.path.join(pwa,'icons',f),os.path.join(dist,'icons',f))
+    guide=open(os.path.join(pwa,'INSTALL.txt'),encoding='utf-8').read().replace('__VERSION__',ver)
+    open(os.path.join(dist,'설치 안내.txt'),'w',encoding='utf-8').write(guide)
+    zp=os.path.join(root,'dist','clu-app-v'+ver+'.zip')
+    with zipfile.ZipFile(zp,'w',zipfile.ZIP_DEFLATED) as z:
+        for d,_,fs in os.walk(dist):
+            for f in fs:
+                full=os.path.join(d,f); z.write(full,os.path.join('clu-app-v'+ver,os.path.relpath(full,dist)))
+    print('app build →',dist,'·',zp,os.path.getsize(zp),'bytes')

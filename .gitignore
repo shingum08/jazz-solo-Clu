@@ -6,3 +6,6 @@ tools/engine_old.js
 node_modules/
 __pycache__/
 .DS_Store
+
+# 테스트용 앱 빌드(python3 tools/build.py --app) — 직접 전달용, 커밋하지 않음
+dist/

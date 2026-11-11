@@ -3,16 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<!-- v0.41 PWA — 홈 화면 설치·오프라인(매니페스트·서비스 워커·아이콘은 tools/build.py가 app/pwa에서 루트로 복사) -->
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#10161f">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="즉흥 악보">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<title>즉흥 악보 생성기 v0.41.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<!--__PWA_HEAD__-->
+<title>즉흥 악보 생성기 v0.41.1 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -542,6 +534,10 @@ svg .playcursor{fill:var(--brass);opacity:.22;pointer-events:none}
 .bkbar button,.instbtn{background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 12px;font-family:inherit;font-size:12.5px;cursor:pointer}
 .bkbar button:hover,.instbtn:hover{border-color:var(--brass);color:var(--brass)}
 .instbtn{margin-left:10px;vertical-align:middle}
+.updbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:9999;display:flex;flex-wrap:wrap;align-items:center;gap:8px;max-width:calc(100% - 24px);background:var(--panel);border:1px solid var(--brass);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--txt);box-shadow:0 6px 24px rgba(0,0,0,.4)}
+.updbar b{color:var(--brass)}
+.updbar button{background:var(--brass);color:#1d1608;border:0;border-radius:8px;padding:7px 12px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.updbar button.ghost{background:none;border:1px solid var(--line);color:var(--mut)}
 .insthelp{margin-top:10px;font-size:13px;line-height:1.6;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:var(--txt)}
 @supports(padding:max(0px)){body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}header.site{padding-top:calc(18px + env(safe-area-inset-top))}}
 .instbtn{letter-spacing:0;text-transform:none;font-size:12.5px}
@@ -703,7 +699,7 @@ body.fslock{overflow:hidden}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.41.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">Concept Prototype · v0.41.1 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">리얼북 필수 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -1911,7 +1907,7 @@ function updRangeBar(){
   else if(L.b===null)h.textContent=pfx+(L.a+1)+'마디부터 — 끝 마디를 누르세요 (같은 마디를 다시 누르면 한 마디 반복)';
   else h.textContent=pfx+(L.a+1)+(L.b>L.a?'–'+(L.b+1):'')+'마디 반복 중 · ▶ 재생도 이 구간을 반복합니다';
   $('#btnRangeClr').style.display=L?'':'none';
-  /* v0.41.0 악보 위 도구줄의 구간 반복 버튼 — 상태를 글자로 보여 준다 */
+  /* v0.41.1 악보 위 도구줄의 구간 반복 버튼 — 상태를 글자로 보여 준다 */
   const lab=!cur.loopOn?'🔁 구간 반복':!L?'🔁 첫 마디 고르기':L.b===null?'🔁 '+pfx+(L.a+1)+'마디~ 끝 마디?':'🔁 '+pfx+(L.a+1)+(L.b>L.a?'–'+(L.b+1):'')+'마디 반복';
   document.querySelectorAll('.loopmode').forEach(b=>{b.classList.toggle('on',!!cur.loopOn);b.textContent=lab;b.style.display=(cur.solo&&cur.solo.drill)?'none':''});
 }
@@ -1920,7 +1916,7 @@ function setLoopOn(on){
   if(!on){cur.loopSel=null;if(cur.playRange&&cur.playRange.loop){cur.playRange=null;stopIfPlaying()}}
 }
 $('#loopOn').addEventListener('change',e=>{setLoopOn(e.target.checked);renderChips()});
-/* v0.41.0 악보 위 🔁 구간 반복 버튼 — 켜면 마디 고정 모드는 끄고 마디 번호 줄로 내려 준다 */
+/* v0.41.1 악보 위 🔁 구간 반복 버튼 — 켜면 마디 고정 모드는 끄고 마디 번호 줄로 내려 준다 */
 document.addEventListener('click',e=>{
   const b=e.target.closest('.loopmode');if(!b)return;
   setLoopOn(!cur.loopOn);
@@ -2158,10 +2154,12 @@ $('#restoreFile').onchange=e=>{
     $('#btnRestore').textContent='⬆ 백업 불러오기 — '+add+'개 추가됨';
   }).catch(err=>{$('#btnRestore').textContent='⬆ 백업 불러오기 — 실패: '+err.message}).finally(()=>{e.target.value=''});
 };
+/* v0.41.1 앱 기능(설치·오프라인·업데이트)은 테스트용 앱 빌드(--app)에서만 켠다 — GitHub에 올라가는 index.html에서는 꺼짐 */
+const PWA_BUILD=/*__PWA_BUILD__*/false;
 /* 앱 설치: 크롬·엣지·안드로이드는 설치 창, 아이폰·아이패드는 「홈 화면에 추가」 안내. 이미 앱으로 실행 중이면 숨김 */
 (function(){
   const standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
-  const btn=$('#btnInstall'),help=$('#instHelp');if(!btn||standalone)return;
+  const btn=$('#btnInstall'),help=$('#instHelp');if(!PWA_BUILD||!btn||standalone)return;
   const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   let ev=null;
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;btn.hidden=false});
@@ -2173,8 +2171,37 @@ $('#restoreFile').onchange=e=>{
     help.hidden=!help.hidden;
   };
 })();
-/* 서비스 워커 — http(s)로 열렸을 때만(파일로 연 경우는 건너뜀) */
-if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(e=>console.warn('서비스 워커 등록 실패',e))});
+/* 서비스 워커 — 앱 빌드에서만 등록. 새 버전이 오면 바로 바꾸지 않고 「업데이트할까요?」를 묻는다.
+   공개 빌드에서는 혹시 v0.41.1에서 등록된 서비스 워커·캐시가 남아 있으면 지운다 */
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
+  if(!PWA_BUILD){
+    navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
+    try{caches.keys().then(ks=>ks.filter(k=>/^clu-/.test(k)).forEach(k=>caches.delete(k)))}catch(e){}
+  }else window.addEventListener('load',()=>{
+    let asked=false,reloading=false;
+    const ask=w=>{
+      if(asked||!w||!navigator.serviceWorker.controller)return;asked=true;
+      const ch=new MessageChannel();ch.port1.onmessage=ev=>{const nv=ev.data&&ev.data.ver;
+        const bar=document.createElement('div');bar.className='updbar';
+        bar.innerHTML='<span>🔄 새 버전'+(nv?'(<b>v'+nv+'</b>)':'')+'이 준비됐어요 · 지금 v'+APP_VER+'</span>';
+        const go=document.createElement('button');go.textContent='지금 업데이트';
+        const later=document.createElement('button');later.textContent='나중에';later.className='ghost';
+        go.onclick=()=>{go.disabled=true;go.textContent='업데이트 중…';w.postMessage({type:'SKIP_WAITING'})};
+        later.onclick=()=>bar.remove();
+        bar.appendChild(go);bar.appendChild(later);document.body.appendChild(bar);
+      };
+      w.postMessage({type:'VER'},[ch.port2]);
+    };
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)return;reloading=true;location.reload()});
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      if(reg.waiting)ask(reg.waiting);
+      reg.addEventListener('updatefound',()=>{const w=reg.installing;if(w)w.addEventListener('statechange',()=>{if(w.state==='installed')ask(w)})});
+      const check=()=>{reg.update().catch(()=>{})};
+      setInterval(check,30*60*1000);
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)check()});
+    }).catch(e=>console.warn('서비스 워커 등록 실패',e));
+  });
+}
 /* v0.27.1 내보내기 — PNG 저장(PC 다운로드·휴대폰 갤러리) · 공유·메일 */
 function sheetPng(cb){
   const svg=$('#staff svg');if(!svg){alert('먼저 악보를 생성해 주세요');return}
@@ -2306,7 +2333,7 @@ function popAct(act){
 /* ── 피드백: 입력창 → GitHub 이슈(곡·설정 자동 첨부) 또는 내용 복사 ── */
 function fbInfo(){
   const so=songSel.selectedOptions&&songSel.selectedOptions[0]?songSel.selectedOptions[0].textContent:'-';
-  return ['버전: v0.41.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'노래↔비밥: '+cur.lyric,'오디오: '+(typeof SHARED_AC!=='undefined'&&SHARED_AC?SHARED_AC.state:'없음')+(typeof IS_IOS!=='undefined'&&IS_IOS?' · iOS'+(navigator.audioSession?' · 세션 '+navigator.audioSession.type:' · 세션 API 없음'):''),'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
+  return ['버전: v0.41.1','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'노래↔비밥: '+cur.lyric,'오디오: '+(typeof SHARED_AC!=='undefined'&&SHARED_AC?SHARED_AC.state:'없음')+(typeof IS_IOS!=='undefined'&&IS_IOS?' · iOS'+(navigator.audioSession?' · 세션 '+navigator.audioSession.type:' · 세션 API 없음'):''),'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
 }
 $('#btnFeedback').onclick=()=>{$('#fbModal').style.display='flex';$('#fbText').focus();$('#fbMsg').textContent=''};
 $('#fbClose').onclick=()=>{$('#fbModal').style.display='none'};
