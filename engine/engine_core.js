@@ -325,6 +325,13 @@ const SONG_CELLS={
   2:[['Q','H'],['Q','Q'],['Ur','H'],['E','Q'],['Q','Ur']]
 };
 const LYRIC_DEFAULT=0.3;   /* 노래↔비밥 조절바 기본값(노래 프레이즈 비율) */
+/* v0.43 당김음 — 4박 엇박에서 다음 마디로 물고 들어가는 음·한 박 당겨 시작하는 프레이즈를 늘린다(난이도 2 이상)
+   pull: 마디 첫 박에 시작할 프레이즈를 앞 마디 4박으로 당길 확률 · lastBeat: 마지막 박 엇박 진입(Ur·Uh) 가중 ·
+   firstUr: 그 당긴 프레이즈 첫 박의 엇박 진입 가중 · holdOver: 엇박 다음 마디 첫 박을 이어 붙이는(H) 가중 */
+const ANTIC={pull:0.3,lastBeat:1.6,firstUr:2.5,holdOver:2.0,merge:0.35};   /* merge: 4박 엇박 8분 + 다음 마디 첫 박 음을 한 음으로 묶을 확률 */
+/* v0.43 첫 코러스 빌드업 — 앞부분(A)은 지금처럼 성기게, B(또는 곡 절반)부터 둘째 코러스 수준으로 바로 끌어올린다
+   from: B에서 시작하는 수준(둘째 코러스=1) · reach: 남은 구간 중 1에 닿는 비율 */
+const BUILD_FIRST={from:0.6,reach:0.5};
 const HL_LABEL={line:'8분 라인',perc:'리듬 반복(한 음)',pivot:'피벗 패턴',hemiola:'3음 시퀀스(헤미올라)',trip:'셋잇단 런'};
 /* 직접 작성한 교육용 리듬 윤곽 — WJD 전사/파생 템플릿이 아니다. */
 const RHY_TPL=[
@@ -392,6 +399,10 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   const NB=bars.length,TOT=NB*TPB;
   const form=prog.form||{phrase:8,sections:'A'};
   const P=form.phrase,sec=form.sections,nPh=Math.ceil(NB/P);
+  /* v0.43 첫 코러스 빌드업 지점: 첫 B 섹션(곡의 1/4~3/4 사이일 때), 없으면 절반 */
+  const buildT=(()=>{const iB=String(sec).search(/[^A]/),tb=iB>0?iB*P*TPB:-1;return (tb>=TOT*0.25&&tb<=TOT*0.75)?tb:Math.round(NB/2)*TPB})();
+  const arcI=t=>{if(ARC.n<=1)return 0;if(ARC.i>0)return ARC.i;if(t<buildT)return 0;
+    return Math.min(1,BUILD_FIRST.from+(1-BUILD_FIRST.from)*(t-buildT)/Math.max(TPB,(TOT-buildT)*BUILD_FIRST.reach))};
   const roles=[];{const seen={};for(let p=0;p<nPh;p++){const L=sec[p]||'A';roles.push(L==='B'?'contrast':(L==='C'?'resolution':(seen[L]?'answer':'statement')));seen[L]=true}}
   const segs=analyzeHarmony(bars,keyPc,BPB);
   const segAt=t=>{t=Math.min(t,TOT-1);for(let i=segs.length-1;i>=0;i--)if(segs[i].t0<=t)return i;return 0};
@@ -436,8 +447,8 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   const phLenQ=PF?PF.stats.phLen:[4.2,7.1,13.1],gapQ=PF?PF.stats.gap:[1.2,2,3.1];
   const capBeats=inst==='wind'?8:(inst==='brass'?12:16);
   const lenScale=[0,0.75,0.9,1][diff];
-  const phraseCap=ARC.n>1&&ARC.i===0?Math.max(3,Math.floor(capBeats*0.72)):capBeats;
-  const densityAt=bt=>ARC.n<=1?1:(ARC.i>=ARC.n-1&&bt>=totalBeats-BPB*2?0.5:0.55+0.65*ARC.i/(ARC.n-1));
+  const capAt=bt=>ARC.n>1&&arcI(bt*6)<0.5?Math.max(3,Math.floor(capBeats*0.72)):capBeats;   /* v0.43 첫 코러스 앞부분만 짧게 */
+  const densityAt=bt=>ARC.n<=1?1:(ARC.i>=ARC.n-1&&bt>=totalBeats-BPB*2?0.5:0.55+0.65*arcI(bt*6)/(ARC.n-1));
   const phrases=[];
   let beat=rng()<0.6?0:(diff===1?2:1);
   const totalBeats=NB*BPB;
@@ -449,7 +460,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     const secBeats=P*BPB;
     const nextB=Math.ceil((beat+1)/secBeats)*secBeats;
     if(nextB<totalBeats&&end>=nextB-3&&end<=nextB+3){end=nextB-2+(rng()<0.4?1:0);if(end-beat<2)end=beat+2}
-    end=Math.min(end,beat+phraseCap-1,totalBeats-1);
+    end=Math.min(end,beat+capAt(beat)-1,totalBeats-1);
     if(end<=beat)break;
     phrases.push({s:beat,e:end});
     let g=sampleQuart(rng,gapQ,diff===1?2:1,6);
@@ -460,13 +471,15 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     /* 곡 첫 박 근처로 새 섹션을 시작하도록 — 섹션 경계 1박 전(픽업)이나 경계에서 */
     const nb2=Math.ceil(beat/secBeats)*secBeats;
     if(nb2-beat<=2&&nb2-beat>0&&rng()<0.6)beat=nb2-(diff>=2&&rng()<0.5?1:0);
+    /* v0.43 마디 첫 박에서 시작할 프레이즈를 앞 마디 4박(엇박 진입)으로 당겨 시작 */
+    else if(diff>=2&&beat%BPB===0&&beat-1>end+1&&rng()<ANTIC.pull)beat-=1;
   }
   /* 마지막 프레이즈는 마지막 마디 1박에서 길게 끝나도록 */
   if(phrases.length){
     const lp=phrases[phrases.length-1];
     lp.e=Math.max(lp.s+1,totalBeats-BPB);lp.final=true;
-    if(lp.e-lp.s>=phraseCap){
-      const end=lp.e,start=Math.max(lp.s,end-phraseCap+1);
+    if(lp.e-lp.s>=capAt(lp.e)){
+      const end=lp.e,start=Math.max(lp.s,end-capAt(lp.e)+1);
       lp.e=start-3;lp.final=false;
       if(lp.e<=lp.s)phrases.pop();
       phrases.push({s:start,e:end,final:true});
@@ -612,6 +625,10 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         if(diff===1&&k2==='H'&&bp%2===1)w*=0.5;
         if(role==='contrast'&&(k2==='E'||k2==='T'))w*=1.15;
         if(role==='resolution'&&(k2==='H'||k2==='Q'))w*=1.2;
+        if(diff>=2){   /* v0.43 당김음: 마지막 박 엇박 진입 → 다음 마디 첫 박으로 이어 붙임 */
+          if(bp===BPB&&!isLast&&(k2==='Ur'||k2==='Uh'))w*=isFirst?ANTIC.firstUr:ANTIC.lastBeat;
+          if(bp===1&&!isFirst&&k2==='H'&&(prev==='Ur'||prev==='Uh'||prev==='E'))w*=ANTIC.holdOver;
+        }
         c.push({v:k2,w});
       }
       k=c.length?pickW(rng,c):'Q';
@@ -649,6 +666,11 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         le.d=Math.max(le.d,Math.min(L*3,12));
         if(le.d<3)le.d=3;
       }else le.d+=rng()<0.6?6:(rng()<0.5?3:0);
+    }
+    /* v0.43 당김음 — 4박 엇박 8분 바로 뒤 다음 마디 첫 박 음을 묶어, 엇박에서 다음 마디로 물고 들어가게(리듬 출처와 무관하게) */
+    if(diff>=2&&!ph.song&&!ph.blues)for(let q=0;q<phEv.length-2;q++){
+      const a=phEv[q],b=phEv[q+1];
+      if(a.t%TPB===TPB-3&&a.d===3&&!a.trip&&!a.hl&&b.t===a.t+3&&!b.trip&&!b.hl&&b.d<=6&&rng()<ANTIC.merge){a.d+=b.d;a.antic=1;phEv.splice(q+1,1)}
     }
     phEv.forEach((e,k)=>{e.ph=pi;e.strong=e.t%6===0;e.first=k===0;e.last=k===phEv.length-1;e.midi=null;events.push(e)});
     if(phEv[0].t%6!==0)tag(Math.floor(phEv[0].t/TPB),'픽업 진입');
@@ -784,7 +806,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   const arcOffset=t=>{
     if(ARC.n<=1)return 0;
     if(ARC.i>=ARC.n-1&&t>=TOT-BPB*12)return -6;
-    return -3+9*ARC.i/Math.max(1,ARC.n-1);
+    return -3+9*arcI(t)/Math.max(1,ARC.n-1);
   };
   const pitchGoal=t=>(contour.goal?contour.goal(t):centerAt(t))+arcOffset(t);
   /* 앞 코드의 7음 → 새 코드의 3음 반음 해결(가능한 음역/도약 안에서만). */

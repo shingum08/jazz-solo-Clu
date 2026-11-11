@@ -5,12 +5,13 @@
 코드 진행을 고르면 **매번 새로운** 연습용 즉흥 솔로 악보를 만들어 주고, 반주와 함께 들려 주는 단일 HTML 웹앱.
 규칙 기반 엔진이 **Weimar Jazz Database 실측 통계**를 확률로 사용해 "사람 같은" 라인을 만든다.
 
-수정 작업 버전 **v0.42.1 "Clu"**. 배포 여부와 검증 결과는 별도로 확인해야 한다. 버전 이력 전체는 [CHANGELOG.md](CHANGELOG.md), 되돌릴 수 있는 시점은 [CHECKPOINTS.md](CHECKPOINTS.md)에 있다 — 이 README에는 현재 기능 요약만 둔다.
+수정 작업 버전 **v0.43.0 "Clu"**. 배포 여부와 검증 결과는 별도로 확인해야 한다. 버전 이력 전체는 [CHANGELOG.md](CHANGELOG.md), 되돌릴 수 있는 시점은 [CHECKPOINTS.md](CHECKPOINTS.md)에 있다 — 이 README에는 현재 기능 요약만 둔다.
 
 > 마스터 기획안: [docs/blueprint-v1.0.pdf](docs/blueprint-v1.0.pdf) — 프로젝트 전체 로드맵(v1~v4), ML·RAG 확장 설계, 비용·법무 프레임.
 
 ## 주요 기능
 
+- **v0.43 Clu**: 재생 시 솔로가 안 들리던 버그 수정 · 첫 코러스 B부터 빌드업 · 당김음(4박 엇박 → 다음 마디) 늘림
 - **v0.42 Clu**: 곡 불러오기(MusicXML·iReal Pro → 기기 안 「내 곡」) · ♡ 저장을 악보 그대로 · 안드로이드 앱 프로젝트(`build.py --android`)
 - **v0.41 Clu**: PWA(홈 화면 설치·오프라인 — 테스트용 앱 빌드 `build.py --app`에서만, 업데이트 확인 알림) · ♡ 저장 영속화·삭제 · 백업 파일 내보내기/불러오기
 - **v0.40 Clu**: 한 마디 릭 사전(engine/licks.js) · 사용자 제공 얼터드 릭 3종(Ⅴ7→Ⅰ 해결)

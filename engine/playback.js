@@ -277,17 +277,18 @@ function playAllInner(acIn,banksIn,feelIn){
   const lvRaw=$('#leadvol')?+$('#leadvol').value:100;
   lead.gain.value=Math.max(0,(Number.isFinite(lvRaw)?lvRaw:100)/100)*LEAD_GAIN;
   lead.connect(master);
-  let wet=null;
+  const leadLP=ac.createBiquadFilter();leadLP.type='lowpass';leadLP.frequency.value=6400;leadLP.Q.value=0.4;leadLP.connect(lead);   /* 샘플 솔로 톤(재생마다 새로) */
+  let wet=null,revIn=null;   /* v0.42.2 리버브 입력도 재생마다(예전 ac._revIn은 지난 재생 출력에 묶여 있었음) */
   try{
     const cv=ac.createConvolver();cv.buffer=roomIR(ac,1.5,2.6);
     wet=ac.createGain();wet.gain.value=1;cv.connect(wet);wet.connect(master);
     const ls=ac.createGain();ls.gain.value=0.2;lead.connect(ls);ls.connect(cv);
-    ac._revIn=cv;
+    revIn=cv;
   }catch(e){}
   const rb=ac.createGain();
   const bvRaw=+$('#backvol').value;const bv=Number.isFinite(bvRaw)?bvRaw:90;   /* 0%도 0%로 — ||90 함정 제거 */
   rb.gain.value=Math.max(0,bv/100)*BACK_GAIN*(Object.keys(banks).length?1.15:1);
-  if(ac._revIn){try{const bs=ac.createGain();bs.gain.value=0.1;rb.connect(bs);bs.connect(ac._revIn)}catch(e){}}
+  if(revIn){try{const bs=ac.createGain();bs.gain.value=0.1;rb.connect(bs);bs.connect(revIn)}catch(e){}}
   master.gain.value*=feel==='ballad'?1.3:1;   /* 발라드는 성긴 편성이라 전체 레벨 보정 */
   rb.connect(master);
   const spb=60/bpm,t0=ac.currentTime+(useSamples?0.6:0.15),start=t0+4*spb;  /* 샘플은 카운트인 동안 로드 */
@@ -354,7 +355,7 @@ function playAllInner(acIn,banksIn,feelIn){
       const ab=cr*nb+Math.floor(e.start/barLen+1e-6);if(ab<A0||ab>A1)return;
       const tt=P0+(cr*nb-A0)*barLen+e.start;
       const dur=Math.min(e.dur,P0+rangeLen-tt);if(dur<=0.01)return;   /* 구간 끝을 넘는 음은 자른다 */
-      jobs.push({t:tt-0.02,f:()=>{const lb=banks[LEAD_SOUND[cur.tone]];if(lb)leadSample(ac,lead,lb,tt,dur,e.midi,e.vel,e.end);else mel(ac,lead,tt,dur,e.midi,LEAD_SOUND[cur.tone]?'flugel':(cur.tone||'flugel'),e.vel,e.end)}});
+      jobs.push({t:tt-0.02,f:()=>{const lb=banks[LEAD_SOUND[cur.tone]];if(lb)leadSample(ac,leadLP,lb,tt,dur,e.midi,e.vel,e.end);else mel(ac,lead,tt,dur,e.midi,LEAD_SOUND[cur.tone]?'flugel':(cur.tone||'flugel'),e.vel,e.end)}});
     });
   });
   };
@@ -412,9 +413,10 @@ function drumsFor(feel,ac,out,bs,spb,bpb,sw,rng){
     for(let k=0;k<16;k++)hat(ac,out,at(k/4),k%2?0.025:0.05);return}
 }
 /* 리드 샘플: 프레이즈 끝 긴 음은 여운을 길게 */
+/* v0.42.2 고침: 로우패스를 AudioContext에 한 번만 만들어 두던 것(ac._leadLP)을 재생마다 새로 — v0.39.2부터 컨텍스트를 재사용하면서
+   두 번째 재생부터 솔로 샘플이 「지난 재생의 끊긴 출력」으로 가 반주만 들리던 버그. out = 이번 재생의 솔로 버스 앞 필터 */
 function leadSample(ac,out,bank,when,dur,midi,vel,isEnd){
-  if(!ac._leadLP){ac._leadLP=ac.createBiquadFilter();ac._leadLP.type='lowpass';ac._leadLP.frequency.value=6400;ac._leadLP.Q.value=0.4;ac._leadLP.connect(out)}
-  playSample(ac,ac._leadLP,bank,when,dur,midi,0.3*(vel||0.85),isEnd?0.4:0.09);
+  playSample(ac,out,bank,when,dur,midi,0.3*(vel||0.85),isEnd?0.4:0.09);
 }
 /* v0.29 믹스 상수 — 솔로가 반주보다 앞에 나오도록(이전: 솔로 1.0 · 반주 2.6) */
 const LEAD_GAIN=1.9,BACK_GAIN=2.1;
