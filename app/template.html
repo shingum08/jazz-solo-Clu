@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!--__PWA_HEAD__-->
-<title>즉흥 악보 생성기 v0.41.1 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.42.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -534,6 +534,18 @@ svg .playcursor{fill:var(--brass);opacity:.22;pointer-events:none}
 .bkbar button,.instbtn{background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 12px;font-family:inherit;font-size:12.5px;cursor:pointer}
 .bkbar button:hover,.instbtn:hover{border-color:var(--brass);color:var(--brass)}
 .instbtn{margin-left:10px;vertical-align:middle}
+/* v0.42 곡 불러오기 */
+.impbtn{margin-left:8px;background:none;border:1px solid var(--line);color:var(--brass);border-radius:7px;padding:2px 8px;font-family:inherit;font-size:11.5px;letter-spacing:0;cursor:pointer;text-transform:none}
+.impbtn:hover{border-color:var(--brass)}
+.imppanel{background:var(--panel);border:1px solid var(--brass);border-radius:12px;padding:14px 16px;margin:10px 0 14px}
+.imppanel h4{font-family:'Gowun Batang',serif;color:var(--paper);font-size:15px;margin:0 0 6px}
+.imppanel .note{font-size:12.5px;color:var(--mut);line-height:1.6;margin:0 0 10px}
+.improw{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.improw textarea{flex:1;min-width:220px;background:var(--panel-2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px;font-family:'JetBrains Mono',monospace;font-size:12px}
+.improw button{background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 12px;font-family:inherit;font-size:12.5px;cursor:pointer}
+.improw button:hover{border-color:var(--brass);color:var(--brass)}
+.impcat{font-size:12.5px;color:var(--mut)}.impcat select{margin-left:4px}
+.impmsg{font-size:12.5px;line-height:1.6;margin:4px 0 8px;white-space:pre-line}.impmsg .ok{color:var(--brass)}.impmsg .bad{color:var(--rose)}
 .updbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:9999;display:flex;flex-wrap:wrap;align-items:center;gap:8px;max-width:calc(100% - 24px);background:var(--panel);border:1px solid var(--brass);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--txt);box-shadow:0 6px 24px rgba(0,0,0,.4)}
 .updbar b{color:var(--brass)}
 .updbar button{background:var(--brass);color:#1d1608;border:0;border-radius:8px;padding:7px 12px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
@@ -699,7 +711,7 @@ body.fslock{overflow:hidden}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.41.1 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">Concept Prototype · v0.42.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">리얼북 필수 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -707,9 +719,18 @@ body.fslock{overflow:hidden}
 </header>
 
 <main class="wrap">
+  <div class="imppanel" id="impPanel" hidden>
+    <h4>곡 불러오기 — 이 기기의 「내 곡」에만 저장</h4>
+    <p class="note"><b>MusicXML</b>(.musicxml · .xml · .mxl — 시벨리우스·뮤즈스코어·피날레의 「내보내기」) 또는 <b>iReal Pro 공유 링크</b>(irealb://…, 링크가 든 HTML 파일도 됨). 코드 기호가 적힌 리드시트여야 합니다. 멜로디가 있으면 「헤드 차용」 재료로 함께 씁니다. 직접 갖고 있는 파일만 불러오세요 — 불러온 곡은 어디로도 보내지 않습니다.</p>
+    <div class="improw"><button id="impFileBtn" type="button">📄 파일 고르기</button><input type="file" id="impFile" accept=".musicxml,.xml,.mxl,.html,.htm,.txt" multiple hidden>
+      <label class="impcat">분류 <select id="impCat"><option value="auto">자동</option><option>스윙</option><option>발라드</option><option>라틴</option><option>블루스</option><option>펑키</option></select></label></div>
+    <div class="improw"><textarea id="impLink" rows="2" spellcheck="false" placeholder="iReal Pro 링크를 붙여 넣으세요 (irealb://… 또는 irealbook://…)"></textarea><button id="impLinkBtn" type="button">링크 불러오기</button></div>
+    <div class="impmsg" id="impMsg"></div>
+    <div class="slist" id="mySongList"></div>
+  </div>
   <div class="toolbar">
     <div class="tb grow"><label>곡 검색 <label class="onlyok"><input type="checkbox" id="onlyOk"> 확인 필요 곡 숨기기</label></label><input type="search" id="songSearch" placeholder="예: night, bossa, moon, 별"></div>
-    <div class="tb grow"><label>곡 <span class="cnt" id="searchCount"></span></label><select id="songSel"></select></div>
+    <div class="tb grow"><label>곡 <span class="cnt" id="searchCount"></span><button class="impbtn" id="btnImport" type="button">📥 곡 불러오기</button></label><select id="songSel"></select></div>
     <div class="tb grow"><label>아티스트 스타일</label><select id="styleSel"></select></div>
     <div class="tb"><label>조 변환 (반음)</label><div class="trbox"><button id="btnTrDn" class="trbtn">−</button><span id="trVal">—</span><button id="btnTrUp" class="trbtn">＋</button></div></div>
     <div class="tb"><label>악보 표시</label><select id="viewSel"><option value="solo" selected>솔로</option><option value="drill">연습</option></select></div>
@@ -800,7 +821,7 @@ body.fslock{overflow:hidden}
   </div>
   <div class="saved">
     <h3>저장한 솔로</h3>
-    <p class="note">이 기기에 저장되어 새로고침해도 남습니다. 아이폰은 사파리와 홈 화면 앱의 저장 공간이 따로라서, 옮기거나 다른 기기로 가져갈 때는 백업 파일을 쓰세요. 엔진이 바뀐 뒤 불러오면 같은 설정이라도 악보가 조금 다를 수 있습니다.</p>
+    <p class="note">이 기기에 저장되어 새로고침해도 남습니다. ♡ 저장은 <b>악보 그대로</b>(편집한 음 · 여러 코러스 포함) 담기므로 앱이 업데이트돼도 같은 악보로 돌아옵니다. 마디만 따로 두려면 「🔒 마디 고정 모드」에서 마디를 골라 「♡ 선택 마디 보관」. 아이폰은 사파리와 홈 화면 앱의 저장 공간이 따로라서, 옮기거나 다른 기기로 가져갈 때는 백업 파일을 쓰세요.</p>
     <div class="bkbar"><button id="btnBackup">⬇ 백업 파일 내보내기</button><button id="btnRestore">⬆ 백업 불러오기</button><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>
     <div class="slist" id="savedList"><div class="none">아직 저장한 솔로가 없습니다.</div></div>
     <h3 style="margin-top:22px">보관한 소절</h3>
@@ -1549,16 +1570,33 @@ STYLE_DATA.cells=STYLE_DATA.cells.concat(CURATED_CELLS.map((c,i)=>Object.assign(
 /* ═══════════ UI · 재생 · 저장 (v0.27.1) ═══════════ */
 'use strict';
 const $=s=>document.querySelector(s);
+/* ── v0.42 파일 저장·공유 — 브라우저는 내려받기, 안드로이드 앱(AndroidBridge)은 저장 위치를 고르는 창·공유 시트 ── */
+function blobToB64(b){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(b)})}
+function saveBlobFile(blob,name){
+  if(window.AndroidBridge&&AndroidBridge.saveFile){blobToB64(blob).then(b=>AndroidBridge.saveFile(name,blob.type||'application/octet-stream',b));return}
+  const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},2000);
+}
+function shareBlobFile(blob,name){if(window.AndroidBridge&&AndroidBridge.shareFile){blobToB64(blob).then(b=>AndroidBridge.shareFile(name,blob.type||'application/octet-stream',b));return true}return false}
+window.saveBlobFile=saveBlobFile;
 const KEYNAMES=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
 const GRP={'스윙':'미디엄/업템포 스윙','블루스':'블루스 & 리듬 체인지','라틴':'보사노바 & 라틴','발라드':'재즈 발라드','모달':'모달·쿨·하드밥','비밥·왈츠':'비밥·왈츠·기타 필수곡','연습':'연습용 진행'};
 const cur={lyric:30,noteColors:'off',selProg:'blue-bossa',trUser:0,selDiff:2,selInst:'wind',selTrans:0,useLicks:true,useGroups:true,style:'all',tone:'clarinet',topic:'auto',themeOn:false,themeCh:'first',feel:'auto',solo:null,abc:'',audio:null,saved:[],view:'solo',playSolo:true,chorus:2};
 
 /* ── 곡 선택 박스 + 검색 ── */
-const SONG_MARK={ok:'✓ ',form:'✓ ',practice:'✓ ',book:'■ ',bookq:'□ ',rb:'◆ ',rbq:'◇ ',partial:'△ ',wrong:'✕ ',unknown:'? '};
-const SONG_STATUS_LABEL={ok:'✓ 코드 진행 확인됨',form:'✓ 형식 확인(블루스·리듬 체인지 등 공통 진행)',practice:'✓ 연습용 진행',partial:'△ 일부 다름 — 원곡과 부분적으로 다른 진행',wrong:'✕ 원곡과 다른 진행 — 수정 전까지 원곡 연습용으로 쓰지 마세요',unknown:'? 미확인 — 원곡과 다를 수 있음',rb:'◆ 리얼북 기준 새 코드집(v0.37) — 연주자 확인 전',rbq:'◇ 새 코드집(v0.37) — 일부 마디 확인 필요',book:'■ 악보 대조 완료 — 리얼북 악보와 한 마디씩 맞춰 옮긴 진행(v0.38)',bookq:'□ 악보 대조 — 일부 마디는 판독·해석 확인 필요'};
+const SONG_MARK={mine:'♪ ',ok:'✓ ',form:'✓ ',practice:'✓ ',book:'■ ',bookq:'□ ',rb:'◆ ',rbq:'◇ ',partial:'△ ',wrong:'✕ ',unknown:'? '};
+const SONG_STATUS_LABEL={mine:'♪ 내가 불러온 곡 — 이 기기에만 저장',ok:'✓ 코드 진행 확인됨',form:'✓ 형식 확인(블루스·리듬 체인지 등 공통 진행)',practice:'✓ 연습용 진행',partial:'△ 일부 다름 — 원곡과 부분적으로 다른 진행',wrong:'✕ 원곡과 다른 진행 — 수정 전까지 원곡 연습용으로 쓰지 마세요',unknown:'? 미확인 — 원곡과 다를 수 있음',rb:'◆ 리얼북 기준 새 코드집(v0.37) — 연주자 확인 전',rbq:'◇ 새 코드집(v0.37) — 일부 마디 확인 필요',book:'■ 악보 대조 완료 — 리얼북 악보와 한 마디씩 맞춰 옮긴 진행(v0.38)',bookq:'□ 악보 대조 — 일부 마디는 판독·해석 확인 필요'};
 const songSel=$('#songSel');
-(function(){
-  /* v0.27.1 곡 목록 — 장르 옵트그룹 완전 제거, 알파벳 순 단일 목록 */
+/* ── v0.42 내 곡(불러온 곡) — 이 기기 localStorage에만. 곡 목록보다 먼저 SONGDB에 올린다 ── */
+const MYSONG_KEY='clu.mysongs.v1';
+function loadMySongs(){try{const v=JSON.parse(localStorage.getItem(MYSONG_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+function storeMySongs(){try{localStorage.setItem(MYSONG_KEY,JSON.stringify(cur.mySongs))}catch(e){}}
+function registerMySong(m){
+  SONGDB[m.id]={name:m.n,c:m.c,key:m.k,bpm:m.bpm,bpb:m.m||4,form:{phrase:m.f[1],sections:m.f[0]},bars:m.ch.split('|').map(b=>b.trim().split(/\s+/).map(parseCh)),mine:true};
+  if(typeof SONG_STATUS!=='undefined')SONG_STATUS[m.id]={s:'mine',n:(m.src||'불러온 곡')+(m.warn&&m.warn.length?' · '+m.warn.join(' · '):''),a:[]};
+}
+cur.mySongs=loadMySongs().filter(m=>{try{registerMySong(m);return true}catch(e){return false}});
+function buildSongOptions(){
+  songSel.innerHTML='';
   Object.entries(SONGDB)
     .sort((a,b)=>(a[1].name||a[1].n||'').localeCompare(b[1].name||b[1].n||''))
     .forEach(([id,s])=>{
@@ -1567,9 +1605,10 @@ const songSel=$('#songSel');
       o.textContent=(SONG_MARK[st.s]||'? ')+(s.name||s.n||id);o.dataset.st=st.s;
       if(id===cur.selProg)o.selected=true;songSel.appendChild(o);
     });
-})();
+}
+buildSongOptions();
 /* v0.36 곡 데이터 검증 상태 — 목록 앞 기호와 선택한 곡 안내 */
-function songOkLevel(st){return st==='ok'||st==='form'||st==='practice'||st==='rb'||st==='book'}   /* 「확인 필요 곡 숨기기」: rbq·bookq·일부 다름·틀림·미확인을 숨긴다 */
+function songOkLevel(st){return st==='mine'||st==='ok'||st==='form'||st==='practice'||st==='rb'||st==='book'}   /* 「확인 필요 곡 숨기기」: rbq·bookq·일부 다름·틀림·미확인을 숨긴다 */
 function filterSongs(){
   const q=$('#songSearch').value.trim().toLowerCase(),only=$('#onlyOk').checked;let vis=0;
   [...songSel.querySelectorAll('option')].forEach(o=>{
@@ -1814,7 +1853,7 @@ function headAbc(prog,tr){
 }
 function regen(){if(cur.solo)gen(false)}
 songSel.onchange=()=>{
-  cur.selProg=songSel.value;cur.trUser=0;updTr();updFeelNote();updSongStatus();if(typeof fetch==='function')prefetchSamples(currentFeel(),cur.tone);
+  cur.selProg=songSel.value;applyMySongHead();cur.trUser=0;updTr();updFeelNote();updSongStatus();if(typeof fetch==='function')prefetchSamples(currentFeel(),cur.tone);
   const s=SONGDB[cur.selProg];
   $('#bpm').value=s.bpm;$('#bpmVal').textContent=s.bpm+' BPM';
   gen(true);
@@ -1907,7 +1946,7 @@ function updRangeBar(){
   else if(L.b===null)h.textContent=pfx+(L.a+1)+'마디부터 — 끝 마디를 누르세요 (같은 마디를 다시 누르면 한 마디 반복)';
   else h.textContent=pfx+(L.a+1)+(L.b>L.a?'–'+(L.b+1):'')+'마디 반복 중 · ▶ 재생도 이 구간을 반복합니다';
   $('#btnRangeClr').style.display=L?'':'none';
-  /* v0.41.1 악보 위 도구줄의 구간 반복 버튼 — 상태를 글자로 보여 준다 */
+  /* v0.42.0 악보 위 도구줄의 구간 반복 버튼 — 상태를 글자로 보여 준다 */
   const lab=!cur.loopOn?'🔁 구간 반복':!L?'🔁 첫 마디 고르기':L.b===null?'🔁 '+pfx+(L.a+1)+'마디~ 끝 마디?':'🔁 '+pfx+(L.a+1)+(L.b>L.a?'–'+(L.b+1):'')+'마디 반복';
   document.querySelectorAll('.loopmode').forEach(b=>{b.classList.toggle('on',!!cur.loopOn);b.textContent=lab;b.style.display=(cur.solo&&cur.solo.drill)?'none':''});
 }
@@ -1916,7 +1955,7 @@ function setLoopOn(on){
   if(!on){cur.loopSel=null;if(cur.playRange&&cur.playRange.loop){cur.playRange=null;stopIfPlaying()}}
 }
 $('#loopOn').addEventListener('change',e=>{setLoopOn(e.target.checked);renderChips()});
-/* v0.41.1 악보 위 🔁 구간 반복 버튼 — 켜면 마디 고정 모드는 끄고 마디 번호 줄로 내려 준다 */
+/* v0.42.0 악보 위 🔁 구간 반복 버튼 — 켜면 마디 고정 모드는 끄고 마디 번호 줄로 내려 준다 */
 document.addEventListener('click',e=>{
   const b=e.target.closest('.loopmode');if(!b)return;
   setLoopOn(!cur.loopOn);
@@ -2098,7 +2137,9 @@ function clearPlayHl(){
 const APP_VER=(document.title.match(/v(\d+\.\d+\.\d+)/)||[])[1]||'?';
 $('#btnSave').onclick=()=>{
   const s=cur.solo,sg=SONGDB[cur.selProg];
-  cur.saved.unshift({v:APP_VER,id:s.ts,seed:cur.seed,song:cur.selProg,tr:cur.trUser,diff:cur.selDiff,inst:cur.selInst,licks:cur.useLicks!==false,groups:cur.useGroups,style:cur.style,lyric:cur.lyric,
+  /* v0.42 악보 그대로 저장 — 시드뿐 아니라 실제 음표(코러스별 원본 + 편집)도 담아, 엔진이 바뀌어도 같은 악보로 돌아온다 */
+  const snap=cur.view!=='drill'&&cur.soloBases&&cur.soloBases.length?{bases:JSON.parse(JSON.stringify(cur.soloBases)),edits:JSON.parse(JSON.stringify(cur.edits||{})),nCh:cur.soloBases.length}:null;
+  cur.saved.unshift({v:APP_VER,snap,id:s.ts,seed:cur.seed,song:cur.selProg,tr:cur.trUser,diff:cur.selDiff,inst:cur.selInst,licks:cur.useLicks!==false,groups:cur.useGroups,style:cur.style,lyric:cur.lyric,
     name:sg.name+' · '+keyLabel(songKeyPc(),cur.trUser)+' · '+STYLE_DATA.profiles[cur.style].label+' · 난이도 '+cur.selDiff});
   storeSaved();askPersist();renderSaved();
 };
@@ -2108,7 +2149,7 @@ function renderSaved(){
   el.innerHTML='';
   cur.saved.forEach(item=>{
     const d=document.createElement('div');d.className='sitem';
-    d.innerHTML='<span class="nm">♡ <b>'+item.name+'</b>'+(item.v&&item.v!==APP_VER?'<span class="old">v'+item.v+'에서 저장 — 악보가 조금 다를 수 있음</span>':'')+'</span>';
+    d.innerHTML='<span class="nm">♡ <b>'+item.name+'</b>'+(item.snap?'<span class="old">악보 그대로 저장'+(item.snap.nCh>1?' · '+item.snap.nCh+'코러스':'')+'</span>':item.v&&item.v!==APP_VER?'<span class="old">v'+item.v+'에서 저장 — 악보가 조금 다를 수 있음</span>':'')+'</span>';
     const acts=document.createElement('span');acts.className='acts';
     const b=document.createElement('button');b.textContent='불러오기';
     b.onclick=()=>{
@@ -2122,7 +2163,13 @@ function renderSaved(){
       [...$('#segInst').children].forEach((c,i)=>c.classList.toggle('on',(i===0)===(cur.selInst==='wind')));
       $('#diffSel').value=cur.selDiff;
       cur.lyric=item.lyric!=null?item.lyric:30;$('#lyric').value=cur.lyric;$('#lyrVal').textContent='노래 '+cur.lyric+' · 비밥 '+(100-cur.lyric);
-      gen(false);window.scrollTo({top:0,behavior:'smooth'});
+      if(item.snap&&cur.view==='drill'){cur.view='solo';$('#viewSel').value='solo'}
+      if(item.snap){$('#chorusSel').value=item.snap.nCh;cur.chorus=item.snap.nCh}
+      gen(false);
+      if(item.snap&&cur.view!=='drill'){   /* 저장한 음표로 바꿔 끼운다 */
+        cur.soloBases=JSON.parse(JSON.stringify(item.snap.bases));cur.soloBase=cur.soloBases[0];cur.edits=JSON.parse(JSON.stringify(item.snap.edits||{}));cur.sel=null;cur.shift=undefined;applyView();
+      }
+      window.scrollTo({top:0,behavior:'smooth'});
     };
     const x=document.createElement('button');x.textContent='삭제';
     x.onclick=()=>{cur.saved=cur.saved.filter(q=>q!==item);storeSaved();renderSaved()};
@@ -2137,10 +2184,9 @@ function storeSaved(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(cur.saved
 function askPersist(){try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}}
 cur.saved=loadSaved().filter(it=>it&&SONGDB[it.song]);renderSaved();
 $('#btnBackup').onclick=()=>{
-  const data={app:'clu',kind:'backup',ver:APP_VER,date:new Date().toISOString(),saved:cur.saved,snips:cur.snips};
+  const data={app:'clu',kind:'backup',ver:APP_VER,date:new Date().toISOString(),saved:cur.saved,snips:cur.snips,mySongs:cur.mySongs};
   const d=new Date(),ymd=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
-  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
-  a.href=url;a.download='clu-backup-'+ymd+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1000);
+  saveBlobFile(new Blob([JSON.stringify(data)],{type:'application/json'}),'clu-backup-'+ymd+'.json');
 };
 $('#btnRestore').onclick=()=>$('#restoreFile').click();
 $('#restoreFile').onchange=e=>{
@@ -2148,13 +2194,95 @@ $('#restoreFile').onchange=e=>{
   f.text().then(t=>{
     const d=JSON.parse(t);if(!d||d.app!=='clu')throw new Error('이 앱의 백업 파일이 아닙니다');
     const merge=(cur0,add,key)=>{const seen=new Set(cur0.map(x=>x[key]));return cur0.concat((add||[]).filter(x=>x&&!seen.has(x[key])))};
+    /* v0.42 내 곡 먼저(저장 솔로가 내 곡을 가리킬 수 있으므로) */
+    const nm0=cur.mySongs.length;cur.mySongs=merge(cur.mySongs,(d.mySongs||[]).filter(m=>{try{registerMySong(m);return true}catch(e){return false}}),'id');
+    if(cur.mySongs.length>nm0){storeMySongs();buildSongOptions();renderMySongs()}
     const ns=merge(cur.saved,(d.saved||[]).filter(it=>SONGDB[it.song]),'id'),nn=merge(cur.snips,(d.snips||[]).filter(it=>SONGDB[it.song]),'id');
-    const add=(ns.length-cur.saved.length)+(nn.length-cur.snips.length);
+    const add=(ns.length-cur.saved.length)+(nn.length-cur.snips.length)+(cur.mySongs.length-nm0);
     cur.saved=ns;cur.snips=nn;storeSaved();storeSnips();askPersist();renderSaved();renderSnips();
     $('#btnRestore').textContent='⬆ 백업 불러오기 — '+add+'개 추가됨';
   }).catch(err=>{$('#btnRestore').textContent='⬆ 백업 불러오기 — 실패: '+err.message}).finally(()=>{e.target.value=''});
 };
-/* v0.41.1 앱 기능(설치·오프라인·업데이트)은 테스트용 앱 빌드(--app)에서만 켠다 — GitHub에 올라가는 index.html에서는 꺼짐 */
+/* ── v0.42 곡 불러오기 — MusicXML · iReal Pro (engine/importers.js). 결과는 이 기기의 「내 곡」에만 ── */
+function myHash(x){let h=2166136261;for(let i=0;i<x.length;i++){h^=x.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)}
+function applyMySongHead(){
+  const m=cur.mySongs.find(x=>x.id===cur.selProg),ta=$('#headAbcIn');if(!ta)return;
+  if(m&&m.head){ta.value=m.head;cur.headAuto=true;readHeadAbc()}
+  else if(cur.headAuto){ta.value='';cur.headAuto=false;readHeadAbc()}
+}
+function addMySong(r,src){
+  const cat=$('#impCat').value;
+  const m=Object.assign({},r.song,{c:cat==='auto'?r.song.c:cat});
+  m.id='u_'+myHash(m.n+'|'+m.ch);m.src=src;m.warn=r.warn||[];m.head=r.head&&r.head.notes.length?notesToAbc(r.head.notes,r.head.bpb):null;m.added=Date.now();
+  try{registerMySong(m);generateSolo(m.id,m.k,2,1,'wind',{style:'all'})}   /* 코드·형식 검사 겸 시험 생성 */
+  catch(e){delete SONGDB[m.id];throw new Error('앱이 쓸 수 없는 진행이에요 ('+e.message+')')}
+  cur.mySongs=cur.mySongs.filter(x=>x.id!==m.id).concat([m]);storeMySongs();askPersist();
+  return m;
+}
+function impReport(lines,lastId){
+  $('#impMsg').innerHTML=lines.map(l=>'<span class="'+(l.ok?'ok':'bad')+'">'+(l.ok?'✓ ':'✕ ')+l.t+'</span>').join('\n');
+  buildSongOptions();renderMySongs();
+  if(lastId){songSel.value=lastId;filterSongs();songSel.onchange()}
+}
+async function importFiles(files){
+  const lines=[];let lastId=null;
+  for(const f of files){
+    try{
+      const nm=f.name||'파일',ext=(nm.split('.').pop()||'').toLowerCase();
+      let rs;
+      if(ext==='mxl')rs=[musicXmlToSong(await mxlToXml(await f.arrayBuffer()),nm)].map(r=>Object.assign(r,{src:'MusicXML'}));
+      else{
+        const txt=await f.text();
+        if(/irealb(ook)?:\/\//.test(txt))rs=irealToSongs(txt).map(r=>Object.assign(r,{src:'iReal Pro'}));
+        else if(/<score-(partwise|timewise)/.test(txt))rs=[Object.assign(musicXmlToSong(txt,nm),{src:'MusicXML'})];
+        else throw new Error('MusicXML도 iReal Pro 링크도 아니에요');
+      }
+      for(const r of rs){
+        if(r.error){lines.push({ok:false,t:(r.title||nm)+' — '+r.error});continue}
+        try{const m=addMySong(r,r.src);lastId=m.id;lines.push({ok:true,t:m.n+' — '+m.ch.split('|').length+'마디 · '+m.c+(m.head?' · 멜로디 있음(헤드 차용)':'')+(m.warn.length?' · '+m.warn.join(' · '):'')})}
+        catch(e){lines.push({ok:false,t:(r.song&&r.song.n||nm)+' — '+e.message})}
+      }
+    }catch(e){lines.push({ok:false,t:(f.name||'파일')+' — '+e.message})}
+  }
+  impReport(lines,lastId);
+}
+function renderMySongs(){
+  const el=$('#mySongList');if(!el)return;
+  if(!cur.mySongs.length){el.innerHTML='<div class="none">아직 불러온 곡이 없습니다.</div>';return}
+  el.innerHTML='';
+  cur.mySongs.slice().sort((a,b)=>a.n.localeCompare(b.n)).forEach(m=>{
+    const d=document.createElement('div');d.className='sitem';
+    d.innerHTML='<span class="nm">♪ <b>'+m.n.replace(/</g,'&lt;')+'</b><span class="old">'+m.ch.split('|').length+'마디 · '+m.c+' · '+(m.src||'')+(m.head?' · 멜로디':'')+'</span></span>';
+    const acts=document.createElement('span');acts.className='acts';
+    const b=document.createElement('button');b.textContent='선택';b.onclick=()=>{songSel.value=m.id;filterSongs();songSel.onchange();window.scrollTo({top:0,behavior:'smooth'})};
+    const x=document.createElement('button');x.textContent='삭제';
+    x.onclick=()=>{
+      const nSaved=cur.saved.filter(it=>it.song===m.id).length+cur.snips.filter(it=>it.song===m.id).length;
+      if(nSaved&&!x.dataset.ask){x.dataset.ask=1;x.textContent='저장 '+nSaved+'개도 지움 — 다시 누르기';return}
+      cur.mySongs=cur.mySongs.filter(q=>q.id!==m.id);storeMySongs();
+      cur.saved=cur.saved.filter(it=>it.song!==m.id);cur.snips=cur.snips.filter(it=>it.song!==m.id);storeSaved();storeSnips();renderSaved();renderSnips();
+      delete SONGDB[m.id];if(typeof SONG_STATUS!=='undefined')delete SONG_STATUS[m.id];
+      if(cur.selProg===m.id){cur.selProg='blue-bossa';buildSongOptions();songSel.value='blue-bossa';songSel.onchange()}else buildSongOptions();
+      filterSongs();renderMySongs();
+    };
+    acts.appendChild(b);acts.appendChild(x);d.appendChild(acts);el.appendChild(d);
+  });
+}
+$('#btnImport').onclick=()=>{const p=$('#impPanel');p.hidden=!p.hidden;if(!p.hidden)p.scrollIntoView({behavior:'smooth',block:'start'})};
+$('#impFileBtn').onclick=()=>$('#impFile').click();
+$('#impFile').onchange=e=>{const fs=[...(e.target.files||[])];e.target.value='';if(fs.length)importFiles(fs)};
+$('#impLinkBtn').onclick=()=>{
+  const t=$('#impLink').value.trim();if(!t)return;
+  const lines=[];let lastId=null;
+  try{for(const r of irealToSongs(t)){
+    if(r.error){lines.push({ok:false,t:(r.title||'곡')+' — '+r.error});continue}
+    try{const m=addMySong(r,'iReal Pro');lastId=m.id;lines.push({ok:true,t:m.n+' — '+m.ch.split('|').length+'마디 · '+m.c+(m.warn.length?' · '+m.warn.join(' · '):'')})}catch(e){lines.push({ok:false,t:r.song.n+' — '+e.message})}
+  }}catch(e){lines.push({ok:false,t:e.message})}
+  if(lastId)$('#impLink').value='';
+  impReport(lines,lastId);
+};
+renderMySongs();
+/* v0.42.0 앱 기능(설치·오프라인·업데이트)은 테스트용 앱 빌드(--app)에서만 켠다 — GitHub에 올라가는 index.html에서는 꺼짐 */
 const PWA_BUILD=/*__PWA_BUILD__*/false;
 /* 앱 설치: 크롬·엣지·안드로이드는 설치 창, 아이폰·아이패드는 「홈 화면에 추가」 안내. 이미 앱으로 실행 중이면 숨김 */
 (function(){
@@ -2172,7 +2300,7 @@ const PWA_BUILD=/*__PWA_BUILD__*/false;
   };
 })();
 /* 서비스 워커 — 앱 빌드에서만 등록. 새 버전이 오면 바로 바꾸지 않고 「업데이트할까요?」를 묻는다.
-   공개 빌드에서는 혹시 v0.41.1에서 등록된 서비스 워커·캐시가 남아 있으면 지운다 */
+   공개 빌드에서는 혹시 v0.42.0에서 등록된 서비스 워커·캐시가 남아 있으면 지운다 */
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
   if(!PWA_BUILD){
     navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
@@ -2204,7 +2332,8 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
 }
 /* v0.27.1 내보내기 — PNG 저장(PC 다운로드·휴대폰 갤러리) · 공유·메일 */
 function sheetPng(cb){
-  const svg=$('#staff svg');if(!svg){alert('먼저 악보를 생성해 주세요');return}
+  /* v0.42 고침: abcjs는 svg를 #staff가 아니라 .sheetwrap 바로 안에 그린다 — 예전 선택자로는 PNG 저장·공유가 「먼저 악보를 생성」으로 막혀 있었다 */
+  const svg=(typeof staffSvg==='function'&&(staffSvg(typeof curChorus==='function'?curChorus():0)||staffSvg(0)))||$('#staff svg');if(!svg){alert('먼저 악보를 생성해 주세요');return}
   const clone=svg.cloneNode(true);
   const bb=svg.getBBox?svg.getBBox():{x:0,y:0,width:1200,height:800};
   const pad=40,W=Math.max(800,Math.ceil(bb.width+pad*2)),H=Math.ceil(bb.height+pad*2);
@@ -2224,10 +2353,7 @@ function sheetPng(cb){
   img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
 }
 function dl(canvas,name){
-  canvas.toBlob(b=>{
-    const u=URL.createObjectURL(b),a=document.createElement('a');
-    a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);
-  },'image/png');
+  canvas.toBlob(b=>saveBlobFile(b,name),'image/png');
 }
 $('#btnExport').onclick=()=>{
   if(!cur.solo){alert('먼저 악보를 생성해 주세요');return}
@@ -2239,6 +2365,7 @@ $('#btnShare').onclick=()=>{
   const fn=(SONGDB[cur.selProg].name||cur.selProg).replace(/[\\/:*?"<>|]/g,'_');
   sheetPng(cv=>{
     cv.toBlob(b=>{
+      if(shareBlobFile(b,fn+'.png'))return;   /* 안드로이드 앱: 공유 시트 */
       const f=new File([b],fn+'.png',{type:'image/png'});
       const meta=(SONGDB[cur.selProg].name||'')+' · 재즈 솔로 생성기';
       const mail='mailto:?subject='+encodeURIComponent('[재즈 솔로] '+meta)+'&body='+encodeURIComponent('재즈 솔로 생성기에서 만든 악보를 첨부합니다 — '+meta);
@@ -2333,7 +2460,7 @@ function popAct(act){
 /* ── 피드백: 입력창 → GitHub 이슈(곡·설정 자동 첨부) 또는 내용 복사 ── */
 function fbInfo(){
   const so=songSel.selectedOptions&&songSel.selectedOptions[0]?songSel.selectedOptions[0].textContent:'-';
-  return ['버전: v0.41.1','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'노래↔비밥: '+cur.lyric,'오디오: '+(typeof SHARED_AC!=='undefined'&&SHARED_AC?SHARED_AC.state:'없음')+(typeof IS_IOS!=='undefined'&&IS_IOS?' · iOS'+(navigator.audioSession?' · 세션 '+navigator.audioSession.type:' · 세션 API 없음'):''),'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
+  return ['버전: v0.42.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'노래↔비밥: '+cur.lyric,'오디오: '+(typeof SHARED_AC!=='undefined'&&SHARED_AC?SHARED_AC.state:'없음')+(typeof IS_IOS!=='undefined'&&IS_IOS?' · iOS'+(navigator.audioSession?' · 세션 '+navigator.audioSession.type:' · 세션 API 없음'):''),'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
 }
 $('#btnFeedback').onclick=()=>{$('#fbModal').style.display='flex';$('#fbText').focus();$('#fbMsg').textContent=''};
 $('#fbClose').onclick=()=>{$('#fbModal').style.display='none'};

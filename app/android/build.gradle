@@ -1,0 +1,2 @@
+// 안드로이드 Gradle 플러그인 — Android Studio가 새 버전으로 올리자고 하면 받아들여도 된다
+plugins { id 'com.android.application' version '8.10.1' apply false }

@@ -2,7 +2,7 @@
 const fs=require('fs'),vm=require('vm'),path=require('path');
 const root=path.resolve(__dirname,'..');
 function loadEngine(coreFile){
-  const files=[coreFile||'engine/engine_core.js','engine/style_data.js','engine/licks.js','engine/headabc.js','engine/drill.js','engine/locks.js','engine/song_status.js',
+  const files=[coreFile||'engine/engine_core.js','engine/style_data.js','engine/licks.js','engine/headabc.js','engine/drill.js','engine/locks.js','engine/song_status.js','engine/importers.js',
     ...fs.readdirSync(root+'/engine').filter(f=>/^songs_part\d+\.js$/.test(f)).sort().map(f=>'engine/'+f)]
     .filter(f=>fs.existsSync(path.join(root,f)));
   const code=files.map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n')

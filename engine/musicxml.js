@@ -153,8 +153,9 @@ if(typeof document!=='undefined'){
   if(xmlButton)xmlButton.addEventListener('click',()=>{
     const xml=buildMusicXml();
     if(!xml){alert('먼저 악보를 생성해 주세요');return}
-    const a=document.createElement('a'),url=URL.createObjectURL(new Blob([xml],{type:'application/vnd.recordare.musicxml+xml'}));
-    a.href=url;a.download=((cur.sheetTitle||'solo')+'.musicxml').replace(/[\\/:*?"<>|]/g,'_');
-    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+    const blob=new Blob([xml],{type:'application/vnd.recordare.musicxml+xml'}),name=((cur.sheetTitle||'solo')+'.musicxml').replace(/[\\/:*?"<>|]/g,'_');
+    if(typeof window!=='undefined'&&typeof window.saveBlobFile==='function'){window.saveBlobFile(blob,name);return}   /* v0.42 안드로이드 앱에서도 저장되게 */
+    const a=document.createElement('a'),url=URL.createObjectURL(blob);
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
   });
 }

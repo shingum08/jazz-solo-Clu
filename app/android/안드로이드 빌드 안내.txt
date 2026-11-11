@@ -1,0 +1,41 @@
+즉흥 악보 생성기 · Clu — 안드로이드 앱 프로젝트 v__VERSION__ (versionCode __VERSION_CODE__)
+(우리끼리 테스트·구글 플레이 등록용 · GitHub에 올리지 않는 묶음)
+
+━━ 이 앱은 ━━
+· 웹앱(index.html)을 앱 안에 통째로 넣은 안드로이드 앱입니다(app/src/main/assets/www). 인터넷 없이도 열립니다.
+  악기 음원·글꼴만 처음 한 번 인터넷에서 받아 오고, 그 뒤에는 캐시로 재생됩니다.
+· 저장한 솔로·보관 마디·내 곡은 앱 저장소에 남습니다. 앱을 지우면 함께 지워지므로 「⬇ 백업 파일 내보내기」를 권합니다.
+· 백업·PNG·MusicXML 저장은 「저장 위치 고르기」 창(다운로드·구글 드라이브 등), 공유는 안드로이드 공유 시트로 열립니다.
+· 곡 불러오기(📥)는 시스템 파일 선택 창으로 MusicXML·iReal 파일을 고릅니다.
+
+━━ 1. 준비 ━━
+· PC에 Android Studio 설치(무료): https://developer.android.com/studio
+· 이 폴더(CluJazz)를 Android Studio에서 「Open」 → 처음 열 때 Gradle 동기화(Sync)가 자동으로 돕니다(몇 분, 인터넷 필요).
+  - Gradle·플러그인 버전을 올리자는 안내가 뜨면 받아들여도 됩니다.
+  - 「Gradle wrapper가 없다」는 안내가 뜨면 Android Studio가 권하는 대로 진행하세요. (이 묶음에는 wrapper 실행 파일이 빠져 있습니다)
+  ※ 이 프로젝트는 안드로이드 SDK가 없는 환경에서 만들어 아직 한 번도 빌드해 보지 않았습니다. 첫 빌드에서 오류가 나면 오류 문구를 그대로 보내 주세요.
+
+━━ 2. 내 폰에서 바로 시험 ━━
+· 폰: 설정 → 휴대전화 정보 → 「빌드 번호」 7번 누르기(개발자 모드) → 개발자 옵션 → 「USB 디버깅」 켜기
+· USB로 연결 → Android Studio 위쪽 ▶(Run) → 폰에 앱이 설치·실행됩니다.
+
+━━ 3. 구글 플레이에 올릴 파일(AAB) 만들기 ━━
+· ⚠ 먼저 패키지 이름 정하기: app/build.gradle 의 applicationId·namespace 'app.clu.jazzsolo'
+  (지금은 임시. 플레이에 처음 올린 뒤에는 바꿀 수 없습니다 — 앱 이름이 정해지면 바꾸고 올리세요.
+   namespace를 바꾸면 java 폴더 경로·첫 줄 package 도 같이 바꿔야 합니다 — Android Studio의 Refactor → Rename 사용)
+· 메뉴 Build → Generate Signed App Bundle or APK → Android App Bundle → 업로드 키 새로 만들기(Create new…)
+  - 키 파일(.jks)과 비밀번호는 잃어버리면 업데이트를 못 올립니다 — 안전한 곳에 따로 보관(채팅에 올리지 마세요)
+  - release 선택 → 만들어진 app-release.aab 를 플레이 콘솔에 올립니다.
+· 앱 이름: app/src/main/res/values/strings.xml 의 app_name (지금 임시 「즉흥 악보」)
+· 아이콘: 임시(오선 + 8분음표). 심볼이 정해지면 바꿉니다.
+
+━━ 4. 플레이 콘솔 순서(요약) ━━
+1) 개발자 계정 만들기(등록비 1회 — 금액은 콘솔에서 확인)
+2) 앱 만들기 → 「테스트 및 출시 → 내부 테스트」에 AAB 올리고 테스터(이메일) 추가 → 링크로 설치해 시험
+3) 개인 계정은 정식 출시 전에 「비공개 테스트」에 테스터 12명 이상이 14일 연속 참여해야 합니다(구글 정책)
+4) 스토어 등록정보(설명·스크린샷·아이콘 512px·그래픽 1024×500), 개인정보처리방침 주소, 데이터 보안 양식, 콘텐츠 등급
+5) 새 버전을 올릴 때는 versionCode 가 매번 커야 합니다 — tools/build.py --android 가 앱 버전에서 자동으로 채웁니다.
+
+━━ 5. 업데이트 ━━
+· 웹 쪽을 고치면 python3 tools/build.py --android 로 새 묶음을 만들고, 이 폴더의 app/src/main/assets/www/index.html 만 바꿔 넣어 다시 빌드해도 됩니다.
+· 플레이에 올린 앱은 플레이 스토어가 자동 업데이트합니다.

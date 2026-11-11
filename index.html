@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>즉흥 악보 생성기 v0.41.1 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.42.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -840,6 +840,18 @@ svg .playcursor{fill:var(--brass);opacity:.22;pointer-events:none}
 .bkbar button,.instbtn{background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 12px;font-family:inherit;font-size:12.5px;cursor:pointer}
 .bkbar button:hover,.instbtn:hover{border-color:var(--brass);color:var(--brass)}
 .instbtn{margin-left:10px;vertical-align:middle}
+/* v0.42 곡 불러오기 */
+.impbtn{margin-left:8px;background:none;border:1px solid var(--line);color:var(--brass);border-radius:7px;padding:2px 8px;font-family:inherit;font-size:11.5px;letter-spacing:0;cursor:pointer;text-transform:none}
+.impbtn:hover{border-color:var(--brass)}
+.imppanel{background:var(--panel);border:1px solid var(--brass);border-radius:12px;padding:14px 16px;margin:10px 0 14px}
+.imppanel h4{font-family:'Gowun Batang',serif;color:var(--paper);font-size:15px;margin:0 0 6px}
+.imppanel .note{font-size:12.5px;color:var(--mut);line-height:1.6;margin:0 0 10px}
+.improw{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.improw textarea{flex:1;min-width:220px;background:var(--panel-2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px;font-family:'JetBrains Mono',monospace;font-size:12px}
+.improw button{background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:7px 12px;font-family:inherit;font-size:12.5px;cursor:pointer}
+.improw button:hover{border-color:var(--brass);color:var(--brass)}
+.impcat{font-size:12.5px;color:var(--mut)}.impcat select{margin-left:4px}
+.impmsg{font-size:12.5px;line-height:1.6;margin:4px 0 8px;white-space:pre-line}.impmsg .ok{color:var(--brass)}.impmsg .bad{color:var(--rose)}
 .updbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:9999;display:flex;flex-wrap:wrap;align-items:center;gap:8px;max-width:calc(100% - 24px);background:var(--panel);border:1px solid var(--brass);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--txt);box-shadow:0 6px 24px rgba(0,0,0,.4)}
 .updbar b{color:var(--brass)}
 .updbar button{background:var(--brass);color:#1d1608;border:0;border-radius:8px;padding:7px 12px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
@@ -1005,7 +1017,7 @@ body.fslock{overflow:hidden}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.41.1 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">Concept Prototype · v0.42.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">리얼북 필수 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -1013,9 +1025,18 @@ body.fslock{overflow:hidden}
 </header>
 
 <main class="wrap">
+  <div class="imppanel" id="impPanel" hidden>
+    <h4>곡 불러오기 — 이 기기의 「내 곡」에만 저장</h4>
+    <p class="note"><b>MusicXML</b>(.musicxml · .xml · .mxl — 시벨리우스·뮤즈스코어·피날레의 「내보내기」) 또는 <b>iReal Pro 공유 링크</b>(irealb://…, 링크가 든 HTML 파일도 됨). 코드 기호가 적힌 리드시트여야 합니다. 멜로디가 있으면 「헤드 차용」 재료로 함께 씁니다. 직접 갖고 있는 파일만 불러오세요 — 불러온 곡은 어디로도 보내지 않습니다.</p>
+    <div class="improw"><button id="impFileBtn" type="button">📄 파일 고르기</button><input type="file" id="impFile" accept=".musicxml,.xml,.mxl,.html,.htm,.txt" multiple hidden>
+      <label class="impcat">분류 <select id="impCat"><option value="auto">자동</option><option>스윙</option><option>발라드</option><option>라틴</option><option>블루스</option><option>펑키</option></select></label></div>
+    <div class="improw"><textarea id="impLink" rows="2" spellcheck="false" placeholder="iReal Pro 링크를 붙여 넣으세요 (irealb://… 또는 irealbook://…)"></textarea><button id="impLinkBtn" type="button">링크 불러오기</button></div>
+    <div class="impmsg" id="impMsg"></div>
+    <div class="slist" id="mySongList"></div>
+  </div>
   <div class="toolbar">
     <div class="tb grow"><label>곡 검색 <label class="onlyok"><input type="checkbox" id="onlyOk"> 확인 필요 곡 숨기기</label></label><input type="search" id="songSearch" placeholder="예: night, bossa, moon, 별"></div>
-    <div class="tb grow"><label>곡 <span class="cnt" id="searchCount"></span></label><select id="songSel"></select></div>
+    <div class="tb grow"><label>곡 <span class="cnt" id="searchCount"></span><button class="impbtn" id="btnImport" type="button">📥 곡 불러오기</button></label><select id="songSel"></select></div>
     <div class="tb grow"><label>아티스트 스타일</label><select id="styleSel"></select></div>
     <div class="tb"><label>조 변환 (반음)</label><div class="trbox"><button id="btnTrDn" class="trbtn">−</button><span id="trVal">—</span><button id="btnTrUp" class="trbtn">＋</button></div></div>
     <div class="tb"><label>악보 표시</label><select id="viewSel"><option value="solo" selected>솔로</option><option value="drill">연습</option></select></div>
@@ -1106,7 +1127,7 @@ body.fslock{overflow:hidden}
   </div>
   <div class="saved">
     <h3>저장한 솔로</h3>
-    <p class="note">이 기기에 저장되어 새로고침해도 남습니다. 아이폰은 사파리와 홈 화면 앱의 저장 공간이 따로라서, 옮기거나 다른 기기로 가져갈 때는 백업 파일을 쓰세요. 엔진이 바뀐 뒤 불러오면 같은 설정이라도 악보가 조금 다를 수 있습니다.</p>
+    <p class="note">이 기기에 저장되어 새로고침해도 남습니다. ♡ 저장은 <b>악보 그대로</b>(편집한 음 · 여러 코러스 포함) 담기므로 앱이 업데이트돼도 같은 악보로 돌아옵니다. 마디만 따로 두려면 「🔒 마디 고정 모드」에서 마디를 골라 「♡ 선택 마디 보관」. 아이폰은 사파리와 홈 화면 앱의 저장 공간이 따로라서, 옮기거나 다른 기기로 가져갈 때는 백업 파일을 쓰세요.</p>
     <div class="bkbar"><button id="btnBackup">⬇ 백업 파일 내보내기</button><button id="btnRestore">⬆ 백업 불러오기</button><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>
     <div class="slist" id="savedList"><div class="none">아직 저장한 솔로가 없습니다.</div></div>
     <h3 style="margin-top:22px">보관한 소절</h3>
@@ -3158,6 +3179,317 @@ function lockSeamCost(solo){
    n: 메모 · a: 자동 검사 경고 · v: 연주자 확인(검증 시트 반영 시) */
 const SONG_STATUS={"round-midnight":{"s":"book","n":"리얼북 1권 364쪽(몽크). 정오표 반영(6·30마디 G♭maj7 A♭7, 브리지 3마디 C-7♭5 B7). B♭7alt는 B♭7♯9, C♭7은 B7로","a":[]},"a-beautiful-friendship":{"s":"book","n":"리얼북 3권 17쪽. Bb+7→Bb7#9, Eb6/9→Eb6","a":[]},"a-foggy-day":{"s":"book","n":"리얼북 1권 6쪽. 34마디(마지막 2마디 꼬리, 괄호 턴어라운드 포함)","a":[]},"a-night-in-tunisia":{"s":"book","n":"리얼북 1권 7쪽 헤드 32마디(인터루드·솔로 브레이크 제외). 브리지 3마디는 정오표대로 G- D7. A7♭5는 앱 표기 A7♯9(얼터드)","a":[]},"afro-blue":{"s":"book","n":"리얼북 1권 9쪽(몽고 산타마리아). 3/4, 헤드 16마디. 책 주: 솔로는 F 오픈 또는 3/4 마이너 블루스","a":[]},"after-youve-gone":{"s":"book","n":"리얼북 3권 2쪽. 반복을 펼쳐 1번 엔딩 16마디 + 2번 엔딩 24마디, 총 40마디","a":[]},"afternoon-in-paris":{"s":"book","n":"리얼북 1권 10쪽. 브리지 3마디 Cmaj7/E는 Cmaj7로","a":[]},"aint-misbehavin":{"s":"book","n":"리얼북 3권 3쪽(팻츠 월러). Eb/G·Bb/F 베이스 생략, G13·F13→9, G+7·F+7→7#9, Cm11→Cm7, Eb6/9→Eb6","a":[]},"airegin":{"s":"book","n":"리얼북 1권 11쪽(소니 롤린스). A8·B12·A8·C8 36마디. 8마디 (Bb7 멜로디만)·마지막 괄호 턴어라운드 (Gm7b5 C7b9) 생략, Cbmaj7은 Bmaj7로","a":[]},"alice-in-wonderland":{"s":"book","n":"리얼북 1권 12쪽(새미 페인). 3/4 왈츠, 16마디 4섹션 64마디","a":[]},"all-blues":{"s":"book","n":"리얼북 1권 13쪽. 원곡 6/8박 — 앱은 3/4박. 5~6마디는 C7","a":["첫 8마디가 다른 4곡과 같음"]},"all-of-me":{"s":"book","n":"리얼북 1권 16쪽. 26마디는 정오표대로 F♯dim7(인쇄본 F-). 마지막 턴어라운드 E♭o는 생략","a":[]},"all-of-you":{"s":"bookq","n":"리얼북 1권 17쪽(Ballad 표기). 9마디 E♭6/G·14마디 G-7♭5/D♭는 베이스음 생략. 4행 끝 반복 기호는 곡 전체 반복으로 보고 32마디로 적음 — 확인 필요","a":["조 표기(E♭)와 첫·끝 화음이 맞지 않음"]},"all-the-things-you-are":{"s":"book","n":"리얼북 1권 18쪽. 36마디. 24마디 C+7은 앱 표기 C7♯9(얼터드), 마지막 마디는 괄호 턴어라운드","a":["조 표기(A♭)와 첫·끝 화음이 맞지 않음"]},"alone-together":{"s":"book","n":"리얼북 1권 19쪽(Ballad 표기). 44마디(A 14 · A 14 · B 8 · A 8). D-는 Dm7로","a":[]},"along-came-betty":{"s":"book","n":"리얼북 3권 7쪽(베니 골슨). 책 그대로 8·8·8·10 34마디. A+7→A7#9, Gm7/F 베이스 생략","a":[]},"anthropology":{"s":"book","n":"리얼북 1권 25쪽(찰리 파커). 리듬 체인지","a":[]},"au-privave":{"s":"book","n":"리얼북 1권 32쪽(찰리 파커). 비밥 블루스 12마디. F+7→F7#9","a":[]},"autumn-in-new-york":{"s":"bookq","n":"리얼북 1권 33쪽. 정오표(11 · 13~14 · 25~28마디) 반영 — 정오표의 마디 번호 해석은 확인 필요. C+7은 C7♯9","a":[]},"autumn-leaves":{"s":"book","n":"리얼북 1권 36쪽(E단조). E- 표기는 Em7로","a":[]},"bags-groove":{"s":"book","n":"리얼북 2권 16쪽(밀트 잭슨). 2마디 (B♭7)은 괄호 표기. F 3화음은 F6로","a":[]},"beautiful-love":{"s":"book","n":"리얼북 1권 39쪽(Ballad 표기). 1·2번 엔딩을 펼쳐 32마디","a":[]},"bernies-tune":{"s":"book","n":"리얼북 3권 24쪽(버니 밀러)","a":[]},"bessies-blues":{"s":"book","n":"리얼북 1권 42쪽(존 콜트레인). 12마디 블루스","a":["진행 전체가 다른 6곡과 같음"]},"billies-bounce":{"s":"book","n":"리얼북 2권 24쪽(찰리 파커)","a":[]},"black-narcissus":{"s":"book","n":"리얼북 1권 47쪽(조 헨더슨). 3/4, 24마디. 앞 16마디는 책에 Ab·Gb 페달 표기(앱 반주는 코드 근음), Cb7은 B7로","a":["첫 8마디가 다른 1곡과 같음"]},"black-orpheus":{"s":"book","n":"리얼북 1권 49쪽(보사). 헤드 32마디(코다 제외). D-7/C·A-7/G는 베이스음 생략","a":[]},"bloomdido":{"s":"book","n":"리얼북 2권 29쪽(찰리 파커). 솔로 구간 12마디 코드로 적음(헤드는 5~8마디에 E♭m·D♭m 경과 코드). B♭+7은 B♭7♯9","a":[]},"blue-bossa":{"s":"book","n":"리얼북 1권 51쪽. 6·14마디는 정오표대로 G7♯9","a":[]},"blue-in-green":{"s":"book","n":"리얼북 1권 53쪽. 10마디. 6마디 A7(♭13)은 앱 표기 A7♭9, 7마디는 D-6","a":[]},"blue-monk":{"s":"book","n":"리얼북 1권 54쪽. B♭·E♭ 3화음은 6코드로. 9~10마디 모두 F7","a":[]},"blue-train":{"s":"book","n":"리얼북 1권 58쪽(존 콜트레인, 책 표기 'Blue Trane'). C단조 12마디, 2번 엔딩(Cm7b5 | G-)은 끝맺음","a":[]},"bluebird":{"s":"book","n":"리얼북 3권 29쪽(찰리 파커). 12마디 블루스","a":[]},"blues-for-alice":{"s":"book","n":"리얼북 1권 57쪽","a":[]},"blues-in-the-closet":{"s":"book","n":"리얼북 2권 36쪽(오스카 페티포드). A♭ 블루스. 둘째 코러스는 9마디 Cm7 F7, 끝 B♭m7 E♭7 턴어라운드","a":[]},"bluesette":{"s":"book","n":"리얼북 1권 56쪽. 재즈 왈츠 24마디. 17마디 C♭maj7은 Bmaj7로 표기","a":[]},"body-and-soul":{"s":"book","n":"리얼북 1권 59쪽. 브리지 1마디 (A7/E)는 대체 코드라 생략, D/F♯는 D6로","a":[]},"bolivia":{"s":"bookq","n":"리얼북 3권 31쪽(시더 월턴). 헤드 16마디(라틴·스윙 교대 표기), 인트로 베이스 반복구 생략. A13→A9, Bm7/A 베이스 생략. 확인 필요: 조성(조 기준음 G로 잡음)","a":["조 표기(G)와 첫·끝 화음이 맞지 않음"]},"boplicity":{"s":"book","n":"리얼북 1권 60쪽(클레오 헨리 = 마일스 데이비스). F+7·Eb+7→7#9, '-- C7'은 앞 화음을 이어 3박부터 C7","a":[]},"born-to-be-blue":{"s":"book","n":"리얼북 3권 35쪽(멜 토메). Cm6/9→Cm6, Abm7/Gb 베이스 생략, G+7→G7#9. 한 마디 3코드는 2+1+1박 근사","a":[]},"but-beautiful":{"s":"book","n":"리얼북 1권 67쪽(지미 반 휴즌). Am7/D→D7sus4, 라인 클리셰 E- / E-(maj7) E-7은 박마다, 마지막 괄호 (A-7 D7) 생략","a":[]},"bye-bye-blackbird":{"s":"book","n":"리얼북 2권 51쪽. B♭m은 B♭m7로","a":[]},"c-jam-blues":{"s":"rb","n":"12마디 C 블루스","a":["진행 전체가 다른 6곡과 같음"]},"cantaloupe-island":{"s":"rb","n":"16마디(F m7 · D♭7 · D m7 · F m7 각 4마디)","a":[]},"caravan":{"s":"book","n":"리얼북 2권 53쪽(엘링턴, Med. Afro-Latin). 64마디. 책은 A 섹션을 G°7로 적음(C7♭9 소리). F+7은 F7♯9","a":[]},"ceora":{"s":"book","n":"리얼북 1권 73쪽(리 모건, 보사). D+7→D7#9","a":[]},"chameleon":{"s":"book","n":"리얼북 2권 58쪽(허비 행콕). B♭m7 · E♭7 2마디 뱀프 반복","a":["첫 8마디가 다른 1곡과 같음"]},"cheek-to-cheek":{"s":"book","n":"리얼북 3권 50~51쪽(어빙 벌린). 헤드 기준 72마디(A16·A16·B8·B8·C8·A16, 반복 펼침). Dm7/G→G7sus4, C/G·C6/9/G→C6. 1·3마디 C#o7는 2박째 표기를 반마디로 근사","a":[]},"chelsea-bridge":{"s":"book","n":"리얼북 1권 77쪽","a":[]},"cherokee":{"s":"book","n":"리얼북 1권 78쪽(레이 노블). 64마디. F+7→F7#9, '-- F+7'·'-- D-7'은 앞 화음을 이어 3박부터. 마지막 A 3~4마디는 책대로 Bb7","a":[]},"cheryl":{"s":"book","n":"리얼북 3권 53쪽(찰리 파커). 비밥 블루스 12마디","a":[]},"comin-home-baby":{"s":"book","n":"리얼북 2권 64쪽. G 단조 12마디. G-·C-는 m7로","a":["첫 8마디가 다른 2곡과 같음"]},"con-alma":{"s":"book","n":"리얼북 1권 89쪽(디지 길레스피). A는 12/8 느낌, B는 스윙. 반복·D.C. al Fine을 AABA로 펼침. G#7/D#·F7/C 베이스 생략","a":[]},"confirmation":{"s":"book","n":"리얼북 1권 92쪽. F+7·7alt는 앱 표기 7♯9(얼터드). 10마디 괄호(C-7) 대체 코드는 생략","a":[]},"corcovado":{"s":"book","n":"리얼북 1권 94쪽(보사). 인트로 제외 34마디, 마지막 C6 두 마디는 끝낼 때만. D7/A는 D7, A7(♭13)은 A7♭9로","a":["조 표기(C)와 첫·끝 화음이 맞지 않음"]},"cottontail":{"s":"book","n":"리얼북 1권 95쪽(듀크 엘링턴). 리듬 체인지 계열(이 판은 Ab)","a":[]},"countdown":{"s":"book","n":"리얼북 1권 97쪽(존 콜트레인). 16마디. 마지막 괄호 (Eb7) 생략","a":[]},"cry-me-a-river":{"s":"book","n":"리얼북 3권 58쪽(아서 해밀턴). Cm–Ab/C–Cm6–Cm7 라인 클리셰에서 Ab/C는 베이스 생략 규칙대로 Ab6, Dm11→Dm7, Eb6/9→Eb6, G+7→G7#9","a":[]},"darn-that-dream":{"s":"book","n":"리얼북 1권 103쪽. 브리지 6마디는 정오표대로 A-7 D7♭9 G-6. 슬래시 코드(E-/D·A9/C♯·E♭7/B♭)는 베이스음 생략","a":[]},"desafinado":{"s":"book","n":"리얼북 1권 112~113쪽(보사). 68마디. 정오표대로 6행(Amaj7 B♭o7 B-7 E7)을 두 번. G7(♭5)는 G7♯11, C7♭5는 C7♯9(얼터드)","a":[]},"dexterity":{"s":"book","n":"리얼북 1권 117쪽(찰리 파커). 리듬 체인지 변형, F7alt→F7#9","a":[]},"dig":{"s":"book","n":"리얼북 3권 64~65쪽(마일스 데이비스, 'Sweet Georgia Brown' 진행). 32마디","a":["첫 8마디가 다른 1곡과 같음"]},"dolphin-dance":{"s":"book","n":"리얼북 1권 122쪽(허비 행콕). 첫 4마디(인트로 Ebmaj7 Bbm7 Ebmaj7 Dm7b5 G7)를 뺀 반복 구간 34마디. 2마디 반복 기호 펼침. 상부 구조 슬래시는 소리대로: A/G→Gmaj7#11, G/F→Fmaj7#11, Am7/B→B7sus4, Cm7/Bb→Cm7","a":["조 표기(E♭)와 첫·끝 화음이 맞지 않음"]},"dont-get-around-much-anymore":{"s":"book","n":"리얼북 1권 126쪽(듀크 엘링턴). 첫 마디 4코드는 박마다, 괄호 (G7)(C7) 생략, C+7→C7#9","a":[]},"donna-lee":{"s":"book","n":"리얼북 1권 124쪽(찰리 파커). 마지막 괄호 턴어라운드 (Bb-7 Eb7) 생략","a":[]},"doxy":{"s":"book","n":"리얼북 2권 79쪽(소니 롤린스). 16마디. F7+5는 F7♯9","a":[]},"esp":{"s":"book","n":"리얼북 1권 141쪽(웨인 쇼터 곡, 책에는 마일스 데이비스). 1·2번 엔딩 펼쳐 32마디. 7alt→7#9","a":[]},"easy-living":{"s":"book","n":"리얼북 1권 129쪽(Med. 표기, 앱은 발라드 반주). 브리지 끝 두 마디는 정오표대로. A+7·G+7은 7♯9, 슬래시 코드 베이스음 생략","a":[]},"embraceable-you":{"s":"bookq","n":"리얼북 2권 85쪽(거슈윈). 8마디는 책 표기대로 F♯ø A7(B7이 아닌지 확인 필요). B♭+(증3화음)은 B♭7♯9, F♯7(♭5)는 F♯7♯9로","a":[]},"emily":{"s":"book","n":"리얼북 3권 74쪽(조니 맨델). 3/4, 이 판은 40마디. C6/9→C6, G+7·C+7→7#9, A7/G 베이스 생략","a":[]},"equinox":{"s":"book","n":"리얼북 1권 139쪽(존 콜트레인). C단조 12마디 블루스","a":["첫 8마디가 다른 2곡과 같음"]},"estate":{"s":"book","n":"리얼북 3권 78쪽(브루노 마르티노, 보사). 14마디 단위 4섹션 56마디. Am7/D·Bm7/F# 베이스 생략, F#+7→F#7#9, 끝맺음 Bm6/9 생략","a":[]},"everything-happens-to-me":{"s":"book","n":"리얼북 3권 82쪽(맷 데니스). Bb6/9→Bb6","a":[]},"feel-like-makin-love":{"s":"bookq","n":"리얼북 3권 86쪽(유진 맥대니얼스, 소프트 록). Fm7/Bb→Bb7sus4. 책 표기대로 8+9=17마디(당김음 화음은 다음 박으로 정리). 확인 필요: 17마디 형식","a":[]},"fine-and-mellow":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 6곡과 같음"]},"fly-me-to-the-moon":{"s":"rb","n":"4·12·20마디 세부(C7·Am7)는 판본마다 조금씩 다름","a":["조 표기(C)와 첫·끝 화음이 맞지 않음"]},"footprints":{"s":"book","n":"리얼북 1권 157쪽. 3/4박 24마디. 리얼북은 17~20마디를 D7 · D♭7로 적음","a":["첫 8마디가 다른 4곡과 같음"]},"four":{"s":"book","n":"리얼북 1권 161쪽. 3~4마디는 정오표대로 E♭-7 | A♭7. 솔로 브레이크 제외","a":[]},"four-brothers":{"s":"book","n":"리얼북 2권 109쪽(지미 지우프리). E♭+7은 E♭7♯9","a":[]},"four-on-six":{"s":"book","n":"리얼북 1권 162쪽(웨스 몽고메리). 책 하단 솔로 체인지 16마디 기준(헤드의 베이스 리프·솔로 브레이크 생략)","a":[]},"freddie-freeloader":{"s":"book","n":"리얼북 1권 164쪽. 1번 엔딩(A♭7 두 마디)으로 적음 — 2번 엔딩은 B♭7 두 마디. 9마디 괄호 (B♭7)은 생략","a":["첫 8마디가 다른 4곡과 같음"]},"freedom-jazz-dance":{"s":"book","n":"리얼북 1권 165쪽. B♭7 한 코드 위 16마디","a":["첫 8마디가 다른 2곡과 같음"]},"gentle-rain":{"s":"book","n":"리얼북 1권 169쪽(루이스 봉파, 보사). 1번 엔딩 2마디·2번 엔딩 8마디를 펼쳐 38마디. 마지막 괄호 (E7) 생략","a":[]},"georgia-on-my-mind":{"s":"book","n":"리얼북 2권 119쪽(호기 카마이클). 괄호 대체 코드는 생략, 슬래시 코드(D-/C·G/B·A7/C♯ 등)는 베이스음 생략. C+7·C7(+5)는 C7♯9","a":[]},"giant-steps":{"s":"book","n":"리얼북 1권 170쪽. 3화음 표기(B·G·E♭)는 6코드로","a":[]},"god-bless-the-child":{"s":"book","n":"리얼북 1권 173쪽. A가 10마디인 38마디(A 10 · A 10 · B 8 · A 10). A♭-는 Abm6(버금딸림 단조)","a":[]},"gone-with-the-wind":{"s":"book","n":"리얼북 3권 101쪽(앨리 루벨). Bb+7→Bb7#9, B9#11→B7#11, Eb6/9→Eb6","a":[]},"goodbye-pork-pie-hat":{"s":"book","n":"리얼북 1권 175쪽. 12마디","a":[]},"groovin-high":{"s":"book","n":"리얼북 1권 181쪽(디지 길레스피, 'Whispering' 진행). 마지막 괄호 (Gb7 Fm7 E7) 생략","a":[]},"half-nelson":{"s":"book","n":"리얼북 1권 184쪽. 16마디","a":[]},"have-you-met-miss-jones":{"s":"book","n":"리얼북 1권 186쪽","a":[]},"how-deep-is-the-ocean":{"s":"book","n":"리얼북 3권 115쪽(어빙 벌린). Eb6/Bb·D7/F#·Eb/Bb·G7/B 베이스 생략, Bb9sus4→Bb7sus4, 괄호 (D7) 생략","a":[]},"how-high-the-moon":{"s":"book","n":"리얼북 1권 202쪽","a":[]},"how-insensitive":{"s":"book","n":"리얼북 1권 203쪽(보사). G7/B는 G7, D♭13은 D♭9로","a":[]},"i-cant-get-started":{"s":"book","n":"리얼북 1권 208쪽. 괄호 대체 코드(B-7 E7 B♭-7 E♭7 등)는 생략, D7(♭9♯11)은 D7♭9로","a":[]},"i-concentrate-on-you":{"s":"book","n":"리얼북 3권 118~119쪽(콜 포터). 64마디. Bb+7·G+7→7#9, Bb13·G13→9, Gb13#11→Gb7#11, C9sus4→C7sus4, Eb6/9→Eb6","a":[]},"i-could-write-a-book":{"s":"book","n":"리얼북 1권 209쪽(Ballad 표기). 1번 엔딩 3~4마디는 정오표대로 F♯-7♭5 B7 | E-7. C/E·A♭7/E♭는 베이스음 생략","a":[]},"i-fall-in-love-too-easily":{"s":"book","n":"리얼북 3권 120쪽(줄 스타인). 16마디. C+7→C7#9, Bb13→Bb9, Eb6/9→Eb6","a":[]},"i-got-rhythm":{"s":"form","n":"리듬 체인지 변형","a":[]},"i-love-you":{"s":"book","n":"리얼북 1권 215쪽(콜 포터)","a":[]},"i-mean-you":{"s":"book","n":"리얼북 1권 219쪽(텔로니어스 멍크). 5~6마디 괄호 대체 (G-7 | C7sus4 C7)은 규칙대로 생략 — 연주에서는 흔히 넣음","a":[]},"i-remember-clifford":{"s":"book","n":"리얼북 1권 235쪽(Med. Ballad). 인트로 제외. 3마디는 정오표대로 E♭/B♭ Bo7. B♭+7·B♭7alt는 B♭7♯9","a":[]},"i-should-care":{"s":"book","n":"리얼북 1권 237쪽(액셀 스토달). Am7/G·D7/F# 베이스 생략, 괄호 대체 (C/E Ebo D-7 G7)·(F7 E-7 A7) 생략","a":[]},"ill-be-seeing-you":{"s":"book","n":"리얼북 3권 129쪽(새미 페인). Fm7/Bb→Bb7sus4, G+7·Bb+7→7#9, F13→F9, Eb6/9→Eb6","a":[]},"ill-close-my-eyes":{"s":"book","n":"리얼북 3권 130쪽. 첫 줄 못갖춘마디(화음 없음)는 제외. Gb7/C 베이스 생략, F6/9→F6","a":[]},"ill-remember-april":{"s":"book","n":"리얼북 1권 218쪽. 48마디(A 16 · B 16 · A 16)","a":[]},"im-old-fashioned":{"s":"book","n":"리얼북 3권 133쪽(제롬 컨). A8·B8·A'8·C12 36마디. D+7→D7#9, G13→G9, Fmaj7/C 베이스 생략","a":[]},"ive-got-the-world-on-a-string":{"s":"book","n":"리얼북 3권 136쪽(해럴드 알렌). F6/9→F6. 1마디 Fmaj7 Eb7 D7은 1·2·3박 위치로 근사","a":[]},"ive-got-you-under-my-skin":{"s":"book","n":"리얼북 3권 138~139쪽(콜 포터). 56마디. Fm7/Bb→Bb7sus4","a":[]},"impressions":{"s":"book","n":"리얼북 1권 220쪽. D-7 16 · E♭-7 8 · D-7 8","a":["진행 전체가 다른 1곡과 같음"]},"in-a-mellow-tone":{"s":"book","n":"리얼북 1권 222쪽(엘링턴). A♭maj7/E♭는 베이스음 생략, 마지막 괄호 턴어라운드 포함","a":[]},"in-a-sentimental-mood":{"s":"book","n":"리얼북 1권 223쪽(엘링턴). 라인 클리셰 첫 코드 D-·G-는 앱 표기 Dm7·Gm7","a":[]},"in-walked-bud":{"s":"book","n":"리얼북 2권 168쪽(몽크). C+7은 C7♯9, 괄호 (F-7)·(C7) 포함","a":[]},"in-your-own-sweet-way":{"s":"book","n":"리얼북 1권 232쪽(데이브 브루벡). Cbmaj7은 Bmaj7로, 코러스 사이 인터루드(Eb 도리안) 생략","a":[]},"indian-summer":{"s":"book","n":"리얼북 3권 148쪽(빅터 허버트). G6/9→G6, 28마디 'Eb'(삼화음)은 규칙대로 Eb6","a":[]},"inner-urge":{"s":"bookq","n":"리얼북 1권 229쪽(조 헨더슨). 24마디. 확인 필요: 23마디 'Bb?7' 글씨가 흐려 마지막 줄 흐름대로 Bbmaj7로 읽음","a":[]},"isfahan":{"s":"book","n":"리얼북 3권 150쪽(빌리 스트레이혼). Bb+7·Ab+7·C+7b9→7#9","a":[]},"it-could-happen-to-you":{"s":"bookq","n":"리얼북 2권 172쪽. 4·20마디는 책에 Aø B7(♭9)로 적혀 있음(B♭7이 아닌지 확인 필요). 13마디 괄호 (C-Δ7) 포함","a":[]},"it-dont-mean-a-thing":{"s":"book","n":"리얼북 1권 241쪽(엘링턴). G-/F♯는 Gm(maj7), G-/F·C7/E·B♭/D는 베이스음 생략. D+7은 D7♯9","a":[]},"it-had-to-be-you":{"s":"book","n":"리얼북 2권 173쪽. 반복용 1번 엔딩(G | A-7 D+7)으로 적음 — 끝낼 때는 2번 엔딩 G C-6 | G6. D+7은 D7♯9, E♭7(♭5)는 E♭7♯11","a":[]},"its-all-right-with-me":{"s":"book","n":"리얼북 3권 152~153쪽(콜 포터). A16·A16·B16·A'24 72마디. Bb9sus4→Bb7sus4, Eb6/9→Eb6","a":[]},"its-you-or-no-one":{"s":"book","n":"리얼북 3권 154쪽(줄 스타인). C/G 베이스 생략, G+7→G7#9, F6/9→F6","a":[]},"jordu":{"s":"book","n":"리얼북 1권 245쪽(듀크 조던). 마지막 A는 코다(A♭7 G7 | C-)로 끝냄","a":[]},"joy-spring":{"s":"book","n":"리얼북 1권 247쪽(클리퍼드 브라운). 13마디는 정오표대로 B♭-7 A7","a":[]},"jumpin-with-symphony-sid":{"s":"book","n":"리얼북 2권 188쪽(레스터 영)","a":["진행 전체가 다른 1곡과 같음"]},"just-friends":{"s":"book","n":"리얼북 1권 249쪽. 27마디는 정오표대로 B7","a":[]},"just-squeeze-me":{"s":"book","n":"리얼북 3권 163쪽(듀크 엘링턴)","a":[]},"kansas-city":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 6곡과 같음"]},"killer-joe":{"s":"bookq","n":"리얼북 2권 200쪽(베니 골슨). E♭-7/A♭는 A♭7sus4, A7(13)은 A9, A7(♯5♯9)는 A7♯9. 브리지 4·6마디 슬래시 코드는 E-7/A♭처럼 보이기도 해 확인 필요","a":[]},"lady-bird":{"s":"book","n":"리얼북 1권 256쪽(태드 대머런). 마지막 두 마디는 정오표대로 E♭7 · D♭7(인쇄본 maj7)","a":[]},"laura":{"s":"bookq","n":"리얼북 2권 203쪽(Ballad). 괄호 경과 코드 포함, 슬래시 코드는 베이스음 생략. 7(♭9♯5)·7(♭5)는 7♯9. 31~32마디는 책의 솔로용 연결(엔딩은 F♯ø7 F-7 E-7 E♭7sus D-7 D♭maj7 Cmaj7) — 대체 코드가 많아 확인 필요","a":[]},"lazy-bird":{"s":"book","n":"리얼북 1권 259쪽(존 콜트레인). 1번 엔딩 괄호 (Ab-7 Db7)·코다(끝맺음) 생략","a":[]},"lester-leaps-in":{"s":"book","n":"리얼북 2권 209쪽(레스터 영). 책은 A를 B♭ 하나로 적음(리듬 체인지 계열 — 흔히 B♭6 G7 C-7 F7로 연주)","a":[]},"like-someone-in-love":{"s":"bookq","n":"리얼북 1권 262쪽. 3마디 A♭7 뒤 텐션(♯9 또는 ♯11)은 흐려서 확인 필요. G7/D·C-7/B♭는 베이스음 생략, B♭+7은 B♭7♯9","a":[]},"little-sunflower":{"s":"bookq","n":"리얼북 2권 216쪽(프레디 허버드). D 도리안 · E♭maj7 · Dmaj7. 반복·엔딩 마디 수가 애매해 8마디 단위로 정리 — 마디 수 확인 필요","a":["첫 8마디가 다른 4곡과 같음"]},"love-for-sale":{"s":"book","n":"리얼북 2권 222~223쪽(콜 포터). 64마디. 14·30·62마디 B7 위 괄호 (F7)은 생략","a":[]},"lover":{"s":"book","n":"리얼북 2권 221쪽(재즈 왈츠). D.C.·코다를 펼쳐 62마디. F-7/B♭는 베이스음 생략, C+7은 C7♯9","a":[]},"lover-man":{"s":"book","n":"리얼북 2권 224쪽. G-6/E는 Em7♭5로","a":[]},"lullaby-of-birdland":{"s":"book","n":"리얼북 1권 277쪽(조지 시어링)","a":[]},"maiden-voyage":{"s":"book","n":"리얼북 1권 281쪽(허비 행콕). 브리지 둘째 코드는 D♭7sus4","a":[]},"meditation":{"s":"book","n":"리얼북 1권 288쪽(보사). 56마디(A 16 · A 16 · B 8 · A 12 + 코다 4)","a":[]},"mercy-mercy-mercy":{"s":"book","n":"리얼북 2권 235쪽(조 자비눌). 20마디 비정형. Eb7/Bb는 베이스 생략. 15마디 Eb7 위치는 4박째 근처로 보여 반마디 분할로 근사","a":[]},"milestones":{"s":"book","n":"리얼북 3권 193쪽(마일스 데이비스, 1958 모달 곡). 책 하단 FORM(Gm7 16·Am7 16·Gm7 8) 기준, 헤드 선율의 평행 화음(Gm7 Am7 Bb△7 Am7)은 생략","a":["첫 8마디가 다른 4곡과 같음"]},"misty":{"s":"book","n":"리얼북 1권 296쪽(에롤 가너)","a":[]},"moanin":{"s":"bookq","n":"리얼북 2권 240쪽(바비 티먼스). A는 책 상단 '솔로 체인지 Fmi Ab9|G7 C7|Sim…' 기준(헤드의 Bb F 응답 화음 대신). 확인 필요: A 7마디를 sim 반복으로 해석, 브리지 4마디 'F B9' 판독","a":[]},"moments-notice":{"s":"book","n":"리얼북 1권 299쪽(존 콜트레인). 1번 엔딩 4마디·2번 엔딩 10마디를 펼쳐 38마디. C7(b13)·C7(#9)→C7#9, 마지막 괄호 (F-7 Bb7) 생략","a":[]},"mood-indigo":{"s":"book","n":"리얼북 1권 301쪽(엘링턴, Med. Slow). E♭+7은 E♭7♯9, G♭7 위 괄호 (E7)은 생략","a":[]},"moonlight-in-vermont":{"s":"book","n":"리얼북 3권 199쪽(칼 수스도프). 6·6·8·8 28마디. Db9#11→Db7#11, Bb+7b9→Bb7#9, Eb6/9→Eb6","a":[]},"mr-pc":{"s":"book","n":"리얼북 1권 305쪽(콜트레인, 마이너 블루스). 8·9마디 끝박 D7, 9~10마디는 G7(흔히 쓰는 A♭7 G7과 다름)","a":[]},"my-favorite-things":{"s":"book","n":"리얼북 1권 306쪽. 3/4박 72마디(A 16 반복 · E장조 16 · B 16 · 끝 8). 마지막 8마디는 책에서 반복 뱀프","a":[]},"my-foolish-heart":{"s":"book","n":"리얼북 1권 307쪽. D.S.·코다를 펼쳐 32마디. 13~15마디는 정오표대로(G-7 | E-7♭5 A9 | D-7 G7+). +7은 7♯9, C13은 C9","a":[]},"my-funny-valentine":{"s":"book","n":"리얼북 1권 308쪽. 36마디(마지막 A 12). C-는 Cm7로","a":[]},"my-old-flame":{"s":"book","n":"리얼북 2권 259쪽. 한 마디 3코드(4·5·6마디 등)는 2+1+1박으로 근사. Am/G는 베이스 생략, D13→D9, D7(#9#5)→D7#9","a":[]},"my-one-and-only-love":{"s":"book","n":"리얼북 1권 310쪽(가이 우드). 베이스 하행 슬래시(C/B·A/G·D7/F#·G7/F·C/E·E7/G#)는 베이스 생략. 브리지 라인 클리셰 E-/D#·E-/D·E-/C#은 소리대로 Emmaj7·Em7·C#m7b5. 마지막 괄호 생략","a":[]},"my-romance":{"s":"book","n":"리얼북 1권 311쪽. 슬래시 코드(C-/B♭·B♭maj7/F·C-7/F)는 베이스음 생략","a":[]},"naima":{"s":"bookq","n":"리얼북 1권 315쪽(콜트레인). 24마디. E♭·B♭ 페달은 생략, B7(♭5)·A7(♭5)는 7♯11. 15마디 코드는 흐려서 F-7로 읽었으나 확인 필요","a":[]},"nardis":{"s":"book","n":"리얼북 1권 316쪽(마일스 데이비스). 2마디 괄호 (Emaj7)는 대체 코드라 생략","a":[]},"nature-boy":{"s":"book","n":"리얼북 2권 260쪽(책에는 마일스 데이비스 'Blue Moods' 버전으로 표기). 3/4, 32마디","a":[]},"nefertiti":{"s":"book","n":"리얼북 1권 317쪽(웨인 쇼터 곡, 책에는 마일스 데이비스). 16마디(발라드 스윙). Cbmaj7→Bmaj7, Bb-11→Bbm7, Eb7(b9#11)→Eb7b9, D7#9/Bb 베이스 생략, A7(b9 13)→A7b9","a":[]},"nicas-dream":{"s":"book","n":"리얼북 1권 319쪽(호레이스 실버). 64마디(A 16 · A 16 · B 16 · A 16). F7alt는 F7♯9, 2번 엔딩 B♭-는 Bbm(maj7)로","a":[]},"night-and-day":{"s":"bookq","n":"리얼북 1권 320쪽(콜 포터). 48마디. 46마디 G7 뒤 D-7은 책 표기대로(확인 필요)","a":[]},"nows-the-time":{"s":"book","n":"리얼북 2권 265쪽(찰리 파커). 12마디 블루스, 책 템포 ♩=220","a":[]},"old-folks":{"s":"book","n":"리얼북 3권 218쪽. A+7→A7#9, F6/9→F6, Bb/C→C7sus4(삼화음/베이스 = sus 도미넌트)","a":[]},"oleo":{"s":"book","n":"리얼북 1권 327쪽(소니 롤린스, 리듬 체인지)","a":[]},"on-green-dolphin-street":{"s":"book","n":"리얼북 1권 179쪽. 책 표기: A 라틴, B·C 스윙. D7/C·D♭/C·D-/C·A-/G는 베이스음 생략(D♭/C는 D♭maj7)","a":[]},"on-the-street-where-you-live":{"s":"book","n":"리얼북 3권 222~223쪽(프레더릭 로우). 16마디 4섹션 64마디. Bb6/9→Bb6","a":[]},"on-the-sunny-side-of-the-street":{"s":"book","n":"리얼북 3권 290쪽(지미 맥휴)","a":[]},"one-note-samba":{"s":"book","n":"리얼북 1권 331쪽(보사). 40마디(코다 포함). B7(♭5)는 B7♯11, C♭maj7은 Bmaj7로","a":[]},"one-oclock-jump":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 6곡과 같음"]},"ornithology":{"s":"book","n":"리얼북 1권 335쪽(찰리 파커). G/B는 G6로","a":[]},"out-of-nowhere":{"s":"bookq","n":"리얼북 1권 336쪽. 31마디 기호가 흐려 G6로 읽음 — 확인 필요","a":[]},"out-of-this-world":{"s":"book","n":"리얼북 3권 226~227쪽(해럴드 알렌, 라틴 또는 미디엄 스윙). A16·A16+4·B16·A16+4 72마디. Gb/Bb·Ab/C는 베이스 생략 규칙대로 Gb6·Ab6, Bb+7·G+7→7#9, Eb6/9→Eb6","a":[]},"over-the-rainbow":{"s":"bookq","n":"리얼북 3권 229쪽(해럴드 알렌). Fm7/Bb→Bb7sus4. 확인 필요: 브리지 4마디 Fm7 Bb7 위치(책에서 앞 마디와 겹쳐 보임)","a":[]},"oye-como-va":{"s":"form","n":"Am7 D7 뱀프","a":[]},"peace":{"s":"book","n":"리얼북 1권 340쪽(호레이스 실버). 10마디. C♭maj7은 Bmaj7, 7♭5는 7♯11, A/G♯·F♯-/E는 베이스음 생략","a":[]},"pennies-from-heaven":{"s":"book","n":"리얼북 2권 286쪽. 1번 엔딩 사용(2번 엔딩 C|Ab7 C는 끝맺음). 8·12·16·32마디 뒤쪽 2코드는 3·4박으로 근사. C7(+5)→C7#9","a":[]},"pent-up-house":{"s":"book","n":"리얼북 1권 346쪽(소니 롤린스). 16마디. 박 표기(/ / 사선)대로 나눔, 3마디 끝 괄호 (G) 생략","a":[]},"perdido":{"s":"book","n":"리얼북 2권 288쪽(후안 티솔). 2번 엔딩·마지막 마디의 괄호 대체 화음 생략. G+7·F+7→7#9","a":[]},"polka-dots-and-moonbeams":{"s":"book","n":"리얼북 2권 297쪽(지미 반 휴즌). 4마디 Am7 F#ø7 B7은 1·2·3박 위치로 근사. E+7→E7#9, 마지막 괄호 턴어라운드 생략","a":[]},"prelude-to-a-kiss":{"s":"bookq","n":"리얼북 1권 353쪽(듀크 엘링턴). G+7→G7#9. 확인 필요: 24마디 마지막 화음이 쪽 끝에서 잘려 'Eb'까지만 보임 — Eb7로 읽음","a":[]},"recado-bossa-nova":{"s":"book","n":"리얼북 2권 302쪽(잘마 페헤이라). A(16)·A(16)·B(8)·A(16) 56마디. Gm6/E→Em7b5","a":[]},"recordame":{"s":"bookq","n":"리얼북 1권 359쪽(조 헨더슨, 보사). 16마디. 8마디 둘째 코드는 흐려서 F7로 읽음(진행상 F7) — 확인 필요","a":[]},"red-clay":{"s":"book","n":"리얼북 1권 362쪽(프레디 허버드, Rock). 솔로 구간(D) 4마디를 두 번. 테마는 Cm7(11) · B♭m7(11) · D♭7sus4 E♭7sus4 · F7sus4 G7sus4. G+7은 G7♯9","a":[]},"reunion-blues":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 6곡과 같음"]},"rhythm-a-ning":{"s":"book","n":"리얼북 2권 309쪽(텔로니어스 멍크). 헤드 화음 기준(책 주: 솔로는 리듬 체인지). Bb7/D·Bb/F 베이스 생략, G+7→G7#9(마지막 A는 책대로 G7)","a":[]},"samba-de-orfeu":{"s":"book","n":"리얼북 3권 254~255쪽(루이스 봉파). 255쪽 'Optional Solo Changes' 기준 A16·A16·B8·A16 56마디","a":[]},"sandu":{"s":"book","n":"리얼북 2권 312쪽(클리포드 브라운). 12마디 블루스, 1번 엔딩 턴어라운드 사용","a":[]},"satin-doll":{"s":"book","n":"리얼북 1권 367쪽(엘링턴). 13·29마디 괄호 대체 코드(A-7♭5)는 생략","a":["조 표기(C)와 첫·끝 화음이 맞지 않음"]},"scrapple-from-the-apple":{"s":"book","n":"리얼북 1권 369쪽(찰리 파커)","a":[]},"seven-steps-to-heaven":{"s":"book","n":"리얼북 1권 379쪽(마일스 데이비스·빅터 펠드먼). 인트로 생략. 5~6마디 괄호 (G-7)(C7)은 브레이크 구간의 화음 표시라 넣음. 7마디 'E'(삼화음)는 규칙대로 E6","a":[]},"sister-sadie":{"s":"book","n":"리얼북 2권 324쪽(호레이스 실버). 책 템포 ♩=176","a":["첫 8마디가 다른 2곡과 같음"]},"skylark":{"s":"book","n":"리얼북 3권 267쪽(호기 카마이클). C+7·D+7→7#9, A6/9·F6/9→6","a":[]},"smoke-gets-in-your-eyes":{"s":"book","n":"리얼북 2권 329쪽(제롬 컨). G+7→G7#9, 마지막 괄호 턴어라운드 (Cmi7 Fmi7 Bb7) 생략","a":[]},"so-what":{"s":"book","n":"리얼북 1권 399쪽(마일스 데이비스). 책의 솔로 형식: D-7 16 · E♭-7 8 · D-7 8","a":["진행 전체가 다른 1곡과 같음"]},"softly-as-in-a-morning-sunrise":{"s":"bookq","n":"리얼북 2권 330쪽(롬버그). D7(b5)→D7#9. 확인 필요: 브리지 2마디 Fm7이 마디 중간(3박)에 적혀 있어 반마디로 처리","a":[]},"solar":{"s":"book","n":"리얼북 1권 386쪽(마일스 데이비스). 12마디. 책은 첫 코드를 C-(3화음)로 적음 — 흔히 C-(maj7)로 연주","a":[]},"solitude":{"s":"book","n":"리얼북 1권 387쪽(엘링턴). D♭6/A♭·D♭maj7/F는 베이스음 생략, A+7·A♭+7은 7♯9, G7♭5는 G7♯11","a":[]},"someday-my-prince-will-come":{"s":"book","n":"리얼북 1권 388쪽(재즈 왈츠). 7+5·+7은 7♯9(얼터드), B♭/F·C-7/F는 베이스음 생략","a":[]},"song-for-my-father":{"s":"book","n":"리얼북 1권 394쪽(호레이스 실버, Med. Latin). 24마디(AAB)","a":[]},"sonnymoon-for-two":{"s":"book","n":"리얼북 3권 276쪽(소니 롤린스). 12마디 블루스(2마디 IV)","a":["첫 8마디가 다른 7곡과 같음"]},"speak-no-evil":{"s":"bookq","n":"리얼북 1권 404쪽(웨인 쇼터). 50마디(A 14 · A 14 · B 8 · A 14). E-11·D-11은 m7, +7은 7♯9, 7♭5는 7♯11. B 5~7마디 코드(B♭7♭5·E♭7♯9)는 흐려서 확인 필요","a":[]},"st-thomas":{"s":"book","n":"리얼북 2권 315쪽(소니 롤린스, 칼립소). 16마디. G+7→G7#9, 9마디 괄호 (Eø7) 생략","a":[]},"stablemates":{"s":"book","n":"리얼북 3권 283쪽(베니 골슨). A14·B8·A14 36마디(14마디 섹션이라 형식은 4마디 단위로 근사)","a":[]},"star-eyes":{"s":"bookq","n":"리얼북 2권 341쪽. A(8)·A(8)·B(8)·A'(12) 36마디. D+7→D7#9. 확인 필요: 2번 엔딩 끝 F7(연필 메모와 겹쳐 인쇄 여부 불확실)","a":[]},"stardust":{"s":"book","n":"리얼북 2권 340쪽(호기 카마이클). 버스 생략, 코러스 32마디. C+7→C7#9, 'Dmi7 / / C#o7'은 3박+1박","a":[]},"stella-by-starlight":{"s":"book","n":"리얼북 1권 408쪽. G+7은 G7♯9","a":[]},"stormy-weather":{"s":"book","n":"리얼북 3권 287쪽(해럴드 알렌). Fm7/Bb→Bb7sus4, Eb/Bb·Eb/G 베이스 생략, Bb+7→Bb7#9","a":[]},"straight-no-chaser":{"s":"book","n":"리얼북 1권 412쪽(몽크). 8마디 A-7 D7, 9마디 G-7","a":[]},"sugar":{"s":"book","n":"리얼북 1권 414쪽(스탠리 터렌타인). 1·2번 엔딩 펼쳐 32마디. G+7→G7#9, Eb7(13)→Eb9, 괄호 (A-7b5)(Dbmaj7) 생략","a":[]},"summertime":{"s":"book","n":"리얼북 2권 323쪽(거슈윈). 16마디. 괄호 대체 화음((Bb7)(E7)(A7)(F7)(D7)(Bm7)(E7))은 모두 생략","a":[]},"sunny":{"s":"book","n":"리얼북 3권 289쪽(바비 헤브, 라이트 록). 16마디","a":[]},"sweet-georgia-brown":{"s":"book","n":"리얼북 2권 353쪽. 1번 엔딩 사용, C+7→C7#9, 29마디 괄호 (E7) 생략","a":["첫 8마디가 다른 1곡과 같음"]},"take-five":{"s":"book","n":"리얼북 1권 420쪽(폴 데즈먼드). 5/4박 — 한 마디 두 코드는 3+2박. Cbmaj7→Bmaj7, Ab-6→Abm6","a":[]},"take-the-a-train":{"s":"book","n":"리얼북 1권 421쪽(엘링턴/스트레이혼). D7♭5는 앱 표기 D7♯11","a":[]},"tangerine":{"s":"book","n":"리얼북 2권 359쪽(빅터 셔징어). 26마디 Eø A7(#9)은 3박+1박으로 근사","a":[]},"tea-for-two":{"s":"book","n":"리얼북 3권 298쪽(빈센트 유먼스). Ab/C 베이스 생략","a":[]},"tenderly":{"s":"book","n":"리얼북 2권 362쪽(월터 그로스, 이 판은 4/4). Bb+7→Bb7#9, Ab13·Bb13→9, E7(alt)→E7#9. 'Cmi / CmiΔ7 Cmi7'의 첫 Cm 삼화음은 Cm7로 표기","a":[]},"tenor-madness":{"s":"book","n":"리얼북 2권 376쪽(소니 롤린스). 12마디 블루스. 2마디 'Eb'(삼화음)은 규칙대로 Eb6","a":[]},"that-old-feeling":{"s":"book","n":"리얼북 3권 300쪽. 베이스 하행(Eb Eb/D Eb/C Eb/Bb)은 소리대로 Eb6 Ebmaj7 Cm7 Eb6, G7/B→G7, Fm7/Eb→Fm7, C+7→C7#9, Eb6/9→Eb6","a":[]},"the-boy-next-door":{"s":"book","n":"리얼북 3권 37쪽(휴 마틴). 3/4. Gm7/F·Bbmaj7/F 베이스 생략, F#+7→F#7#9, Bb6/9→Bb6","a":[]},"days-of-wine-and-roses":{"s":"book","n":"리얼북 1권 105쪽. 3·19마디 D7(♭5♭9) D7(♯5♭9)는 앱 표기 D7♯9(얼터드) 하나로","a":[]},"girl-from-ipanema":{"s":"book","n":"리얼북 1권 171쪽(보사). 40마디(브리지 16)","a":[]},"hucklebuck":{"s":"form","n":"블루스 형식. 원곡 조는 확인 필요","a":["진행 전체가 다른 6곡과 같음"]},"the-lady-is-a-tramp":{"s":"book","n":"리얼북 3권 166쪽(리처드 로저스). 책 그대로 A16·A16·B8·A8 48마디. C6/9→C6, A+7→A7#9, 브리지 괄호 (F#m7 B7) 생략","a":[]},"the-nearness-of-you":{"s":"book","n":"리얼북 2권 261쪽(호기 카마이클). A(8)·A(8)·B(8)·A'(12) 36마디. 마지막 괄호 턴어라운드 (Dmi Gmi C7)은 생략","a":[]},"the-shadow-of-your-smile":{"s":"book","n":"리얼북 1권 381쪽(조니 맨델, 느린 보사). B7(9)-(b9)→B7b9, Em7/D 베이스 생략, E7alt→E7#9, 마지막 괄호 (B7) 생략","a":[]},"sidewinder":{"s":"book","n":"리얼북 1권 382쪽(리 모건, 24마디 블루스). 마디마다 반음 아래에서 들어가는 리듬 형(D7→E♭7, G7→A♭7)은 생략하고 중심 코드로 적음","a":["첫 8마디가 다른 2곡과 같음"]},"the-thrill-is-gone":{"s":"form","n":"B단조 마이너 블루스","a":["첫 8마디가 다른 2곡과 같음"]},"the-very-thought-of-you":{"s":"book","n":"리얼북 3권 329쪽(레이 노블). Ab6/9→Ab6, Ab/C·Fm7/Eb 베이스 생략, F+7→F7#9. 29마디 Ao7 Bbm7 Ao7는 박 위치 근사","a":[]},"the-way-you-look-tonight":{"s":"book","n":"리얼북 2권 388쪽(제롬 컨). 반복·D.C. al Coda를 펼쳐 A(16)·A(16)·B(16)·A'(12+코다 8) 68마디. 마지막 괄호 (D7 Gmi7 C7) 생략","a":[]},"there-is-no-greater-love":{"s":"book","n":"리얼북 1권 423쪽. 7~8마디는 정오표대로 C-7 | F7","a":[]},"there-will-never-be-another-you":{"s":"bookq","n":"리얼북 1권 426쪽. 인쇄본대로 적음 — 정오표(끝에서 5마디 A-7 D7, 3마디 G7♯9 C7)는 어느 마디인지 모호해 반영하지 않음, 확인 필요","a":[]},"these-foolish-things":{"s":"book","n":"리얼북 2권 364쪽. 1번 엔딩 사용, Bb+→Bb7#9(4박)","a":[]},"things-aint-what-they-used-to-be":{"s":"book","n":"리얼북 2권 365쪽(엘링턴). 첫 12마디 코러스 기준(둘째 코러스는 F7(#9) 변형, 마지막 괄호 턴어라운드)","a":["첫 8마디가 다른 4곡과 같음"]},"this-cant-be-love":{"s":"book","n":"리얼북 3권 309쪽(리처드 로저스). F6/9→F6","a":[]},"too-close-for-comfort":{"s":"book","n":"리얼북 3권 322쪽. 반복·1/2번 엔딩 풀어 40마디. B+7→B7#9, C/G→C6","a":[]},"triste":{"s":"book","n":"리얼북 1권 436쪽(조빔, 보사). 10마디는 정오표대로 A-7♭5 D7. 끝의 B♭-7 E♭7 반복 뱀프는 2마디로 줄임","a":[]},"tune-up":{"s":"bookq","n":"리얼북 1권 437쪽(마일스 데이비스). 16마디. 15마디 코드가 얼룩져 Dmaj7로 읽음 — 확인 필요","a":[]},"up-jumped-spring":{"s":"book","n":"리얼북 1권 440쪽(프레디 허버드, 3/4). 56마디(A 16 · A 16 · B 8 · A 16). G+7·G7alt는 G7♯9, F-는 Fm7","a":[]},"walkin":{"s":"book","n":"리얼북 1권 446쪽(리처드 카펜터). 12마디 블루스, 인트로 생략. 괄호 (Bb7)(F7)(C7) 생략","a":["진행 전체가 다른 1곡과 같음"]},"waltz-for-debby":{"s":"book","n":"리얼북 1권 450쪽(빌 에반스). 3/4 재즈 왈츠. 1·2·3번 엔딩과 D.C.를 펼쳐 78마디(16+32+30). A7/C#·D7/C·G7/B·C7/Bb 베이스 생략","a":[]},"watch-what-happens":{"s":"book","n":"리얼북 2권 384쪽(미셸 르그랑, 보사). A(8)·A(8)·B(8)·A'(12) 36마디. 마지막 괄호 (Fmi7 Bb7) 생략","a":[]},"wave":{"s":"book","n":"리얼북 1권 452쪽(조빔, 보사). 44마디. 13은 9, +7은 7♯9, B-7/E는 E7sus4, 브리지 슬래시 코드는 베이스음 생략","a":[]},"well-you-neednt":{"s":"book","n":"리얼북 1권 454쪽(몽크)","a":[]},"west-coast-blues":{"s":"book","n":"리얼북 1권 455쪽(웨스 몽고메리). 책은 6/4박 12마디 — 앱은 3/4박 24마디로(책 한 마디 = 앱 두 마디). 헤드 화음 기준, 아래 칸의 대체 솔로 체인지는 생략","a":[]},"what-is-this-thing-called-love":{"s":"book","n":"리얼북 1권 460쪽(콜 포터, 책 표기 Ballad — 흔히 빠르게도 연주). G7alt·G+7은 G7♯9","a":[]},"whats-new":{"s":"book","n":"리얼북 2권 391쪽(밥 해거트). Cm Cm/Bb·Fm/Eb 베이스 생략, 괄호 (Fm7) 생략, G7(+5)→G7#9","a":[]},"when-i-fall-in-love":{"s":"book","n":"리얼북 1권 461쪽. 괄호 경과 코드(A♭7 D♭7 C7)도 넣음. +7·7alt는 7♯9","a":[]},"when-sunny-gets-blue":{"s":"book","n":"리얼북 1권 462쪽. 1번 엔딩은 정오표대로 A7 D7♭9. 마지막 A는 코다 첫 두 마디로 끝냄(코다의 F maj7 G♭7 꼬리 4마디는 생략). F6/A는 베이스음 생략, G+7·C7alt는 7♯9","a":[]},"whisper-not":{"s":"book","n":"리얼북 2권 393쪽(베니 골슨). 헤드 32마디 기준(솔로용 C 섹션은 별도). Cm/Bb·Gm/F·Dm/C 베이스 생략, A13(b9)·G13(b9)→7b9, G+7→G7#9","a":[]},"willow-weep-for-me":{"s":"book","n":"리얼북 2권 396쪽(앤 로넬). Cm/Bb 베이스 생략, G7(b5)는 다음 화음이 5도 아래가 아니라 G7#11로 표기","a":[]},"witchcraft":{"s":"bookq","n":"리얼북 3권 346쪽(사이 콜먼). 40마디. 라인 클리셰 Am–Am+5–Am6–Am+5, Gm–Gm+5는 증5 단3화음 코드형이 없어 m7로 대체(확인 필요: 클리셰 음은 반영 안 됨)","a":[]},"woodyn-you":{"s":"book","n":"리얼북 1권 470쪽(디지 길레스피). 2번 엔딩 D♭maj7/F는 베이스음 생략","a":[]},"work-song":{"s":"book","n":"리얼북 2권 399쪽(냇 애덜리). 16마디. 7마디는 솔로용 G7(책 주: 헤드는 C7), 괄호 (Eb7)(C7) 생략","a":[]},"yardbird-suite":{"s":"book","n":"리얼북 2권 401쪽(찰리 파커). 책 템포 ♩=224. 마지막 괄호 (Dmi G7) 생략","a":[]},"yes-or-no":{"s":"book","n":"리얼북 1권 471쪽(웨인 쇼터). A14·A14·B16·A14 58마디(D.S. al 2nd ending 펼침)","a":["조 표기(G)와 첫·끝 화음이 맞지 않음"]},"yesterdays":{"s":"book","n":"리얼북 1권 473쪽(제롬 컨). 16마디 두 번. 끝낼 때 D- (E♭7) 꼬리. D-/C♯는 Dm(maj7), A+7은 A7♯9","a":[]},"you-dont-know-what-love-is":{"s":"book","n":"리얼북 1권 476쪽","a":[]},"you-go-to-my-head":{"s":"book","n":"리얼북 3권 352~353쪽(J. 프레드 쿠츠). A8·A8·B8·A'16 40마디. F+7·Bb+7→7#9, Ebmaj7/Bb 베이스 생략, Fm7/Bb→Bb7sus4","a":[]},"you-stepped-out-of-a-dream":{"s":"book","n":"리얼북 2권 402쪽. 괄호 대체 화음 (Bbmi7)(Fmi7)(Bb7)(Bbmi7 Eb7) 생략","a":[]},"youd-be-so-nice-to-come-home-to":{"s":"book","n":"리얼북 2권 403쪽(콜 포터). Am Am/G→Am7, 괄호 대체 화음 (B7)(Fm7 Bb7)(E7) 생략","a":[]},"p251":{"s":"practice","n":"앱 연습용 진행","a":[]},"blues12":{"s":"practice","n":"앱 연습용 진행","a":[]},"m25":{"s":"practice","n":"앱 연습용 진행","a":[]}};
 
+/* ── 곡 불러오기 v0.42 — MusicXML(.musicxml/.xml/.mxl) · iReal Pro 링크 → 앱 곡 데이터 ─────────────
+   사용자가 「자기 기기에서」 연 파일만 읽는다. 결과는 그 기기의 「내 곡」에만 저장되고 어디로도 보내지 않는다.
+   DOM 없이 Node에서도 돈다(작은 XML 파서 · DecompressionStream으로 .mxl 압축 해제).
+   결과 형식: {song:{n,c,k,bpm,m,f:[섹션,프레이즈],ch}, head:{notes:[{t,d,midi}],bpb}|null, warn:[..]}
+   코드 표기는 앱 어휘(maj7·m7·7·m7b5·7b9·7#9·6·m6·9·m9·dim7·7sus4·mmaj7·7#11·maj7#11)로 단순화한다. */
+'use strict';
+const IMP_NOTE=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const imod=x=>((x%12)+12)%12;
+
+/* ── 작은 XML 파서(요소·속성·텍스트·주석·CDATA·DOCTYPE) ── */
+function xmlParse(src){
+  const root={name:'#root',attrs:{},children:[],text:''},st=[root],n=src.length;let i=0;
+  const ent=s=>s.replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos);/gi,(m,e)=>e[0]==='#'?String.fromCodePoint(/^#x/i.test(e)?parseInt(e.slice(2),16):+e.slice(1)):({amp:'&',lt:'<',gt:'>',quot:'"',apos:"'"})[e.toLowerCase()]);
+  const tagEnd=p=>{let q=null;for(let k=p;k<n;k++){const c=src[k];if(q){if(c===q)q=null}else if(c==='"'||c==="'")q=c;else if(c==='>')return k}return n};
+  while(i<n){
+    const lt=src.indexOf('<',i);if(lt<0)break;
+    if(lt>i){const t=src.slice(i,lt);if(t.trim())st[st.length-1].text+=ent(t)}
+    if(src.startsWith('<!--',lt)){const e=src.indexOf('-->',lt);i=e<0?n:e+3;continue}
+    if(src.startsWith('<![CDATA[',lt)){const e=src.indexOf(']]>',lt);st[st.length-1].text+=src.slice(lt+9,e<0?n:e);i=e<0?n:e+3;continue}
+    if(src[lt+1]==='?'||src[lt+1]==='!'){
+      let e=src.indexOf('>',lt);const b=src.indexOf('[',lt);
+      if(src.startsWith('<!DOCTYPE',lt)&&b>=0&&b<e){const c=src.indexOf(']>',b);if(c>=0)e=c+1}
+      i=e<0?n:e+1;continue;
+    }
+    const gt=tagEnd(lt+1),raw=src.slice(lt+1,gt).trim();i=gt+1;
+    if(raw[0]==='/'){const nm=raw.slice(1).trim();for(let k=st.length-1;k>0;k--)if(st[k].name===nm){st.length=k;break}continue}
+    const self=raw.endsWith('/'),body=self?raw.slice(0,-1):raw,m=body.match(/^[^\s/>]+/);if(!m)continue;
+    const el={name:m[0],attrs:{},children:[],text:''};
+    body.slice(m[0].length).replace(/([^\s=]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g,(_,k,a,b)=>{el.attrs[k]=ent(a!==undefined?a:b);return ''});
+    st[st.length-1].children.push(el);if(!self)st.push(el);
+  }
+  return root;
+}
+const xkids=(e,nm)=>e?e.children.filter(c=>c.name===nm):[];
+const xkid=(e,nm)=>e?e.children.find(c=>c.name===nm)||null:null;
+const xtxt=(e,nm)=>{const k=xkid(e,nm);return k?k.text.trim():''};
+function xfind(e,nm){if(!e)return null;for(const c of e.children){if(c.name===nm)return c;const r=xfind(c,nm);if(r)return r}return null}
+
+/* ── .mxl(압축 MusicXML) — ZIP 중앙 디렉터리를 읽고 deflate는 DecompressionStream으로 푼다 ── */
+async function unzipEntries(buf){
+  const u8=new Uint8Array(buf),dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength);
+  let eocd=-1;for(let p=u8.length-22;p>=Math.max(0,u8.length-66000);p--)if(dv.getUint32(p,true)===0x06054b50){eocd=p;break}
+  if(eocd<0)throw new Error('압축 파일(.mxl)을 읽지 못했어요');
+  const cnt=dv.getUint16(eocd+10,true);let p=dv.getUint32(eocd+16,true);const out={};
+  const dec=new TextDecoder('utf-8');
+  for(let k=0;k<cnt;k++){
+    if(dv.getUint32(p,true)!==0x02014b50)break;
+    const meth=dv.getUint16(p+10,true),csz=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true);
+    const name=dec.decode(u8.subarray(p+46,p+46+nl));p+=46+nl+xl+cl;
+    const ds=lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true),data=u8.subarray(ds,ds+csz);
+    out[name]={meth,data};
+  }
+  const read=async nm=>{const e=out[nm];if(!e)return null;
+    if(e.meth===0)return dec.decode(e.data);
+    if(e.meth!==8)throw new Error('지원하지 않는 압축 방식');
+    const s=new Blob([e.data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return dec.decode(await new Response(s).arrayBuffer());};
+  return {names:Object.keys(out),read};
+}
+async function mxlToXml(buf){
+  const z=await unzipEntries(buf);
+  const cont=await z.read('META-INF/container.xml');
+  let main=null;if(cont){const r=xfind(xmlParse(cont),'rootfile');if(r)main=r.attrs['full-path']}
+  if(!main)main=z.names.find(n=>/\.(xml|musicxml)$/i.test(n)&&!/^META-INF\//.test(n));
+  const x=main&&await z.read(main);if(!x)throw new Error('압축 안에 악보(MusicXML)가 없어요');
+  return x;
+}
+
+/* ── 코드 이름 → 앱 어휘 ── */
+const MXL_KIND={major:'6','major-sixth':'6',minor:'m7','minor-seventh':'m7','minor-sixth':'m6','minor-ninth':'m9','minor-11th':'m7','minor-13th':'m9',
+  dominant:'7','dominant-seventh':'7','dominant-ninth':'9','dominant-11th':'7sus4','dominant-13th':'9','major-seventh':'maj7','major-ninth':'maj7','major-11th':'maj7','major-13th':'maj7',
+  'half-diminished':'m7b5',diminished:'dim7','diminished-seventh':'dim7',augmented:'7#9','augmented-seventh':'7#9','major-minor':'mmaj7',
+  'suspended-fourth':'7sus4','suspended-second':'7sus4',power:'6'};
+function mxlChord(h,shift){
+  const rs=xtxt(xkid(h,'root'),'root-step');if(!rs)return null;   /* N.C.·function 표기는 건너뜀 */
+  const ra=+xtxt(xkid(h,'root'),'root-alter')||0,kindEl=xkid(h,'kind'),kind=kindEl?kindEl.text.trim():'major';
+  if(kind==='none'||kind==='pedal')return null;
+  let t=MXL_KIND[kind]||(/dominant/.test(kind)?'7':/minor/.test(kind)?'m7':/major/.test(kind)?'maj7':'6');
+  const txt=(kindEl&&kindEl.attrs.text||'').toLowerCase();
+  const alt=xkids(h,'degree').map(d=>({v:+xtxt(d,'degree-value'),a:+xtxt(d,'degree-alter')||0,ty:xtxt(d,'degree-type')}));
+  const has=(v,a)=>alt.some(d=>d.v===v&&d.a===a&&d.ty!=='subtract');
+  if(t==='7'||t==='9'){
+    if(has(9,1)||has(5,1)||has(13,-1)||/alt|\+/.test(txt))t='7#9';
+    else if(has(9,-1))t='7b9';
+    else if(has(11,1)||has(5,-1))t='7#11';
+  }else if(t==='maj7'&&(has(11,1)||has(5,-1)))t='maj7#11';
+  else if(t==='m7'&&has(5,-1))t='m7b5';
+  return {root:imod({C:0,D:2,E:4,F:5,G:7,A:9,B:11}[rs]+ra+(shift||0)),type:t};
+}
+/* iReal 품질 문자열 → 앱 어휘 */
+function irealQual(q){
+  q=q.replace(/\(.*?\)/g,'');
+  if(/^\^7?#11|^\^9#11|^\^13#11/.test(q))return 'maj7#11';
+  if(/^\^/.test(q))return 'maj7';
+  if(/^-\^/.test(q))return 'mmaj7';
+  if(/^-6/.test(q))return 'm6';
+  if(/^-(9|11|13)/.test(q))return /^-9|^-13/.test(q)?'m9':'m7';
+  if(/^-/.test(q))return /^-7b5/.test(q)?'m7b5':'m7';
+  if(/^h/.test(q))return 'm7b5';
+  if(/^o/.test(q))return 'dim7';
+  if(/sus/.test(q))return '7sus4';
+  if(/^(6|69|2|add9)?$/.test(q))return '6';
+  if(/^(\+|7#5|7b13|7alt|7#9|7b9#9|9#5|7#5#9|7b9b13|alt)/.test(q))return /^7b9(?!#)/.test(q)?'7b9':'7#9';
+  if(/^7b9|^13b9|^9b9/.test(q))return '7b9';
+  if(/^(7#11|9#11|13#11|7b5)/.test(q))return '7#11';
+  if(/^(9|13|11)/.test(q))return /^11/.test(q)?'7sus4':'9';
+  if(/^7/.test(q))return '7';
+  return '6';
+}
+/* 한 마디의 박별 코드 → 토큰(1개·반마디 2개·박마다) */
+function barTokens(beats,bpb){
+  const nm=c=>IMP_NOTE[c.root]+c.type;
+  if(beats.every(c=>nm(c)===nm(beats[0])))return [nm(beats[0])];
+  const half=Math.ceil(bpb/2);
+  if(beats.every((c,b)=>nm(c)===nm(beats[b<half?0:half])))return [nm(beats[0]),nm(beats[half])];
+  return beats.map(nm);
+}
+function formOf(nb){const P=(nb%8===0||nb%4!==0)?8:4;return ['A'.repeat(Math.max(1,Math.floor(nb/P))),P]}
+const KEY_FIFTHS_PC=f=>imod(f*7);
+
+/* ── MusicXML → 곡 ── */
+function musicXmlToSong(xml,fileName){
+  const root=xmlParse(xml),warn=[];
+  const sp=xkid(root,'score-partwise');
+  if(!sp)throw new Error(xkid(root,'score-timewise')?'score-timewise 형식은 아직 못 읽어요(악보 프로그램에서 일반 MusicXML로 다시 내보내 주세요)':'MusicXML 악보가 아니에요');
+  const title=(xtxt(xkid(sp,'work'),'work-title')||xtxt(sp,'movement-title')||String(fileName||'').replace(/\.(musicxml|xml|mxl)$/i,'')||'불러온 곡').trim();
+  const parts=xkids(sp,'part');if(!parts.length)throw new Error('악보에 파트가 없어요');
+  const hasNotes=p=>xkids(p,'measure').some(m=>xkids(m,'note').some(n=>xkid(n,'pitch')));
+  const hasHarm=p=>xkids(p,'measure').some(m=>xkid(m,'harmony'));
+  const melP=parts.find(hasNotes)||parts[0],harP=hasHarm(melP)?melP:(parts.find(hasHarm)||null);
+  if(!harP)throw new Error('코드 기호(화음 이름)가 없는 악보예요 — 코드가 적힌 리드시트를 불러와 주세요');
+  /* 파트를 마디 목록으로: 박자·조·이조·반복·엔딩·코드 위치·음 */
+  function readPart(p,wantNotes){
+    let div=1,beats=4,bt=4,fifths=null,mode='major',shift=0,tempo=null,melVoice=null,ending=null;
+    return xkids(p,'measure').map(m=>{
+      const M={num:m.attrs.number,implicit:m.attrs.implicit==='yes',harm:[],notes:[],fwd:false,bwd:0,ending:null};
+      let pos=0,maxPos=0;
+      for(const c of m.children){
+        if(c.name==='attributes'){
+          if(xtxt(c,'divisions'))div=+xtxt(c,'divisions')||div;
+          const ti=xkid(c,'time');if(ti&&xtxt(ti,'beats')){beats=+xtxt(ti,'beats').split('+').reduce((a,b)=>+a+ +b,0);bt=+xtxt(ti,'beat-type')||4}
+          const ke=xkid(c,'key');if(ke&&fifths===null&&xtxt(ke,'fifths')!==''){fifths=+xtxt(ke,'fifths');mode=xtxt(ke,'mode')||'major'}
+          const tr=xkid(c,'transpose');if(tr)shift=+xtxt(tr,'chromatic')||0;
+        }else if(c.name==='harmony'){
+          const ch=mxlChord(c,shift);const off=+xtxt(c,'offset')||0;
+          if(ch)M.harm.push({tk:Math.round((pos+off)*6/div),ch});
+        }else if(c.name==='note'){
+          if(xkid(c,'grace'))continue;
+          const du=+xtxt(c,'duration')||0;
+          if(xkid(c,'chord'))continue;
+          const v=xtxt(c,'voice')||'1';
+          if(wantNotes){
+            if(melVoice===null&&xkid(c,'pitch'))melVoice=v;
+            if(v===(melVoice||'1')){
+              const pi=xkid(c,'pitch'),ties=xkids(c,'tie').map(t=>t.attrs.type);
+              const midi=pi?12*((+xtxt(pi,'octave'))+1)+{C:0,D:2,E:4,F:5,G:7,A:9,B:11}[xtxt(pi,'step')]+(+xtxt(pi,'alter')||0)+shift:null;
+              M.notes.push({tk:Math.round(pos*6/div),d:Math.round(du*6/div),midi,tieStop:ties.includes('stop')});
+            }
+          }
+          pos+=du;
+        }else if(c.name==='backup')pos-=+xtxt(c,'duration')||0;
+        else if(c.name==='forward')pos+=+xtxt(c,'duration')||0;
+        else if(c.name==='barline'){
+          const r=xkid(c,'repeat');if(r){if(r.attrs.direction==='forward')M.fwd=true;else M.bwd=+r.attrs.times||2}
+          const e=xkid(c,'ending');if(e){const ns=String(e.attrs.number||'1').split(/[ ,]+/).map(Number).filter(Boolean);
+            if(e.attrs.type==='start'){ending=ns;M.ending=ns}else{M.ending=M.ending||ending||ns;ending=null}}
+        }else if(c.name==='direction'||c.name==='sound'){
+          const s=c.name==='sound'?c:xfind(c,'sound');if(s&&s.attrs.tempo&&!tempo)tempo=+s.attrs.tempo;
+          const pm=xfind(c,'per-minute');if(pm&&!tempo)tempo=+pm.text||null;
+        }
+        if(pos>maxPos)maxPos=pos;
+      }
+      if(ending&&!M.ending)M.ending=ending;
+      M.len=Math.round(maxPos*6/div);M.bpbRaw=beats*4/bt;M.full=Math.round(beats*4/bt*6);M.fifths=fifths;M.mode=mode;M.tempo=tempo;M.shift=shift;
+      return M;
+    });
+  }
+  let H=readPart(harP,harP===melP),N=harP===melP?H:readPart(melP,true);
+  /* 못갖춘마디(픽업) — 첫 마디가 짧으면 빼고(멜로디도) 알린다 */
+  if(H.length>1&&H[0].len<H[0].full&&!H[0].harm.length){H=H.slice(1);if(N!==H){N=N.slice(1)}else N=H;warn.push('못갖춘마디(픽업)는 빼고 읽었어요')}
+  /* 반복·엔딩 펼치기 */
+  const unroll=L=>{const out=[];let i=0,start=0,pass=1;const done=new Set();
+    while(i<L.length&&out.length<1000){const m=L[i];
+      if(m.fwd&&start!==i){start=i;pass=1}
+      if(m.ending&&!m.ending.includes(pass)){i++;continue}
+      out.push(m);
+      if(m.bwd&&!done.has(i)){if(pass<m.bwd){pass++;i=start;continue}done.add(i);start=i+1;pass=1}
+      i++}
+    return out};
+  const order=unroll(H.map((m,k)=>Object.assign({},m,{k})));
+  const Nk=N===H?null:N;
+  /* 박자 */
+  let bpb=Math.round(H[0].bpbRaw);let merge=1;
+  if(Math.abs(H[0].bpbRaw-bpb)>0.01||![2,3,4,5].includes(bpb))throw new Error(H[0].bpbRaw+'박(4분음표 기준) 마디는 아직 못 읽어요 — 4/4·3/4·5/4·2/2·6/8을 지원해요');
+  if(bpb===2){merge=2;bpb=4;warn.push('2박 마디를 두 마디씩 묶어 4/4로 읽었어요')}
+  if(H.some(m=>Math.abs(m.bpbRaw-H[0].bpbRaw)>0.01))warn.push('중간에 박자가 바뀌는 곳은 첫 박자 기준으로 읽었어요');
+  /* 마디별 박 단위 코드 */
+  let last=null;const bars=[],head=[];let tick=0;
+  const beatOf=(m,k)=>{const off=k*m.full;return m.harm.map(h=>({b:Math.floor((h.tk+off)/6),ch:h.ch}))};
+  for(let q=0;q<order.length;q+=merge){
+    const grp=order.slice(q,q+merge),beats=[];const hs=[];grp.forEach((m,k)=>beatOf(m,k).forEach(x=>hs.push(x)));
+    for(let b=0;b<bpb;b++){const h=hs.filter(x=>x.b<=b).pop();if(h)last=h.ch;if(!last){const f=hs[0]||order.slice(q).flatMap(m=>m.harm.map(x=>({ch:x.ch})))[0];last=f?f.ch:null}beats.push(last)}
+    if(beats.some(c=>!c))continue;
+    bars.push(barTokens(beats,bpb).join(' '));
+    grp.forEach((m,k)=>{const src=Nk?Nk[m.k]:m;if(src)src.notes.forEach(n=>head.push({t:tick+k*m.full+n.tk,d:n.d,midi:n.midi,tieStop:n.tieStop}))});
+    tick+=bpb*6;
+  }
+  if(!bars.length)throw new Error('코드를 읽지 못했어요');
+  /* 멜로디: 붙임줄 합치기 · 쉼표 제외 */
+  const notes=[];for(const n of head){if(n.midi===null)continue;const p=notes[notes.length-1];if(n.tieStop&&p&&p.midi===n.midi&&p.t+p.d===n.t){p.d+=n.d;continue}notes.push({t:n.t,d:n.d,midi:n.midi})}
+  const f0=H[0].fifths,sh=H[0].shift;
+  let k=f0===null?null:imod(KEY_FIFTHS_PC(f0)+(H[0].mode==='minor'?9:0)+sh);
+  if(k===null){const lastC=bars[bars.length-1].split(' ').pop();k=IMP_NOTE.indexOf(lastC.match(/^[A-G]b?/)[0]);warn.push('조표가 없어 마지막 코드로 조를 정했어요')}
+  const bpm=Math.max(40,Math.min(320,Math.round(H.find(m=>m.tempo)?.tempo||120)));
+  if(order.length>H.length)warn.push('반복·엔딩을 펼쳐 '+order.length+'마디로 읽었어요');
+  return {song:{n:title,c:'스윙',k,bpm,m:bpb,f:formOf(bars.length),ch:bars.join('|')},head:notes.length?{notes,bpb}:null,warn};
+}
+
+/* ── iReal Pro 링크(irealb:// · irealbook://) 또는 그 링크가 든 HTML ── */
+function irealUnscramble(s){
+  const swap50=p=>{const a=p.split('');for(let i=0;i<5;i++){a[49-i]=p[i];a[i]=p[49-i]}for(let i=10;i<24;i++){a[49-i]=p[i];a[i]=p[49-i]}return a.join('')};
+  let r='';while(s.length>50){const p=s.slice(0,50);s=s.slice(50);r+=s.length<2?p:swap50(p)}
+  return (r+s).replace(/Kcl/g,'| x').replace(/LZ/g,' |').replace(/XyQ/g,'   ');
+}
+const IREAL_STYLE=[[/ballad/i,'발라드'],[/bossa|samba|latin|afro|cuban|salsa|mambo|cha/i,'라틴'],[/funk|soul|rock|pop|rnb|r&b|groove|fusion/i,'펑키'],[/blues|shuffle/i,'블루스']];
+function irealToSongs(text){
+  let s=String(text||'');
+  const m=s.match(/irealb(?:ook)?:\/\/[^"'<>\s]+/);if(!m)throw new Error('iReal Pro 링크(irealb://…)를 찾지 못했어요');
+  s=m[0];const book=/^irealbook:/.test(s);
+  try{s=decodeURIComponent(s.replace(/^irealb(?:ook)?:\/\//,''))}catch(e){throw new Error('링크가 깨졌어요(일부만 복사됐을 수 있어요)')}
+  const chunks=s.split('===').filter(x=>x.trim());
+  const out=[];
+  const last=chunks[chunks.length-1];if(chunks.length>1&&!/=/.test(last))chunks.pop();   /* 끝의 플레이리스트 이름 */
+  for(const ch of chunks){
+    try{out.push(irealOne(ch,book))}catch(e){out.push({error:e.message,title:ch.split('=')[0]})}
+  }
+  return out;
+}
+function irealOne(str,book){
+  const f=str.split('=');const warn=[];
+  let mi=f.findIndex(x=>/^1r34LbKcu7/.test(x)),music;
+  if(mi>=0)music=irealUnscramble(f[mi].slice(10));
+  else{mi=book?5:6;music=f[mi]||'';if(!music)throw new Error('곡 내용을 찾지 못했어요')}
+  const title=(f[0]||'불러온 곡').replace(/\s*,\s*The$/,'').trim(),style=f[3]||'',keyS=f[4]||'C';
+  const bpmF=+f[mi+2]||0;
+  /* 박자 */
+  const ts=music.match(/T(\d)(\d)/);let bpb=4;
+  if(ts){const a=+ts[1],b=+ts[2];bpb=a===1&&b===2?12:Math.round(a*4/b);if(a===6&&b===8)bpb=3}
+  if(![3,4,5].includes(bpb))throw new Error('박자 T'+(ts?ts[1]+ts[2]:'')+'는 아직 못 읽어요');
+  /* 토큰화: 마디·반복·엔딩·코드 */
+  const src=music.replace(/<[^>]*>/g,' ').replace(/\([^)]*\)/g,' ').replace(/T\d\d/g,' ').replace(/\*[A-Za-z]/g,' ');
+  const bars=[];let curB={ch:[],fwd:false,bwd:false,end:null},ending=null;const push=()=>{if(curB.ch.length||curB.rep){curB.end=curB.end||ending;bars.push(curB)}curB={ch:[],fwd:false,bwd:false,end:null}};
+  /* 코드: 뿌리 + 품질(- ^ h o + 숫자 sus alt add, 숫자 앞 #·b) + /베이스. 그 밖의 표시(S·Q·Y·U·f·s·l 등)는 건너뜀 */
+  const re=/(\{|\}|\[|\]|\||Z|N(\d)|x|r|n|p|W(?:\/[A-G][b#]?)?|([A-G][b#]?)((?:[-^ho+]|\d|sus|alt|add|[#b](?=\d))*)(?:\/[A-G][b#]?)?)/g;let t;
+  while((t=re.exec(src))){
+    const k=t[0];
+    if(k==='{'){push();ending=null;curB.fwd=true}
+    else if(k==='}'){curB.bwd=true;push();ending=null}
+    else if(k==='['||k===']'||k==='Z'){push();ending=null}
+    else if(k==='|')push();
+    else if(t[2]){ending=[+t[2]];curB.end=ending}
+    else if(k==='x'){curB.rep=1}
+    else if(k==='r'){curB.rep=2}
+    else if(k==='n'||k==='p'||k[0]==='W'){curB.ch.push(null)}
+    else if(t[3]){const base={C:0,D:2,E:4,F:5,G:7,A:9,B:11}[t[3][0]]+(t[3][1]==='b'?-1:t[3][1]==='#'?1:0);curB.ch.push({root:imod(base),type:irealQual(t[4]||'')})}
+  }
+  push();
+  /* x(한 마디 반복)·r(두 마디 반복) 채우기 */
+  const flat=[];for(const b of bars){if(b.rep===1&&!b.ch.length&&flat.length){flat.push(Object.assign({},flat[flat.length-1],{fwd:b.fwd,bwd:b.bwd,end:b.end}));continue}
+    if(b.rep===2&&!b.ch.length&&flat.length>=2){flat.push(Object.assign({},flat[flat.length-2],{fwd:b.fwd,bwd:false,end:b.end}));flat.push(Object.assign({},flat[flat.length-2],{fwd:false,bwd:b.bwd,end:b.end}));continue}
+    flat.push(b)}
+  /* 반복 펼치기 */
+  const order=[];{let i=0,start=0,pass=1;const done=new Set();
+    while(i<flat.length&&order.length<1000){const m=flat[i];
+      if(m.fwd&&start!==i){start=i;pass=1}
+      if(m.end&&!m.end.includes(pass)){i++;continue}
+      order.push(m);
+      if(m.bwd&&!done.has(i)){if(pass<2){pass++;i=start;continue}done.add(i);start=i+1;pass=1}
+      i++}}
+  let lastC=null;const out=[];
+  for(const b of order){
+    const cs=b.ch.map(c=>c||lastC);const real=cs.filter(Boolean);
+    if(!real.length&&!lastC)continue;
+    const n=Math.max(1,cs.length),beats=[];
+    for(let q=0;q<bpb;q++){const c=cs[Math.min(n-1,Math.floor(q*n/bpb))]||lastC;beats.push(c)}
+    beats.forEach(c=>{if(c)lastC=c});
+    out.push(barTokens(beats.map(c=>c||lastC),bpb).join(' '));
+  }
+  if(!out.length)throw new Error('코드를 읽지 못했어요');
+  const km=keyS.match(/^([A-G][b#]?)(-)?/);let k=0;
+  if(km){k=imod({C:0,D:2,E:4,F:5,G:7,A:9,B:11}[km[1][0]]+(km[1][1]==='b'?-1:km[1][1]==='#'?1:0))}
+  let c='스윙';for(const [re2,cc] of IREAL_STYLE)if(re2.test(style)){c=cc;break}
+  const bpm=bpmF>=40?bpmF:(c==='발라드'?70:c==='라틴'?140:c==='펑키'?100:/up/i.test(style)?220:150);
+  if(order.length!==flat.length)warn.push('반복·엔딩을 펼쳐 '+order.length+'마디로 읽었어요');
+  return {song:{n:title,c,k,bpm,m:bpb,f:formOf(out.length),ch:out.join('|')},head:null,warn,style};
+}
+
+/* ── 멜로디 → ABC(헤드 입력란 형식). 붙임줄로 마디를 넘긴다 ── */
+function notesToAbc(notes,bpb){
+  const BAR=bpb*6,PC=['C','_D','D','_E','E','F','_G','G','_A','A','_B','B'],NAT={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+  const nm=m=>{const s=PC[imod(m)],L=s.replace('_',''),acc=s[0]==='_'?'_':'=';
+    const o=Math.floor((m-(acc==='_'?-1:0)-NAT[L]-60)/12);let out=acc+(o>=1?L.toLowerCase():L);
+    if(o>=2)out+="'".repeat(o-1);if(o<0)out+=','.repeat(-o);return out};
+  const dur=d=>d===3?'':(d%3===0?String(d/3):d+'/3');
+  let s='',t=0;const end=notes.length?Math.ceil((notes[notes.length-1].t+notes[notes.length-1].d)/BAR)*BAR:0;
+  const emit=(tok,d,tie)=>{while(d>0){const room=BAR-(t%BAR),dd=Math.min(d,room);s+=tok+dur(dd)+(tie&&d>dd?'-':'')+' ';t+=dd;d-=dd;if(t%BAR===0)s+='| '}};
+  for(const n of notes){if(n.t>t)emit('z',n.t-t,false);if(n.t<t)continue;emit(nm(n.midi),n.d,true)}
+  if(t<end)emit('z',end-t,false);
+  return 'M:'+bpb+'/4\nL:1/8\nK:C\n'+s.trim();
+}
+
 /* ── 곡 데이터베이스 v0.38 ─────────────────────────────────────────
    v0.38: 리얼북 1~3권(사용자가 준 스캔본)을 한 장씩 보며 옮긴 코드 진행으로 바꿨다 — b 필드(권·쪽)가 있는 곡.
    이 파일은 tools/rb_import.js 산출물이다. 책 곡을 고치려면 tools/data/realbook_chords.txt를 고치고 다시 돌린다.
@@ -3971,16 +4303,33 @@ SONGDB.m25={name:'마이너 Ⅱ-Ⅴ 연쇄 (연습)',c:'연습',key:0,bpm:120,bp
 /* ═══════════ UI · 재생 · 저장 (v0.27.1) ═══════════ */
 'use strict';
 const $=s=>document.querySelector(s);
+/* ── v0.42 파일 저장·공유 — 브라우저는 내려받기, 안드로이드 앱(AndroidBridge)은 저장 위치를 고르는 창·공유 시트 ── */
+function blobToB64(b){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(b)})}
+function saveBlobFile(blob,name){
+  if(window.AndroidBridge&&AndroidBridge.saveFile){blobToB64(blob).then(b=>AndroidBridge.saveFile(name,blob.type||'application/octet-stream',b));return}
+  const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},2000);
+}
+function shareBlobFile(blob,name){if(window.AndroidBridge&&AndroidBridge.shareFile){blobToB64(blob).then(b=>AndroidBridge.shareFile(name,blob.type||'application/octet-stream',b));return true}return false}
+window.saveBlobFile=saveBlobFile;
 const KEYNAMES=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
 const GRP={'스윙':'미디엄/업템포 스윙','블루스':'블루스 & 리듬 체인지','라틴':'보사노바 & 라틴','발라드':'재즈 발라드','모달':'모달·쿨·하드밥','비밥·왈츠':'비밥·왈츠·기타 필수곡','연습':'연습용 진행'};
 const cur={lyric:30,noteColors:'off',selProg:'blue-bossa',trUser:0,selDiff:2,selInst:'wind',selTrans:0,useLicks:true,useGroups:true,style:'all',tone:'clarinet',topic:'auto',themeOn:false,themeCh:'first',feel:'auto',solo:null,abc:'',audio:null,saved:[],view:'solo',playSolo:true,chorus:2};
 
 /* ── 곡 선택 박스 + 검색 ── */
-const SONG_MARK={ok:'✓ ',form:'✓ ',practice:'✓ ',book:'■ ',bookq:'□ ',rb:'◆ ',rbq:'◇ ',partial:'△ ',wrong:'✕ ',unknown:'? '};
-const SONG_STATUS_LABEL={ok:'✓ 코드 진행 확인됨',form:'✓ 형식 확인(블루스·리듬 체인지 등 공통 진행)',practice:'✓ 연습용 진행',partial:'△ 일부 다름 — 원곡과 부분적으로 다른 진행',wrong:'✕ 원곡과 다른 진행 — 수정 전까지 원곡 연습용으로 쓰지 마세요',unknown:'? 미확인 — 원곡과 다를 수 있음',rb:'◆ 리얼북 기준 새 코드집(v0.37) — 연주자 확인 전',rbq:'◇ 새 코드집(v0.37) — 일부 마디 확인 필요',book:'■ 악보 대조 완료 — 리얼북 악보와 한 마디씩 맞춰 옮긴 진행(v0.38)',bookq:'□ 악보 대조 — 일부 마디는 판독·해석 확인 필요'};
+const SONG_MARK={mine:'♪ ',ok:'✓ ',form:'✓ ',practice:'✓ ',book:'■ ',bookq:'□ ',rb:'◆ ',rbq:'◇ ',partial:'△ ',wrong:'✕ ',unknown:'? '};
+const SONG_STATUS_LABEL={mine:'♪ 내가 불러온 곡 — 이 기기에만 저장',ok:'✓ 코드 진행 확인됨',form:'✓ 형식 확인(블루스·리듬 체인지 등 공통 진행)',practice:'✓ 연습용 진행',partial:'△ 일부 다름 — 원곡과 부분적으로 다른 진행',wrong:'✕ 원곡과 다른 진행 — 수정 전까지 원곡 연습용으로 쓰지 마세요',unknown:'? 미확인 — 원곡과 다를 수 있음',rb:'◆ 리얼북 기준 새 코드집(v0.37) — 연주자 확인 전',rbq:'◇ 새 코드집(v0.37) — 일부 마디 확인 필요',book:'■ 악보 대조 완료 — 리얼북 악보와 한 마디씩 맞춰 옮긴 진행(v0.38)',bookq:'□ 악보 대조 — 일부 마디는 판독·해석 확인 필요'};
 const songSel=$('#songSel');
-(function(){
-  /* v0.27.1 곡 목록 — 장르 옵트그룹 완전 제거, 알파벳 순 단일 목록 */
+/* ── v0.42 내 곡(불러온 곡) — 이 기기 localStorage에만. 곡 목록보다 먼저 SONGDB에 올린다 ── */
+const MYSONG_KEY='clu.mysongs.v1';
+function loadMySongs(){try{const v=JSON.parse(localStorage.getItem(MYSONG_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+function storeMySongs(){try{localStorage.setItem(MYSONG_KEY,JSON.stringify(cur.mySongs))}catch(e){}}
+function registerMySong(m){
+  SONGDB[m.id]={name:m.n,c:m.c,key:m.k,bpm:m.bpm,bpb:m.m||4,form:{phrase:m.f[1],sections:m.f[0]},bars:m.ch.split('|').map(b=>b.trim().split(/\s+/).map(parseCh)),mine:true};
+  if(typeof SONG_STATUS!=='undefined')SONG_STATUS[m.id]={s:'mine',n:(m.src||'불러온 곡')+(m.warn&&m.warn.length?' · '+m.warn.join(' · '):''),a:[]};
+}
+cur.mySongs=loadMySongs().filter(m=>{try{registerMySong(m);return true}catch(e){return false}});
+function buildSongOptions(){
+  songSel.innerHTML='';
   Object.entries(SONGDB)
     .sort((a,b)=>(a[1].name||a[1].n||'').localeCompare(b[1].name||b[1].n||''))
     .forEach(([id,s])=>{
@@ -3989,9 +4338,10 @@ const songSel=$('#songSel');
       o.textContent=(SONG_MARK[st.s]||'? ')+(s.name||s.n||id);o.dataset.st=st.s;
       if(id===cur.selProg)o.selected=true;songSel.appendChild(o);
     });
-})();
+}
+buildSongOptions();
 /* v0.36 곡 데이터 검증 상태 — 목록 앞 기호와 선택한 곡 안내 */
-function songOkLevel(st){return st==='ok'||st==='form'||st==='practice'||st==='rb'||st==='book'}   /* 「확인 필요 곡 숨기기」: rbq·bookq·일부 다름·틀림·미확인을 숨긴다 */
+function songOkLevel(st){return st==='mine'||st==='ok'||st==='form'||st==='practice'||st==='rb'||st==='book'}   /* 「확인 필요 곡 숨기기」: rbq·bookq·일부 다름·틀림·미확인을 숨긴다 */
 function filterSongs(){
   const q=$('#songSearch').value.trim().toLowerCase(),only=$('#onlyOk').checked;let vis=0;
   [...songSel.querySelectorAll('option')].forEach(o=>{
@@ -4236,7 +4586,7 @@ function headAbc(prog,tr){
 }
 function regen(){if(cur.solo)gen(false)}
 songSel.onchange=()=>{
-  cur.selProg=songSel.value;cur.trUser=0;updTr();updFeelNote();updSongStatus();if(typeof fetch==='function')prefetchSamples(currentFeel(),cur.tone);
+  cur.selProg=songSel.value;applyMySongHead();cur.trUser=0;updTr();updFeelNote();updSongStatus();if(typeof fetch==='function')prefetchSamples(currentFeel(),cur.tone);
   const s=SONGDB[cur.selProg];
   $('#bpm').value=s.bpm;$('#bpmVal').textContent=s.bpm+' BPM';
   gen(true);
@@ -4329,7 +4679,7 @@ function updRangeBar(){
   else if(L.b===null)h.textContent=pfx+(L.a+1)+'마디부터 — 끝 마디를 누르세요 (같은 마디를 다시 누르면 한 마디 반복)';
   else h.textContent=pfx+(L.a+1)+(L.b>L.a?'–'+(L.b+1):'')+'마디 반복 중 · ▶ 재생도 이 구간을 반복합니다';
   $('#btnRangeClr').style.display=L?'':'none';
-  /* v0.41.1 악보 위 도구줄의 구간 반복 버튼 — 상태를 글자로 보여 준다 */
+  /* v0.42.0 악보 위 도구줄의 구간 반복 버튼 — 상태를 글자로 보여 준다 */
   const lab=!cur.loopOn?'🔁 구간 반복':!L?'🔁 첫 마디 고르기':L.b===null?'🔁 '+pfx+(L.a+1)+'마디~ 끝 마디?':'🔁 '+pfx+(L.a+1)+(L.b>L.a?'–'+(L.b+1):'')+'마디 반복';
   document.querySelectorAll('.loopmode').forEach(b=>{b.classList.toggle('on',!!cur.loopOn);b.textContent=lab;b.style.display=(cur.solo&&cur.solo.drill)?'none':''});
 }
@@ -4338,7 +4688,7 @@ function setLoopOn(on){
   if(!on){cur.loopSel=null;if(cur.playRange&&cur.playRange.loop){cur.playRange=null;stopIfPlaying()}}
 }
 $('#loopOn').addEventListener('change',e=>{setLoopOn(e.target.checked);renderChips()});
-/* v0.41.1 악보 위 🔁 구간 반복 버튼 — 켜면 마디 고정 모드는 끄고 마디 번호 줄로 내려 준다 */
+/* v0.42.0 악보 위 🔁 구간 반복 버튼 — 켜면 마디 고정 모드는 끄고 마디 번호 줄로 내려 준다 */
 document.addEventListener('click',e=>{
   const b=e.target.closest('.loopmode');if(!b)return;
   setLoopOn(!cur.loopOn);
@@ -4520,7 +4870,9 @@ function clearPlayHl(){
 const APP_VER=(document.title.match(/v(\d+\.\d+\.\d+)/)||[])[1]||'?';
 $('#btnSave').onclick=()=>{
   const s=cur.solo,sg=SONGDB[cur.selProg];
-  cur.saved.unshift({v:APP_VER,id:s.ts,seed:cur.seed,song:cur.selProg,tr:cur.trUser,diff:cur.selDiff,inst:cur.selInst,licks:cur.useLicks!==false,groups:cur.useGroups,style:cur.style,lyric:cur.lyric,
+  /* v0.42 악보 그대로 저장 — 시드뿐 아니라 실제 음표(코러스별 원본 + 편집)도 담아, 엔진이 바뀌어도 같은 악보로 돌아온다 */
+  const snap=cur.view!=='drill'&&cur.soloBases&&cur.soloBases.length?{bases:JSON.parse(JSON.stringify(cur.soloBases)),edits:JSON.parse(JSON.stringify(cur.edits||{})),nCh:cur.soloBases.length}:null;
+  cur.saved.unshift({v:APP_VER,snap,id:s.ts,seed:cur.seed,song:cur.selProg,tr:cur.trUser,diff:cur.selDiff,inst:cur.selInst,licks:cur.useLicks!==false,groups:cur.useGroups,style:cur.style,lyric:cur.lyric,
     name:sg.name+' · '+keyLabel(songKeyPc(),cur.trUser)+' · '+STYLE_DATA.profiles[cur.style].label+' · 난이도 '+cur.selDiff});
   storeSaved();askPersist();renderSaved();
 };
@@ -4530,7 +4882,7 @@ function renderSaved(){
   el.innerHTML='';
   cur.saved.forEach(item=>{
     const d=document.createElement('div');d.className='sitem';
-    d.innerHTML='<span class="nm">♡ <b>'+item.name+'</b>'+(item.v&&item.v!==APP_VER?'<span class="old">v'+item.v+'에서 저장 — 악보가 조금 다를 수 있음</span>':'')+'</span>';
+    d.innerHTML='<span class="nm">♡ <b>'+item.name+'</b>'+(item.snap?'<span class="old">악보 그대로 저장'+(item.snap.nCh>1?' · '+item.snap.nCh+'코러스':'')+'</span>':item.v&&item.v!==APP_VER?'<span class="old">v'+item.v+'에서 저장 — 악보가 조금 다를 수 있음</span>':'')+'</span>';
     const acts=document.createElement('span');acts.className='acts';
     const b=document.createElement('button');b.textContent='불러오기';
     b.onclick=()=>{
@@ -4544,7 +4896,13 @@ function renderSaved(){
       [...$('#segInst').children].forEach((c,i)=>c.classList.toggle('on',(i===0)===(cur.selInst==='wind')));
       $('#diffSel').value=cur.selDiff;
       cur.lyric=item.lyric!=null?item.lyric:30;$('#lyric').value=cur.lyric;$('#lyrVal').textContent='노래 '+cur.lyric+' · 비밥 '+(100-cur.lyric);
-      gen(false);window.scrollTo({top:0,behavior:'smooth'});
+      if(item.snap&&cur.view==='drill'){cur.view='solo';$('#viewSel').value='solo'}
+      if(item.snap){$('#chorusSel').value=item.snap.nCh;cur.chorus=item.snap.nCh}
+      gen(false);
+      if(item.snap&&cur.view!=='drill'){   /* 저장한 음표로 바꿔 끼운다 */
+        cur.soloBases=JSON.parse(JSON.stringify(item.snap.bases));cur.soloBase=cur.soloBases[0];cur.edits=JSON.parse(JSON.stringify(item.snap.edits||{}));cur.sel=null;cur.shift=undefined;applyView();
+      }
+      window.scrollTo({top:0,behavior:'smooth'});
     };
     const x=document.createElement('button');x.textContent='삭제';
     x.onclick=()=>{cur.saved=cur.saved.filter(q=>q!==item);storeSaved();renderSaved()};
@@ -4559,10 +4917,9 @@ function storeSaved(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(cur.saved
 function askPersist(){try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}}
 cur.saved=loadSaved().filter(it=>it&&SONGDB[it.song]);renderSaved();
 $('#btnBackup').onclick=()=>{
-  const data={app:'clu',kind:'backup',ver:APP_VER,date:new Date().toISOString(),saved:cur.saved,snips:cur.snips};
+  const data={app:'clu',kind:'backup',ver:APP_VER,date:new Date().toISOString(),saved:cur.saved,snips:cur.snips,mySongs:cur.mySongs};
   const d=new Date(),ymd=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
-  const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
-  a.href=url;a.download='clu-backup-'+ymd+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1000);
+  saveBlobFile(new Blob([JSON.stringify(data)],{type:'application/json'}),'clu-backup-'+ymd+'.json');
 };
 $('#btnRestore').onclick=()=>$('#restoreFile').click();
 $('#restoreFile').onchange=e=>{
@@ -4570,13 +4927,95 @@ $('#restoreFile').onchange=e=>{
   f.text().then(t=>{
     const d=JSON.parse(t);if(!d||d.app!=='clu')throw new Error('이 앱의 백업 파일이 아닙니다');
     const merge=(cur0,add,key)=>{const seen=new Set(cur0.map(x=>x[key]));return cur0.concat((add||[]).filter(x=>x&&!seen.has(x[key])))};
+    /* v0.42 내 곡 먼저(저장 솔로가 내 곡을 가리킬 수 있으므로) */
+    const nm0=cur.mySongs.length;cur.mySongs=merge(cur.mySongs,(d.mySongs||[]).filter(m=>{try{registerMySong(m);return true}catch(e){return false}}),'id');
+    if(cur.mySongs.length>nm0){storeMySongs();buildSongOptions();renderMySongs()}
     const ns=merge(cur.saved,(d.saved||[]).filter(it=>SONGDB[it.song]),'id'),nn=merge(cur.snips,(d.snips||[]).filter(it=>SONGDB[it.song]),'id');
-    const add=(ns.length-cur.saved.length)+(nn.length-cur.snips.length);
+    const add=(ns.length-cur.saved.length)+(nn.length-cur.snips.length)+(cur.mySongs.length-nm0);
     cur.saved=ns;cur.snips=nn;storeSaved();storeSnips();askPersist();renderSaved();renderSnips();
     $('#btnRestore').textContent='⬆ 백업 불러오기 — '+add+'개 추가됨';
   }).catch(err=>{$('#btnRestore').textContent='⬆ 백업 불러오기 — 실패: '+err.message}).finally(()=>{e.target.value=''});
 };
-/* v0.41.1 앱 기능(설치·오프라인·업데이트)은 테스트용 앱 빌드(--app)에서만 켠다 — GitHub에 올라가는 index.html에서는 꺼짐 */
+/* ── v0.42 곡 불러오기 — MusicXML · iReal Pro (engine/importers.js). 결과는 이 기기의 「내 곡」에만 ── */
+function myHash(x){let h=2166136261;for(let i=0;i<x.length;i++){h^=x.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)}
+function applyMySongHead(){
+  const m=cur.mySongs.find(x=>x.id===cur.selProg),ta=$('#headAbcIn');if(!ta)return;
+  if(m&&m.head){ta.value=m.head;cur.headAuto=true;readHeadAbc()}
+  else if(cur.headAuto){ta.value='';cur.headAuto=false;readHeadAbc()}
+}
+function addMySong(r,src){
+  const cat=$('#impCat').value;
+  const m=Object.assign({},r.song,{c:cat==='auto'?r.song.c:cat});
+  m.id='u_'+myHash(m.n+'|'+m.ch);m.src=src;m.warn=r.warn||[];m.head=r.head&&r.head.notes.length?notesToAbc(r.head.notes,r.head.bpb):null;m.added=Date.now();
+  try{registerMySong(m);generateSolo(m.id,m.k,2,1,'wind',{style:'all'})}   /* 코드·형식 검사 겸 시험 생성 */
+  catch(e){delete SONGDB[m.id];throw new Error('앱이 쓸 수 없는 진행이에요 ('+e.message+')')}
+  cur.mySongs=cur.mySongs.filter(x=>x.id!==m.id).concat([m]);storeMySongs();askPersist();
+  return m;
+}
+function impReport(lines,lastId){
+  $('#impMsg').innerHTML=lines.map(l=>'<span class="'+(l.ok?'ok':'bad')+'">'+(l.ok?'✓ ':'✕ ')+l.t+'</span>').join('\n');
+  buildSongOptions();renderMySongs();
+  if(lastId){songSel.value=lastId;filterSongs();songSel.onchange()}
+}
+async function importFiles(files){
+  const lines=[];let lastId=null;
+  for(const f of files){
+    try{
+      const nm=f.name||'파일',ext=(nm.split('.').pop()||'').toLowerCase();
+      let rs;
+      if(ext==='mxl')rs=[musicXmlToSong(await mxlToXml(await f.arrayBuffer()),nm)].map(r=>Object.assign(r,{src:'MusicXML'}));
+      else{
+        const txt=await f.text();
+        if(/irealb(ook)?:\/\//.test(txt))rs=irealToSongs(txt).map(r=>Object.assign(r,{src:'iReal Pro'}));
+        else if(/<score-(partwise|timewise)/.test(txt))rs=[Object.assign(musicXmlToSong(txt,nm),{src:'MusicXML'})];
+        else throw new Error('MusicXML도 iReal Pro 링크도 아니에요');
+      }
+      for(const r of rs){
+        if(r.error){lines.push({ok:false,t:(r.title||nm)+' — '+r.error});continue}
+        try{const m=addMySong(r,r.src);lastId=m.id;lines.push({ok:true,t:m.n+' — '+m.ch.split('|').length+'마디 · '+m.c+(m.head?' · 멜로디 있음(헤드 차용)':'')+(m.warn.length?' · '+m.warn.join(' · '):'')})}
+        catch(e){lines.push({ok:false,t:(r.song&&r.song.n||nm)+' — '+e.message})}
+      }
+    }catch(e){lines.push({ok:false,t:(f.name||'파일')+' — '+e.message})}
+  }
+  impReport(lines,lastId);
+}
+function renderMySongs(){
+  const el=$('#mySongList');if(!el)return;
+  if(!cur.mySongs.length){el.innerHTML='<div class="none">아직 불러온 곡이 없습니다.</div>';return}
+  el.innerHTML='';
+  cur.mySongs.slice().sort((a,b)=>a.n.localeCompare(b.n)).forEach(m=>{
+    const d=document.createElement('div');d.className='sitem';
+    d.innerHTML='<span class="nm">♪ <b>'+m.n.replace(/</g,'&lt;')+'</b><span class="old">'+m.ch.split('|').length+'마디 · '+m.c+' · '+(m.src||'')+(m.head?' · 멜로디':'')+'</span></span>';
+    const acts=document.createElement('span');acts.className='acts';
+    const b=document.createElement('button');b.textContent='선택';b.onclick=()=>{songSel.value=m.id;filterSongs();songSel.onchange();window.scrollTo({top:0,behavior:'smooth'})};
+    const x=document.createElement('button');x.textContent='삭제';
+    x.onclick=()=>{
+      const nSaved=cur.saved.filter(it=>it.song===m.id).length+cur.snips.filter(it=>it.song===m.id).length;
+      if(nSaved&&!x.dataset.ask){x.dataset.ask=1;x.textContent='저장 '+nSaved+'개도 지움 — 다시 누르기';return}
+      cur.mySongs=cur.mySongs.filter(q=>q.id!==m.id);storeMySongs();
+      cur.saved=cur.saved.filter(it=>it.song!==m.id);cur.snips=cur.snips.filter(it=>it.song!==m.id);storeSaved();storeSnips();renderSaved();renderSnips();
+      delete SONGDB[m.id];if(typeof SONG_STATUS!=='undefined')delete SONG_STATUS[m.id];
+      if(cur.selProg===m.id){cur.selProg='blue-bossa';buildSongOptions();songSel.value='blue-bossa';songSel.onchange()}else buildSongOptions();
+      filterSongs();renderMySongs();
+    };
+    acts.appendChild(b);acts.appendChild(x);d.appendChild(acts);el.appendChild(d);
+  });
+}
+$('#btnImport').onclick=()=>{const p=$('#impPanel');p.hidden=!p.hidden;if(!p.hidden)p.scrollIntoView({behavior:'smooth',block:'start'})};
+$('#impFileBtn').onclick=()=>$('#impFile').click();
+$('#impFile').onchange=e=>{const fs=[...(e.target.files||[])];e.target.value='';if(fs.length)importFiles(fs)};
+$('#impLinkBtn').onclick=()=>{
+  const t=$('#impLink').value.trim();if(!t)return;
+  const lines=[];let lastId=null;
+  try{for(const r of irealToSongs(t)){
+    if(r.error){lines.push({ok:false,t:(r.title||'곡')+' — '+r.error});continue}
+    try{const m=addMySong(r,'iReal Pro');lastId=m.id;lines.push({ok:true,t:m.n+' — '+m.ch.split('|').length+'마디 · '+m.c+(m.warn.length?' · '+m.warn.join(' · '):'')})}catch(e){lines.push({ok:false,t:r.song.n+' — '+e.message})}
+  }}catch(e){lines.push({ok:false,t:e.message})}
+  if(lastId)$('#impLink').value='';
+  impReport(lines,lastId);
+};
+renderMySongs();
+/* v0.42.0 앱 기능(설치·오프라인·업데이트)은 테스트용 앱 빌드(--app)에서만 켠다 — GitHub에 올라가는 index.html에서는 꺼짐 */
 const PWA_BUILD=/*__PWA_BUILD__*/false;
 /* 앱 설치: 크롬·엣지·안드로이드는 설치 창, 아이폰·아이패드는 「홈 화면에 추가」 안내. 이미 앱으로 실행 중이면 숨김 */
 (function(){
@@ -4594,7 +5033,7 @@ const PWA_BUILD=/*__PWA_BUILD__*/false;
   };
 })();
 /* 서비스 워커 — 앱 빌드에서만 등록. 새 버전이 오면 바로 바꾸지 않고 「업데이트할까요?」를 묻는다.
-   공개 빌드에서는 혹시 v0.41.1에서 등록된 서비스 워커·캐시가 남아 있으면 지운다 */
+   공개 빌드에서는 혹시 v0.42.0에서 등록된 서비스 워커·캐시가 남아 있으면 지운다 */
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
   if(!PWA_BUILD){
     navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
@@ -4626,7 +5065,8 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
 }
 /* v0.27.1 내보내기 — PNG 저장(PC 다운로드·휴대폰 갤러리) · 공유·메일 */
 function sheetPng(cb){
-  const svg=$('#staff svg');if(!svg){alert('먼저 악보를 생성해 주세요');return}
+  /* v0.42 고침: abcjs는 svg를 #staff가 아니라 .sheetwrap 바로 안에 그린다 — 예전 선택자로는 PNG 저장·공유가 「먼저 악보를 생성」으로 막혀 있었다 */
+  const svg=(typeof staffSvg==='function'&&(staffSvg(typeof curChorus==='function'?curChorus():0)||staffSvg(0)))||$('#staff svg');if(!svg){alert('먼저 악보를 생성해 주세요');return}
   const clone=svg.cloneNode(true);
   const bb=svg.getBBox?svg.getBBox():{x:0,y:0,width:1200,height:800};
   const pad=40,W=Math.max(800,Math.ceil(bb.width+pad*2)),H=Math.ceil(bb.height+pad*2);
@@ -4646,10 +5086,7 @@ function sheetPng(cb){
   img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
 }
 function dl(canvas,name){
-  canvas.toBlob(b=>{
-    const u=URL.createObjectURL(b),a=document.createElement('a');
-    a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);
-  },'image/png');
+  canvas.toBlob(b=>saveBlobFile(b,name),'image/png');
 }
 $('#btnExport').onclick=()=>{
   if(!cur.solo){alert('먼저 악보를 생성해 주세요');return}
@@ -4661,6 +5098,7 @@ $('#btnShare').onclick=()=>{
   const fn=(SONGDB[cur.selProg].name||cur.selProg).replace(/[\\/:*?"<>|]/g,'_');
   sheetPng(cv=>{
     cv.toBlob(b=>{
+      if(shareBlobFile(b,fn+'.png'))return;   /* 안드로이드 앱: 공유 시트 */
       const f=new File([b],fn+'.png',{type:'image/png'});
       const meta=(SONGDB[cur.selProg].name||'')+' · 재즈 솔로 생성기';
       const mail='mailto:?subject='+encodeURIComponent('[재즈 솔로] '+meta)+'&body='+encodeURIComponent('재즈 솔로 생성기에서 만든 악보를 첨부합니다 — '+meta);
@@ -4755,7 +5193,7 @@ function popAct(act){
 /* ── 피드백: 입력창 → GitHub 이슈(곡·설정 자동 첨부) 또는 내용 복사 ── */
 function fbInfo(){
   const so=songSel.selectedOptions&&songSel.selectedOptions[0]?songSel.selectedOptions[0].textContent:'-';
-  return ['버전: v0.41.1','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'노래↔비밥: '+cur.lyric,'오디오: '+(typeof SHARED_AC!=='undefined'&&SHARED_AC?SHARED_AC.state:'없음')+(typeof IS_IOS!=='undefined'&&IS_IOS?' · iOS'+(navigator.audioSession?' · 세션 '+navigator.audioSession.type:' · 세션 API 없음'):''),'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
+  return ['버전: v0.42.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'노래↔비밥: '+cur.lyric,'오디오: '+(typeof SHARED_AC!=='undefined'&&SHARED_AC?SHARED_AC.state:'없음')+(typeof IS_IOS!=='undefined'&&IS_IOS?' · iOS'+(navigator.audioSession?' · 세션 '+navigator.audioSession.type:' · 세션 API 없음'):''),'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
 }
 $('#btnFeedback').onclick=()=>{$('#fbModal').style.display='flex';$('#fbText').focus();$('#fbMsg').textContent=''};
 $('#fbClose').onclick=()=>{$('#fbModal').style.display='none'};
@@ -4945,9 +5383,10 @@ if(typeof document!=='undefined'){
   if(xmlButton)xmlButton.addEventListener('click',()=>{
     const xml=buildMusicXml();
     if(!xml){alert('먼저 악보를 생성해 주세요');return}
-    const a=document.createElement('a'),url=URL.createObjectURL(new Blob([xml],{type:'application/vnd.recordare.musicxml+xml'}));
-    a.href=url;a.download=((cur.sheetTitle||'solo')+'.musicxml').replace(/[\\/:*?"<>|]/g,'_');
-    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+    const blob=new Blob([xml],{type:'application/vnd.recordare.musicxml+xml'}),name=((cur.sheetTitle||'solo')+'.musicxml').replace(/[\\/:*?"<>|]/g,'_');
+    if(typeof window!=='undefined'&&typeof window.saveBlobFile==='function'){window.saveBlobFile(blob,name);return}   /* v0.42 안드로이드 앱에서도 저장되게 */
+    const a=document.createElement('a'),url=URL.createObjectURL(blob);
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
   });
 }
 

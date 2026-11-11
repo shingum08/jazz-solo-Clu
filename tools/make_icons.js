@@ -1,4 +1,4 @@
-/* PWA 아이콘 PNG 만들기 — app/pwa/icon.svg → app/pwa/icons/*.png (Playwright 크로미움으로 렌더)
+/* PWA·안드로이드 아이콘 PNG 만들기 — app/pwa/icon.svg → app/pwa/icons/*.png · app/android/…/mipmap-(밀도)/ic_launcher.png (Playwright 크로미움으로 렌더)
    node tools/make_icons.js   · 아이콘 SVG를 바꾸면 다시 돌리고 python3 tools/build.py */
 const {chromium}=require('playwright'),fs=require('fs'),path=require('path');
 const root=path.resolve(__dirname,'..'),dir=path.join(root,'app/pwa/icons');
@@ -7,6 +7,9 @@ const svg=fs.readFileSync(path.join(root,'app/pwa/icon.svg'),'utf8');
   fs.mkdirSync(dir,{recursive:true});
   const b=await chromium.launch();
   const jobs=[['icon-192.png',192,1],['icon-512.png',512,1],['apple-touch-icon.png',180,1],['icon-maskable-512.png',512,0.78]];
+  /* v0.42 안드로이드 런처 아이콘(mipmap) */
+  const res=path.join(root,'app/android/app/src/main/res');
+  for(const [d,px] of [['mdpi',48],['hdpi',72],['xhdpi',96],['xxhdpi',144],['xxxhdpi',192]]){fs.mkdirSync(path.join(res,'mipmap-'+d),{recursive:true});jobs.push([path.join('..','..','android','app','src','main','res','mipmap-'+d,'ic_launcher.png'),px,1])}
   for(const [name,px,scale] of jobs){
     const p=await b.newPage({viewport:{width:px,height:px}});
     const inner=Math.round(px*scale),off=Math.round((px-inner)/2);

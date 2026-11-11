@@ -17,6 +17,7 @@ head=open(os.path.join(root,'engine','headabc.js'),encoding='utf-8').read()
 head+='\n'+open(os.path.join(root,'engine','drill.js'),encoding='utf-8').read()
 head+='\n'+open(os.path.join(root,'engine','locks.js'),encoding='utf-8').read()
 head+='\n'+open(os.path.join(root,'engine','song_status.js'),encoding='utf-8').read()
+head+='\n'+open(os.path.join(root,'engine','importers.js'),encoding='utf-8').read()   # v0.42 곡 불러오기
 songs=''
 for fp in sorted(glob.glob(os.path.join(root,'engine','songs_part*.js'))):
     songs+=open(fp,encoding='utf-8').read()
@@ -31,7 +32,9 @@ if out.count(marker) != 1:
 xml=open(os.path.join(root,'engine','musicxml.js'),encoding='utf-8').read()
 out=out.replace(marker, '<script id="musicxml">\n'+xml+'\n</script>', 1)
 # v0.41.1 공개 빌드(GitHub에 올라가는 index.html)는 앱 기능(설치·오프라인·업데이트)을 끈다.
-#   python3 tools/build.py --app → dist/app/ 에 테스트용 앱 빌드(설치 가능) + dist/clu-app-v버전.zip (dist/는 커밋하지 않음)
+#   python3 tools/build.py --app     → dist/app/ 에 테스트용 PWA 빌드(설치 가능) + dist/clu-app-v버전.zip
+#   python3 tools/build.py --android → dist/android/CluJazz/ 안드로이드 프로젝트(앱 안에 index.html) + dist/clu-android-v버전.zip
+#   (dist/는 커밋하지 않음 — 직접 전달)
 import sys, shutil, zipfile
 ver=re.search(r'<title>[^<]*?v(\d+\.\d+\.\d+)',tpl).group(1)
 if '<!--__PWA_HEAD__-->' not in out or '/*__PWA_BUILD__*/false' not in out:
@@ -56,3 +59,19 @@ if '--app' in sys.argv:
             for f in fs:
                 full=os.path.join(d,f); z.write(full,os.path.join('clu-app-v'+ver,os.path.relpath(full,dist)))
     print('app build →',dist,'·',zp,os.path.getsize(zp),'bytes')
+if '--android' in sys.argv:
+    src=os.path.join(root,'app','android'); out_dir=os.path.join(root,'dist','android','CluJazz')
+    shutil.rmtree(os.path.join(root,'dist','android'),ignore_errors=True)
+    shutil.copytree(src,out_dir)
+    a,b,c=(int(x) for x in ver.split('.')); vcode=a*1000000+b*1000+c
+    for rel in ['app/build.gradle','안드로이드 빌드 안내.txt']:
+        fp=os.path.join(out_dir,rel); t=open(fp,encoding='utf-8').read().replace('__VERSION_CODE__',str(vcode)).replace('__VERSION__',ver)
+        open(fp,'w',encoding='utf-8').write(t)
+    www=os.path.join(out_dir,'app','src','main','assets','www'); os.makedirs(www,exist_ok=True)
+    open(os.path.join(www,'index.html'),'w',encoding='utf-8').write(pub)   # 공개 빌드(서비스 워커 없음) — 파일은 앱 안에 있다
+    zp=os.path.join(root,'dist','clu-android-v'+ver+'.zip')
+    with zipfile.ZipFile(zp,'w',zipfile.ZIP_DEFLATED) as z:
+        for d,_,fs in os.walk(out_dir):
+            for f in fs:
+                full=os.path.join(d,f); z.write(full,os.path.join('CluJazz',os.path.relpath(full,out_dir)))
+    print('android build →',out_dir,'·',zp,os.path.getsize(zp),'bytes · versionCode',vcode)

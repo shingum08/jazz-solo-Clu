@@ -1,0 +1,27 @@
+plugins { id 'com.android.application' }
+
+android {
+    // ⚠ 패키지 이름(applicationId)은 구글 플레이에 처음 올린 뒤에는 바꿀 수 없다 — 앱 이름이 정해지면 여기서 먼저 바꾼다
+    namespace 'app.clu.jazzsolo'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'app.clu.jazzsolo'
+        minSdk 24
+        targetSdk 36          // 구글 플레이: 2026-08-31부터 새 앱·업데이트는 API 36 이상
+        versionCode __VERSION_CODE__
+        versionName '__VERSION__'
+    }
+    buildTypes {
+        release { minifyEnabled false }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.12.1'   // 앱 안 파일을 https 주소처럼 여는 WebViewAssetLoader
+    implementation 'androidx.core:core:1.13.1'       // 공유용 FileProvider
+}
