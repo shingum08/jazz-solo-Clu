@@ -25,8 +25,9 @@ let solos=0,headSolos=0,motifTotal=0,v={bar:0,range:0,leap:0,overlap:0};
 for(const id of Object.keys(E.SONGDB)){
   const song=E.SONGDB[id],TPB=song.bpb*6;
   for(const d of [2,3]){
-    const s1=E.generateSolo(id,song.key,d,31337+d,'wind',{headMotifs:frags,headRate:0.6});
-    const s2=E.generateSolo(id,song.key,d,31337+d,'wind',{headMotifs:frags,headRate:0.6});
+    /* v0.39: 모티프 장치만 따로 보기 위해 노래 프레이즈(자체 동기 시퀀스를 씀)는 끈다 */
+    const s1=E.generateSolo(id,song.key,d,31337+d,'wind',{headMotifs:frags,headRate:0.6,lyric:0});
+    const s2=E.generateSolo(id,song.key,d,31337+d,'wind',{headMotifs:frags,headRate:0.6,lyric:0});
     ok(JSON.stringify(s1.bars)===JSON.stringify(s2.bars),'같은 시드·옵션은 같은 악보 '+id);
     solos++;motifTotal+=s1.stats.motif;if(s1.motifs.some(m=>m.from==='head'))headSolos++;
     let pv=null;

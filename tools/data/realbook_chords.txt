@@ -572,6 +572,190 @@ x: 리얼북 3권 346쪽(사이 콜먼). 40마디. 라인 클리셰 Am–Am+5–
 ch: Ebmaj7|Abm7 Db7|Gbmaj7|F7#9 Bb7#9|Ebm7 Cm7b5|F7#9 Bb7#9|Ebmaj7|Fm7 Bb7|Ebmaj7|Abm7 Db7|Gbmaj7|F7#9 Bb7#9|Ebm7 Cm7b5|F7#9 Bb7#9|Ebmaj7|Bbm7 Eb7|Abmaj7|Adim7|Ebmaj7 Bb7sus4|Ebmaj7|Am7 D7|Bm7 E7b9|Am7 D7|Gmaj7 Bb7|Ebmaj7|Abm7 Db7|Gbmaj7|F7#9 Bb7#9|Ebm7 Cm7b5|F7#9 Bb7#9|Ebmaj7|Bbm7 Eb7|Abmaj7|Db7#11|Ebmaj7 Gm7|Am7b5 D7b9|Gm7 C7b9|Fm7 Bb7#9|Ebmaj7|Ebmaj7
 x: 리얼북 3권 352~353쪽(J. 프레드 쿠츠). A8·A8·B8·A'16 40마디. F+7·Bb+7→7#9, Ebmaj7/Bb 베이스 생략, Fm7/Bb→Bb7sus4
 
+@afro-blue|Afro Blue|라틴|5|180|3|AABB|4|1-9
+ch: Fm7|Gm7|Abmaj7 Gm7|Fm7|Fm7|Gm7|Abmaj7 Gm7|Fm7|Eb6|Eb6|Db6 Eb6|Fm7|Eb6|Eb6|Db6 Eb6|Fm7
+x: 리얼북 1권 9쪽(몽고 산타마리아). 3/4, 헤드 16마디. 책 주: 솔로는 F 오픈 또는 3/4 마이너 블루스
+@airegin|Airegin|스윙|8|240|4|-|4|1-11
+ch: Fm7|C7#9|Fm7|F7b9|Bbm7|F7#9|Bbm7|Bbm7|Dbmaj7|Dm7 G7|Cmaj7|Dbm7 Gb7|Bmaj7|Cm7 F7|Bbmaj7|Bbmaj7|Bbm7|Eb7|Abmaj7|Gm7b5 C7|Fm7|C7#9|Fm7|F7b9|Bbm7|F7#9|Bbm7|Bbm7|Dbmaj7|Dm7b5 G7|Cm7b5 Gb7|F7 B7|Bbm7|Eb7sus4|Ab6|Ab6
+x: 리얼북 1권 11쪽(소니 롤린스). A8·B12·A8·C8 36마디. 8마디 (Bb7 멜로디만)·마지막 괄호 턴어라운드 (Gm7b5 C7b9) 생략, Cbmaj7은 Bmaj7로
+@alice-in-wonderland|Alice in Wonderland|스윙|0|160|3|AABA|16|1-12
+ch: Dm7|G7|Cmaj7|Fmaj7|Bm7b5|E7|Am7|Eb7|Dm7|G7|Em7|Am7|Dm7|G7|Em7 A7|Dm7 G7|Dm7|G7|Cmaj7|Fmaj7|Bm7b5|E7|Am7|Eb7|Dm7|G7|Em7|Am7|Dm7|G7|Cmaj7|Am7|D7|G7|Em7|Am7|Dm7|G7|Cmaj7|Fmaj7|F#m7|B7b9|Em7|A7|Dm7 A7|Dm7 A7|Dm7 Ab7|G7|Dm7|G7|Cmaj7|Fmaj7|Bm7b5|E7|Am7|Eb7|Dm7|G7|Em7|Am7|Dm7|G7|Cmaj7|Cmaj7
+x: 리얼북 1권 12쪽(새미 페인). 3/4 왈츠, 16마디 4섹션 64마디
+@anthropology|Anthropology|스윙|10|240|4|AABA|8|1-25
+ch: Bb6 G7|Cm7 F7|Bb6 Gm7|Cm7 F7|Fm7 Bb7|Eb7 Ab7|Dm7 G7|Cm7 F7|Bb6 G7|Cm7 F7|Bb6 Gm7|Cm7 F7|Fm7 Bb7|Eb7 Ab7|Cm7 F7|Bb6|D7|D7|G7|G7|C7|C7|F7|F7|Bb6 G7|Cm7 F7|Bb6 Gm7|Cm7 F7|Fm7 Bb7|Eb7 Ab7|Cm7 F7|Bb6
+x: 리얼북 1권 25쪽(찰리 파커). 리듬 체인지
+@au-privave|Au Privave|블루스|5|180|4|AAB|4|1-32
+ch: F6|Gm7 C7|F6 Gm7|Cm7 F7#9|Bb7b9|Bbm7 Eb7|F6 Gm7|Am7 D7|Gm7|Gm7 C7|F6 D7b9|Gm7 C7
+x: 리얼북 1권 32쪽(찰리 파커). 비밥 블루스 12마디. F+7→F7#9
+@bessies-blues|Bessie's Blues|블루스|3|200|4|AAB|4|1-42
+ch: Eb7|Ab7|Eb7|Eb7|Ab7|Ab7|Eb7|Eb7|Bb7|Ab7|Eb7|Bb7
+x: 리얼북 1권 42쪽(존 콜트레인). 12마디 블루스
+@black-narcissus|Black Narcissus|스윙|8|140|3|ABC|8|1-47
+ch: Abm7|Db7|Abm7|Db7|Abm7|Db7|Abm7|Db7|Gbm7|B7|Gbm7|B7|Gbm7|B7|Gbm7|B7|Ebmaj7#11|Fmaj7#11|Bbmaj7#11|Cmaj7|Ebmaj7#11|Fmaj7#11|Bbmaj7#11|Cmaj7
+x: 리얼북 1권 47쪽(조 헨더슨). 3/4, 24마디. 앞 16마디는 책에 Ab·Gb 페달 표기(앱 반주는 코드 근음), Cb7은 B7로
+@blue-train|Blue Train|블루스|0|140|4|AAB|4|1-58
+ch: Cm7|Fm7 Bb7|Cm7|Bbm7 Eb7|Fm7|Fm7 Bb7|Cm7|Am7 D7|Gm7|Fm7 Bb7|Cm7|Fm7 Bb7
+x: 리얼북 1권 58쪽(존 콜트레인, 책 표기 'Blue Trane'). C단조 12마디, 2번 엔딩(Cm7b5 | G-)은 끝맺음
+@boplicity|Boplicity|스윙|5|160|4|AABA|8|1-60
+ch: Gm7 F6|F6 C7|F6|Cm7 F7#9|Bb6|Gm7|C7|F6|Gm7 F6|F6 C7|F6|Cm7 F7#9|Bb6|Gm7|C7|F6|Cm7 F7#9|Cm7 B7|Bb6|Bb6|Bbm7 Eb7#9|Bbm7 A7|Ab6 Abm7|Gm7 C7|Gm7 F6|F6 C7|F6|Cm7 F7#9|Bb6|Gm7|C7|F6
+x: 리얼북 1권 60쪽(클레오 헨리 = 마일스 데이비스). F+7·Eb+7→7#9, '-- C7'은 앞 화음을 이어 3박부터 C7
+@but-beautiful|But Beautiful|발라드|7|60|4|ABAC|8|1-67
+ch: G6|Bm7b5 E7b9|Am7|C#m7b5 F#7b9|G6|Bm7b5 E7|A7|A7|D7|Bm7 Em7|Am7 D7|G6|Em7 Em7 Emmaj7 Em7|A7|D7sus4|D7|G6|Bm7b5 E7b9|Am7|C#m7b5 F#7b9|G6|Bm7b5 E7|A7|A7|D7|Bm7 Em7|Cmaj7 Cmaj7 F#m7b5 B7|Em7 F7|Bm7 E7|Am7 D7|G6|G6
+x: 리얼북 1권 67쪽(지미 반 휴즌). Am7/D→D7sus4, 라인 클리셰 E- / E-(maj7) E-7은 박마다, 마지막 괄호 (A-7 D7) 생략
+@ceora|Ceora|라틴|8|140|4|AB|16|1-73
+ch: Abmaj7|Bbm7 Eb7|Abmaj7|Ebm7 Ab7|Dbmaj7|Dm7 G7|Cm7|F7|Bbm7|Eb7|Cm7|F7|Dm7|G7|Cm7 F7|Bbm7 Eb7|Abmaj7|Bbm7 Eb7|Abmaj7|Ebm7 D7#9|Dbmaj7|Dm7 G7|Cm7|F7|Bbm7|Eb7|Cm7b5|F7|Bbm7|Eb7sus4|Abmaj7|Bbm7 Eb7
+x: 리얼북 1권 73쪽(리 모건, 보사). D+7→D7#9
+@cherokee|Cherokee|스윙|10|280|4|AABA|16|1-78
+ch: Bbmaj7|Bbmaj7 F7#9|Fm7|Bb7|Ebmaj7|Ebmaj7|Ab7|Ab7|Bb6|Bb6 Dm7|C7|C7|Cm7|Dm7b5 G7|Cm7|F7#9|Bbmaj7|Bbmaj7 F7#9|Fm7|Bb7|Ebmaj7|Ebmaj7|Ab7|Ab7|Bb6|Bb6 Dm7|C7|C7|Cm7|F7|Bb6|Bb6|C#m7|F#7|Bmaj7|Bmaj7|Bm7|E7|Amaj7|Amaj7|Am7|D7|Gmaj7|Gmaj7|Gm7|C7|Cm7|F7#9|Bbmaj7|Bbmaj7 F7#9|Bb7|Bb7|Ebmaj7|Ebmaj7|Ab7|Ab7|Bb6|Bb6 Dm7|C7|C7|Cm7|F7|Bb6|Bb6
+x: 리얼북 1권 78쪽(레이 노블). 64마디. F+7→F7#9, '-- F+7'·'-- D-7'은 앞 화음을 이어 3박부터. 마지막 A 3~4마디는 책대로 Bb7
+@con-alma|Con Alma|라틴|4|160|4|AABA|8|1-89
+ch: Emaj7 G#7|C#m7 B7|Bb7|Ebmaj7 Ebmaj7 Ebm7 Ab7|Dbmaj7 F7|Bbm7 Ab7|G7|Cmaj7|Emaj7 G#7|C#m7 B7|Bb7|Ebmaj7 Ebmaj7 Ebm7 Ab7|Dbmaj7 F7|Bbm7 Ab7|G7|Cmaj7|Cm7b5|F7b9|F#m7|B7|Emaj7|Emaj7|Fm7|Bb7|Emaj7 G#7|C#m7 B7|Bb7|Ebmaj7 Ebmaj7 Ebm7 Ab7|Dbmaj7 F7|Bbm7 Ab7|G7|Cmaj7
+x: 리얼북 1권 89쪽(디지 길레스피). A는 12/8 느낌, B는 스윙. 반복·D.C. al Fine을 AABA로 펼침. G#7/D#·F7/C 베이스 생략
+@countdown|Countdown|스윙|10|280|4|AB|8|1-97
+ch: Em7 F7|Bbmaj7 Db7|Gbmaj7 A7|Dmaj7|Dm7 Eb7|Abmaj7 B7|Emaj7 G7|Cmaj7|Cm7 Db7|Gbmaj7 A7|Dmaj7 F7|Bbmaj7|Em7|F7|Bbmaj7|Bbmaj7
+x: 리얼북 1권 97쪽(존 콜트레인). 16마디. 마지막 괄호 (Eb7) 생략
+@dolphin-dance|Dolphin Dance|스윙|3|140|4|-|-|1-122
+ch: Cm7|Ab7|Cm7|Am7 D7|Gmaj7|Abm7 Db7|Fm7|Bb7|Cm7|Cm7|Am7|D7|Gmaj7|G7sus4|Gmaj7#11|G7sus4|F7sus4|Fmaj7#11|F7sus4|Em7 A7|Eb7|Am7 D7|Bm7|E7 Dm7|C#m7|F#7|Bm7|B7sus4|Bm7|B7sus4|Bbm7|Bb7b9|Bb7sus4|Dm7b5 G7b9
+x: 리얼북 1권 122쪽(허비 행콕). 첫 4마디(인트로 Ebmaj7 Bbm7 Ebmaj7 Dm7b5 G7)를 뺀 반복 구간 34마디. 2마디 반복 기호 펼침. 상부 구조 슬래시는 소리대로: A/G→Gmaj7#11, G/F→Fmaj7#11, Am7/B→B7sus4, Cm7/Bb→Cm7
+@donna-lee|Donna Lee|스윙|8|260|4|ABAC|8|1-124
+ch: Ab6|F7|Bb7|Bb7|Bbm7|Eb7|Ab6|Ebm7 D7|Db6|Dbm7|Ab6|F7|Bb7|Bb7|Bbm7|Eb7|Ab6|F7|Bb7|Bb7|C7|C7|Fm7|C7#9|Fm7|C7|Fm7|Abdim7|Ab6 F7|Bbm7 Eb7|Ab6|Ab6
+x: 리얼북 1권 124쪽(찰리 파커). 마지막 괄호 턴어라운드 (Bb-7 Eb7) 생략
+@dont-get-around-much-anymore|Don't Get Around Much Anymore|스윙|0|140|4|AABA|8|1-126
+ch: Cmaj7 Dm7 D#dim7 Em7|Em7|A7|A7|Am7 D7|G7|C6|C6|Cmaj7 Dm7 D#dim7 Em7|Em7|A7|A7|Am7 D7|G7|C6|C6|F6|Fm7|Em7 C6|C7 C7#9|D7|F#m7b5 B7b9|Em7 D7b9|G7|Cmaj7 Dm7 D#dim7 Em7|Em7|A7|A7 Am7|D7|G7|C6|C6
+x: 리얼북 1권 126쪽(듀크 엘링턴). 첫 마디 4코드는 박마다, 괄호 (G7)(C7) 생략, C+7→C7#9
+@esp|E.S.P.|스윙|5|280|4|-|8|1-141
+ch: E7#9|E7#9|Fmaj7|Fmaj7|E7#9|E7#9|Ebmaj7|Ebmaj7|D7#9|Eb7#11|E7#9|Fmaj7 Eb7|Dm7|G7|Gm7|F#7|E7#9|E7#9|Fmaj7|Fmaj7|E7#9|E7#9|Ebmaj7|Ebmaj7|D7#9|Eb7#11|E7#9|Fmaj7 Eb7|Db7#11|C7|Db7 Gb7|F7
+x: 리얼북 1권 141쪽(웨인 쇼터 곡, 책에는 마일스 데이비스). 1·2번 엔딩 펼쳐 32마디. 7alt→7#9
+@equinox|Equinox|블루스|0|140|4|AAB|4|1-139
+ch: Cm7|Cm7|Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|Ab7|G7|Cm7|Cm7
+x: 리얼북 1권 139쪽(존 콜트레인). C단조 12마디 블루스
+@four-on-six|Four on Six|스윙|7|220|4|AB|8|1-162
+ch: Gm7|Gm7|Gm7|Gm7|Cm7 F7|Bbm7 Eb7|Am7 D7|Ebm7 Ab7|Gm7|Gm7|Gm7|Cm7 F7|Bbmaj7|Am7b5 D7b9|Gm7|Am7b5 D7b9
+x: 리얼북 1권 162쪽(웨스 몽고메리). 책 하단 솔로 체인지 16마디 기준(헤드의 베이스 리프·솔로 브레이크 생략)
+@gentle-rain|Gentle Rain|라틴|9|130|4|-|8|1-169
+ch: Am6|Am6|Bm7b5|E7|Am7 D7|Gm7 C7|F6|F6|F#m7b5|B7b9|Em7b5|A7b9|Dm7b5|Bm7b5 E7|Am6|Bb7|Am6|Am6|Bm7b5|E7|Am7 D7|Gm7 C7|F6|F6|F#m7b5|B7b9|Em7b5|A7b9|Dm7b5|Bm7b5 E7|Am7 D7|Gm7 C7|F6|C7|F6|Em7|Am7|Am7
+x: 리얼북 1권 169쪽(루이스 봉파, 보사). 1번 엔딩 2마디·2번 엔딩 8마디를 펼쳐 38마디. 마지막 괄호 (E7) 생략
+@groovin-high|Groovin' High|스윙|3|220|4|AB|16|1-181
+ch: Eb6|Eb6|Am7 D7|Am7 D7|Eb6|Eb6|Gm7 C7|Gm7 C7|F7|F7|Fm7 Bb7|Fm7 Bb7|Ebmaj7 Gm7|F#m7|Fm7|E7|Eb6|Eb6|Am7 D7|Am7 D7|Eb6|Eb6|Gm7 C7|Gm7 C7|F7|F7|Fm7 Bb7|Fm7 Bb7|Fm7|Abm7 Db7|Eb6|Eb6
+x: 리얼북 1권 181쪽(디지 길레스피, 'Whispering' 진행). 마지막 괄호 (Gb7 Fm7 E7) 생략
+@i-mean-you|I Mean You|스윙|5|200|4|AABA|8|1-219
+ch: F6|F6|Db7|D7|F6|F6|F6|F6|F6|F6|Db7|D7|F6|F6|F6|F6|Eb7|Eb7|F6|F6|Db7|Db7|C7|C7|F6|F6|Db7|D7|F6|F6|F6|F6
+x: 리얼북 1권 219쪽(텔로니어스 멍크). 5~6마디 괄호 대체 (G-7 | C7sus4 C7)은 규칙대로 생략 — 연주에서는 흔히 넣음
+@i-should-care|I Should Care|발라드|0|60|4|ABAC|8|1-237
+ch: Dm7 G7|Em7 A7|Dm7 G7|Cmaj7|Em7b5|A7sus4 A7|Dm7|Fm7 Bb7|Cmaj7|Bm7b5 E7|Gm7 C7|Fmaj7|Bm7b5 E7b9|Am7|Am7 D7|Dm7 G7|F#m7b5 B7b9|Em7 A7|Dm7 G7|Cmaj7|Em7b5|A7sus4 A7|Dm7|Fm7 Bb7|Am7|Bm7b5 E7b9|Am7|D7|Dm7|G7|C6|C6
+x: 리얼북 1권 237쪽(액셀 스토달). Am7/G·D7/F# 베이스 생략, 괄호 대체 (C/E Ebo D-7 G7)·(F7 E-7 A7) 생략
+@in-your-own-sweet-way|In Your Own Sweet Way|스윙|10|160|4|AABA|8|1-232
+ch: Am7b5 D7b9|Gm7 C7|Cm7 F7|Bb6 Ebmaj7|Abm7 Db7|Gbmaj7 Bmaj7|Cm7b5 F7b9|Bbmaj7#11|Am7b5 D7b9|Gm7 C7|Cm7 F7|Bb6 Ebmaj7|Abm7 Db7|Gbmaj7 Bmaj7|Cm7b5 F7b9|Bbmaj7#11|Em7b5 A7b9|Dmaj7|Em7 A7|Dmaj7|Dm7 G7|Cmaj7|Ebm7 Ab7|G7|Am7b5 D7b9|Gm7 C7|Cm7 F7|Bb6 Ebmaj7|Abm7 Db7|Gbmaj7 Bmaj7|Cm7b5 F7b9|Bbmaj7#11
+x: 리얼북 1권 232쪽(데이브 브루벡). Cbmaj7은 Bmaj7로, 코러스 사이 인터루드(Eb 도리안) 생략
+@inner-urge|Inner Urge|스윙|6|220|4|ABC|8|1-229
+ch: F#m7b5|F#m7b5|F#m7b5|F#m7b5|Fmaj7#11|Fmaj7#11|Fmaj7#11|Fmaj7#11|Ebmaj7#11|Ebmaj7#11|Ebmaj7#11|Ebmaj7#11|Dbmaj7#11|Dbmaj7#11|Dbmaj7#11|Dbmaj7#11|Emaj7#11|Dbmaj7#11|Dmaj7#11|Bmaj7#11|Cmaj7|Amaj7|Bbmaj7|Gmaj7
+x: 리얼북 1권 229쪽(조 헨더슨). 24마디. 확인 필요: 23마디 'Bb?7' 글씨가 흐려 마지막 줄 흐름대로 Bbmaj7로 읽음
+@lazy-bird|Lazy Bird|스윙|7|220|4|AABA|8|1-259
+ch: Am7 D7|Cm7 F7|Fm7|Bb7|Ebmaj7|Am7 D7|Gmaj7|Gmaj7|Am7 D7|Cm7 F7|Fm7|Bb7|Ebmaj7|Am7 D7|Gmaj7|Gmaj7|Bm7|E7|Amaj7|Bbm7 Eb7|Am7|D7|Gmaj7|Abm7 Db7|Am7 D7|Cm7 F7|Fm7|Bb7|Ebmaj7|Am7 D7|Gmaj7|Gmaj7
+x: 리얼북 1권 259쪽(존 콜트레인). 1번 엔딩 괄호 (Ab-7 Db7)·코다(끝맺음) 생략
+@moments-notice|Moment's Notice|스윙|3|260|4|-|8|1-299
+ch: Em7 A7|Fm7 Bb7|Ebmaj7|Abm7 Db7|Dm7 G7|Ebm7 Ab7|Dbmaj7#11|Dm7 G7|Cm7 B7b9|Bbm7 Eb7|Abmaj7|Abm7 Db7|Gm7 C7#9|Abm7 Db7|Gb6|Fm7 Bb7|Em7 A7|Fm7 Bb7|Ebmaj7|Abm7 Db7|Dm7 G7|Ebm7 Ab7|Dbmaj7#11|Dm7 G7|Cm7 B7b9|Bbm7 Eb7|Abmaj7|Abm7 Db7|Gm7 C7#9|Fm7 Bb7|Eb6|Fm7|Gm7|Fm7|Eb6 Fm7|Gm7 Fm7|Eb6|Eb6
+x: 리얼북 1권 299쪽(존 콜트레인). 1번 엔딩 4마디·2번 엔딩 10마디를 펼쳐 38마디. C7(b13)·C7(#9)→C7#9, 마지막 괄호 (F-7 Bb7) 생략
+@my-one-and-only-love|My One and Only Love|발라드|0|60|4|AABA|8|1-310
+ch: Cmaj7 Cmaj7 Am7 Am7|D7 G7|C6 Fmaj7|G7 G7 Em7 A7|Dm7 Dm7 G7 E7|Am7 D7|Dm7 G7|Em7 A7 Dm7 G7|Cmaj7 Cmaj7 Am7 Am7|D7 G7|C6 Fmaj7|G7 G7 Em7 A7|Dm7 Dm7 G7 E7|Am7 D7|Dm7 G7|C6 C6 F#m7b5 B7|Em7|F#m7 B7|Em7|F#m7 B7|Em7 Emmaj7|Em7 C#m7b5|Dm7 A7|Dm7 G7|Cmaj7 Cmaj7 Am7 Am7|D7 G7|C6 Fmaj7|G7 G7 Em7 A7|Dm7 Dm7 G7 E7|Am7 D7|Dm7 G7b9|C6
+x: 리얼북 1권 310쪽(가이 우드). 베이스 하행 슬래시(C/B·A/G·D7/F#·G7/F·C/E·E7/G#)는 베이스 생략. 브리지 라인 클리셰 E-/D#·E-/D·E-/C#은 소리대로 Emmaj7·Em7·C#m7b5. 마지막 괄호 생략
+@nefertiti|Nefertiti|발라드|8|100|4|AB|8|1-317
+ch: Abmaj7#11|Dbmaj7#11|Gm7b5|C7b9|Bmaj7|Bbm7|Amaj7#11|Eb7b9|Emaj7#11|A7sus4|D7#9|E7#11|E7sus4|Eb7#11|A7b9|A7b9
+x: 리얼북 1권 317쪽(웨인 쇼터 곡, 책에는 마일스 데이비스). 16마디(발라드 스윙). Cbmaj7→Bmaj7, Bb-11→Bbm7, Eb7(b9#11)→Eb7b9, D7#9/Bb 베이스 생략, A7(b9 13)→A7b9
+@pent-up-house|Pent-Up House|스윙|7|200|4|AABA|4|1-346
+ch: Am7 Ab7|Am7 Ab7 Ab7 Ab7|Gmaj7 Gmaj7 Ab7 Ab7|Gmaj7|Am7 Ab7|Am7 Ab7 Ab7 Ab7|Gmaj7 Gmaj7 Ab7 Ab7|Gmaj7|Dm7 Db7|Dm7 Db7 Db7 Db7|Cm7|Cm7 F7|Am7 Ab7|Am7 Ab7 Ab7 Ab7|Gmaj7 Gmaj7 Ab7 Ab7|Gmaj7
+x: 리얼북 1권 346쪽(소니 롤린스). 16마디. 박 표기(/ / 사선)대로 나눔, 3마디 끝 괄호 (G) 생략
+@prelude-to-a-kiss|Prelude to a Kiss|발라드|0|56|4|AABA|8|1-353
+ch: D7 G7#9|C7 Fmaj7|B7b9 E7|A7b9 Dm7|Dm7 G7#9|Am7 D7#11|Dm7 G7#9|Cmaj7 Am7|D7 G7#9|C7 Fmaj7|B7b9 E7|A7b9 Dm7|Dm7 G7#9|Am7 D7#11|Dm7 G7#9|C6 B7|Emaj7 C#m7|F#m7b5 B7|G#m7 Gdim7|F#m7 F7|Emaj7 C#m7|F#m7b5 B7|Emaj7 A7b9|Dm7 Ebm7 Em7 Eb7|D7 G7#9|C7 Fmaj7|B7b9 E7|A7b9 Dm7|Dm7 G7#9|Am7 D7#11|Dm7 G7#9|C6
+x: 리얼북 1권 353쪽(듀크 엘링턴). G+7→G7#9. 확인 필요: 24마디 마지막 화음이 쪽 끝에서 잘려 'Eb'까지만 보임 — Eb7로 읽음
+@seven-steps-to-heaven|Seven Steps to Heaven|스윙|5|280|4|AABA|8|1-379
+ch: Fmaj7 Bb7|Em7b5 A7|Dm7 Ab7|G7|Gm7|C7|Ebmaj7 E6|Fmaj7|Fmaj7 Bb7|Em7b5 A7|Dm7 Ab7|G7|Gm7|C7|Ebmaj7 E6|Fmaj7|Cmaj7|Dm7|Em7|Fm7 Bb7|Ebmaj7|Abm7 Db7|Gbmaj7|Gm7 C7|Fmaj7 Bb7|Em7b5 A7|Dm7 Ab7|G7|Gm7|C7|Ebmaj7 E6|Fmaj7
+x: 리얼북 1권 379쪽(마일스 데이비스·빅터 펠드먼). 인트로 생략. 5~6마디 괄호 (G-7)(C7)은 브레이크 구간의 화음 표시라 넣음. 7마디 'E'(삼화음)는 규칙대로 E6
+@the-shadow-of-your-smile|The Shadow of Your Smile|라틴|7|110|4|ABAC|8|1-381
+ch: F#m7|B7b9|Em7|A7|Am7|D7|Gmaj7|Cmaj7|F#m7b5|B7|Em7|Em7|C#m7b5|F#7|F#m7|B7|F#m7|B7b9|Em7|A7|Am7|D7|Bm7b5|E7#9|Am7|Cm7 F7|Bm7|E7b9|A7 Eb7|Am7 D7b9|G6|G6
+x: 리얼북 1권 381쪽(조니 맨델, 느린 보사). B7(9)-(b9)→B7b9, Em7/D 베이스 생략, E7alt→E7#9, 마지막 괄호 (B7) 생략
+@sugar|Sugar|스윙|0|140|4|AB|16|1-414
+ch: Cm7|Dm7b5 G7#9|Cm9|G7#9|Cm7|Cm7|Dm9|G7#9|Cm9|Cm9|Fm9|Eb9|Dm7b5|G7#9|Ab7#11|G7#9|Cm7|Dm7b5 G7#9|Cm9|G7#9|Cm7|Cm7|Dm9|G7#9|Cm9|Cm9|Fm9|Eb9|Dm7b5|G7#9|Cm9|Cm9
+x: 리얼북 1권 414쪽(스탠리 터렌타인). 1·2번 엔딩 펼쳐 32마디. G+7→G7#9, Eb7(13)→Eb9, 괄호 (A-7b5)(Dbmaj7) 생략
+@take-five|Take Five|스윙|3|170|5|AABA|8|1-420
+ch: Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Bmaj7 Abm6|Bbm7 Ebm7|Abm7 Db7|Gbmaj7|Bmaj7 Abm6|Bbm7 Ebm7|Abm7 Db7|Fm7 Bb7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7 Bbm7|Ebm7
+x: 리얼북 1권 420쪽(폴 데즈먼드). 5/4박 — 한 마디 두 코드는 3+2박. Cbmaj7→Bmaj7, Ab-6→Abm6
+@walkin|Walkin'|블루스|5|160|4|AAB|4|1-446
+ch: F7|F7|F7|F7|Bb7|Bb7|F7|F7|C7|Bb7|F7|F7
+x: 리얼북 1권 446쪽(리처드 카펜터). 12마디 블루스, 인트로 생략. 괄호 (Bb7)(F7)(C7) 생략
+@waltz-for-debby|Waltz for Debby|스윙|5|160|3|-|8|1-450
+ch: Fmaj7|Dm7|Gm7|E7|A7|D7|G7|C7|F7|Bbmaj7|Gm7|C7|Am7|D7|Gm7|C7|Fmaj7|Dm7|Gm7|E7|A7|D7|G7|C7|F7|Bbmaj7|Bm7|E7|Amaj7|Bm7|C#m7|Bm7|Gm7|C7|Am7|D7|Gm7|A7|Dm7|F7|Bbmaj7|A7|Dm7|E7|Am7|Ab7|Gm7|Gb7|Fmaj7|Dm7|Gm7|E7|A7|D7|G7|C7|F7|Bbmaj7|Bb6|Eb7|Am7|D7|Bm7|E7|Am7|Am7|Bbmaj7|Eb7|Am7|Abdim7|Am7|Abdim7|Gm7|C7|F6|F6|F6|F6
+x: 리얼북 1권 450쪽(빌 에반스). 3/4 재즈 왈츠. 1·2·3번 엔딩과 D.C.를 펼쳐 78마디(16+32+30). A7/C#·D7/C·G7/B·C7/Bb 베이스 생략
+@west-coast-blues|West Coast Blues|블루스|10|180|3|AAB|8|1-455
+ch: Bb7|Bb7|Ab7|Ab7|Bb7|Bb7|Bm7|E7|Eb7|Eb7|Eb7|Eb7|Bb7|Bb7|Bb7|Bb7|F7|F7|Eb7|Eb7|Bb7|Bb7|Bb7|Bb7
+x: 리얼북 1권 455쪽(웨스 몽고메리). 책은 6/4박 12마디 — 앱은 3/4박 24마디로(책 한 마디 = 앱 두 마디). 헤드 화음 기준, 아래 칸의 대체 솔로 체인지는 생략
+@yes-or-no|Yes or No|스윙|7|260|4|-|-|1-471
+ch: D7sus4|D7sus4|D7sus4|D7sus4|Dmaj7|Dmaj7|Dmaj7|Dmaj7|Am7 D7|Gmaj7 F7|Bbmaj7|Bbmaj7|Em7|Em7|D7sus4|D7sus4|D7sus4|D7sus4|Dmaj7|Dmaj7|Dmaj7|Dmaj7|Am7 D7|Gmaj7 F7|Bbmaj7|Bbmaj7|Em7|Em7|Am7b5|Am7b5|D7b9|D7b9|Gm7|Gm7|C7|C7|Fm7|Fm7|Bb7|Bb7|Ebmaj7|Ebmaj7|Am7|D7|D7sus4|D7sus4|D7sus4|D7sus4|Dmaj7|Dmaj7|Dmaj7|Dmaj7|Am7 D7|Gmaj7 F7|Bbmaj7|Bbmaj7|Em7|Em7
+x: 리얼북 1권 471쪽(웨인 쇼터). A14·A14·B16·A14 58마디(D.S. al 2nd ending 펼침)
+@cottontail|Cottontail|스윙|8|260|4|AABA|8|1-95
+ch: Abmaj7 Fm7|Bbm7 Eb7|Cm7 Fm7|Bbm7 Eb7|Ab7|Db6 Ddim7|Ab6 Eb7|F7 F7 Bbm7 Eb7|Abmaj7 Fm7|Bbm7 Eb7|Cm7 Fm7|Bbm7 Eb7|Ab7|Db6 Ddim7|Ab6 Eb7|Ab6|C7|C7|F7|F7|Bb7|Bb7|Eb7|Eb7|Abmaj7 Fm7|Bbm7 Eb7|Cm7 Fm7|Bbm7 Eb7|Ab7|Db6|Ab6 Eb7|Ab6
+x: 리얼북 1권 95쪽(듀크 엘링턴). 리듬 체인지 계열(이 판은 Ab)
+@dexterity|Dexterity|스윙|10|240|4|AABA|8|1-117
+ch: Bb6|Cm7 F7b9|Bb6 G7|Cm7 F7|Bb6 Bb7|Eb6 Ab7|Dm7 Db7|Cm7 F7|Bb6|Cm7 F7b9|Bb6 G7|Cm7 F7|Bb6 Bb7|Eb6 Ab7|Cm7 F7#9|Bb6|Am7 D7|Am7 D7|Dm7|G7|Gm7|C7|Cm7|F7|Bb6|Cm7 F7b9|Bb6 G7|Cm7 F7|Bb6 Bb7|Eb6 Ab7|Cm7 F7#9|Bb6
+x: 리얼북 1권 117쪽(찰리 파커). 리듬 체인지 변형, F7alt→F7#9
+@along-came-betty|Along Came Betty|스윙|8|160|4|-|8|3-7
+ch: Bbm7|Bm7|Bbm7|Bm7 E7|Amaj7|Ab7|Gmaj7|Gb7|Gbm7|Gm7|Gbm7|Gm7 C7|Fmaj7|A7#9|Dm7|G7|Cm7|F7|Am7b5 D7|Gm7|Em7b5|A7#9|Fm7|Bb7|Bbm7|Bm7|Bbm7|Bm7 E7|Cm7b5|F7b9|Bbm7b5|Eb7#9|Abmaj7|Abmaj7
+x: 리얼북 3권 7쪽(베니 골슨). 책 그대로 8·8·8·10 34마디. A+7→A7#9, Gm7/F 베이스 생략
+@bernies-tune|Bernie's Tune|스윙|2|200|4|AABA|8|3-24
+ch: Dm7|Dm7|Bb7|Bb7|Em7b5|A7|Dm7|Em7b5 A7|Dm7|Dm7|Bb7|Bb7|Em7b5|A7|Dm7|Cm7 F7|Bb6 Gm7|Cm7 F7|Bb6 Gm7|Cm7 F7|Bb6 Gm7|Cm7 F7|Bb6|Em7b5 A7|Dm7|Dm7|Bb7|Bb7|Em7b5|A7|Dm7|Dm7
+x: 리얼북 3권 24쪽(버니 밀러)
+@bluebird|Bluebird|블루스|3|180|4|AAB|4|3-29
+ch: Eb7|Eb7|Eb7|Eb7|Ab7|Ab7|Eb7|C7b9|Fm7|Bb7|Eb7 Bb7|Eb7 Bb7
+x: 리얼북 3권 29쪽(찰리 파커). 12마디 블루스
+@the-boy-next-door|The Boy Next Door|스윙|10|150|3|ABAC|8|3-37
+ch: Bbmaj7|G7#11|Cm7|F7#11|Bbmaj7|Gm7|C7sus4|C7|Cm7|F7|Bbmaj7|Gm7|Em7b5|A7b9|Dm7 C#dim7|Cm7 F7|Bbmaj7|G7#11|Cm7|F7#11|Bbmaj7|Gm7|C7|F#7#9|Bbmaj7|Bbmaj7|Em7b5|C7#11|Gb9|F7|Bb6|Bb6
+x: 리얼북 3권 37쪽(휴 마틴). 3/4. Gm7/F·Bbmaj7/F 베이스 생략, F#+7→F#7#9, Bb6/9→Bb6
+@cheryl|Cheryl|블루스|0|200|4|AAB|4|3-53
+ch: C6|Dm7|Gm7|C7|Cm7|F7|C6 Dm7|Em7 A7|Fm7 Bb7|Dm7 G7|C6|C6
+x: 리얼북 3권 53쪽(찰리 파커). 비밥 블루스 12마디
+@gone-with-the-wind|Gone with the Wind|스윙|3|160|4|ABAC|8|3-101
+ch: Fm7 Bb7#9|Ebmaj7 C7b9|Fm7 Bb7#9|Ebmaj7|Am7 D7|Gmaj7 Bbdim7|Am7 D7|Gmaj7|Gm7|F#dim7|Fm7|Bb7|Eb6 Ab7|Gm7b5 C7b9|Fm7|B7#11 Bb9|Fm7 Bb7#9|Ebmaj7 C7b9|Fm7 Bb7#9|Ebmaj7|Am7 D7|Gmaj7 Bbdim7|Am7 D7|Gmaj7|Fm7|Cm7|Abmaj7#11|Gm7 C7|Fm7|B7#11 Bb7#9|Ebmaj7|Ebmaj7
+x: 리얼북 3권 101쪽(앨리 루벨). Bb+7→Bb7#9, B9#11→B7#11, Eb6/9→Eb6
+@dig|Dig|스윙|8|260|4|AB|16|3-64
+ch: F7|F7|F7|F7|Bb7|Bb7|Bb7|Bb7|Eb7|Eb7|Eb7|Eb7|Abmaj7|Bbm7 Eb7|Ab7|Gm7 C7|F7|F7|F7|F7|Bb7|Bb7|Bb7|Bb7|Fm7|C7|Fm7|Eb7|Abmaj7|F7|Bbm7 Eb7|Abmaj7
+x: 리얼북 3권 64~65쪽(마일스 데이비스, 'Sweet Georgia Brown' 진행). 32마디
+@ill-be-seeing-you|I'll Be Seeing You|발라드|3|70|4|ABAC|8|3-129
+ch: Ebmaj7|G7#9|Fm7 C7b9|Fm7|Bb7sus4|Bb7|Ebmaj7 Fm7|F#dim7 Gm7|Cm7|Cmmaj7|Fm7|Bb7|Fm7|Bb7#9|Ebmaj7 C7|Bb7#9|Ebmaj7|G7#9|Fm7 C7b9|Fm7|Bb7sus4|Bb7|Gm7b5|C7b9|Fm7|Dm7b5 G7b9|Cm7|F9|Fm7b5|Bb7b9|Eb6|Eb6
+x: 리얼북 3권 129쪽(새미 페인). Fm7/Bb→Bb7sus4, G+7·Bb+7→7#9, F13→F9, Eb6/9→Eb6
+@i-concentrate-on-you|I Concentrate on You|스윙|3|180|4|AABA|16|3-118
+ch: Ebmaj7|Ebmaj7|Ab7#11|Ab7#11|Ebm7|Dbm7 Gb7|Bmaj7|Bmaj7|Fm7|Bb7b9|Ebm7|Gb7|B7#11|Bb7#9 Bb7|Eb6|Eb6|Ebmaj7|Ebmaj7|Ab7#11|Ab7#11|Ebm7|Dbm7 Gb7|Bmaj7|Bmaj7|Abm7|Db7|Gbmaj7|C7|F7|Bb7#9 Bb7|Eb6|Eb7|Abmaj7|Abm7 Db7|Ebmaj7|C7#9|Fm7|Bb7|Ebmaj7|A7#11|Abmaj7|Abm7|Gbmaj7|Gbmaj7|Cm7|F7|Bb9|Bb7#9|Eb6|Ab7#11|Gm7|Gb7#11|Fm7|Bb7 Ab7|G9 G7#9|C7sus4 C7b9|Fm7|Db9 C9|Fm7|F#dim7|B7#11|Bb7#9 Bb7|Eb6|Eb6
+x: 리얼북 3권 118~119쪽(콜 포터). 64마디. Bb+7·G+7→7#9, Bb13·G13→9, Gb13#11→Gb7#11, C9sus4→C7sus4, Eb6/9→Eb6
+@isfahan|Isfahan|발라드|1|70|4|ABAC|8|3-150
+ch: Dbmaj7|Bbmaj7 Bb7#9|Eb9|Eb9|Amaj7|Ab7#9|Dbmaj7|Dbmaj7|Gm7b5 C7b9|Fm6|Am7b5 D7b9|Gm6|Gm7b5|C7#9|Fmaj7 Emaj7|Ebmaj7 D7|Dbmaj7|Bbmaj7 Bb7#9|Eb9|Eb9|Amaj7|Ab7#9|Db7#11|Db7#11|Gbmaj7|C7#9|F7#11|Bb7|Eb9|Ab7b9 Ab7#9|Dbmaj7|Dbmaj7
+x: 리얼북 3권 150쪽(빌리 스트레이혼). Bb+7·Ab+7·C+7b9→7#9
+@just-squeeze-me|Just Squeeze Me|스윙|5|140|4|AABA|8|3-163
+ch: Fmaj7 Gm7|Am7 Gm7|Fmaj7 Gm7|Am7 D7|Gm7|C7|Fmaj7|Gm7 C7|Fmaj7 Gm7|Am7 Gm7|Fmaj7 Gm7|Am7 D7|Gm7|C7|Fmaj7|Fmaj7|F7 Cm7|F7 F7 Cm7 F7|Bbmaj7|Bbmaj7|G7 Dm7|G7 Dm7|Gm7|C7|Fmaj7 Gm7|Am7 Gm7|Fmaj7 Gm7|Am7 D7|Gm7|C7|Fmaj7|Fmaj7
+x: 리얼북 3권 163쪽(듀크 엘링턴)
+@its-all-right-with-me|It's All Right with Me|스윙|3|200|4|-|8|3-152
+ch: Cm7|Cmmaj7|Cm7|Cm6|Cm7|Cm6|Fm7|Fm7|Bb7|Bb7|Gm7b5|C7b9|F7|F7|Dm7b5|G7b9|Cm7|Cmmaj7|Cm7|Cm6|Cm7|Cm6|Fm7|Fm7|Bb7|Bb7|Gm7b5|C7b9|Fm7|Bb7|Eb6|Eb6|Gm7b5|C7b9|F7|F7|Fm7b5|Bb7b9|Ebmaj7|Ebmaj7|Gm7b5|C7b9|F7|F7|Fm7b5|Bb7b9|Dm7b5|G7|Cm7|Cmmaj7|Cm7|Cm6|Cm7|Cm6|Fm7|Fm7|Bb7|Bb7|Gm7b5|C7b9|F7|F7|Fm7|Bb7|Ebmaj7|Eb7|Abmaj7|Abmaj7|Fm7|Bb7sus4|Eb6|Eb6
+x: 리얼북 3권 152~153쪽(콜 포터). A16·A16·B16·A'24 72마디. Bb9sus4→Bb7sus4, Eb6/9→Eb6
+@the-lady-is-a-tramp|The Lady Is a Tramp|스윙|0|180|4|-|8|3-166
+ch: Cmaj7|A7b9|Dm7|G7|Cmaj7|A7b9|Dm7|G7|C7sus4|Gm7 C7|Fmaj7|Bb7sus4 Bb7|Em7 A7|Dm7 G7|C6 A7#9|Dm7 G7|Cmaj7|A7b9|Dm7|G7|Cmaj7|A7b9|Dm7|G7|C7sus4|Gm7 C7|Fmaj7|Bb7sus4 Bb7|Em7 A7|Dm7 G7|C6|C6|Dm7|G7|Em7|A7|Dm7|G7|Bb7#11 A7|Dm7 G7|Cmaj7|A7b9|Dm7|Bm7b5 E7|Am7|Dm7 G7|Cmaj7|Cmaj7
+x: 리얼북 3권 166쪽(리처드 로저스). 책 그대로 A16·A16·B8·A8 48마디. C6/9→C6, A+7→A7#9, 브리지 괄호 (F#m7 B7) 생략
+@moonlight-in-vermont|Moonlight in Vermont|발라드|3|60|4|-|-|3-199
+ch: Ebmaj7 Cm7|Fm7 Bb7|Ebmaj7 Cm7|Db7#11|Fm7 Bb7sus4|Eb6|Ebmaj7 Cm7|Fm7 Bb7|Ebmaj7 Cm7|Db7#11|Fm7 Bb7sus4|Eb6|Am7 D7|Bm7 Bb9|Am7 D7#9|Gmaj7|Bbm7 Eb7|Cm7 B9|Bbm7 Eb7|Abmaj7 Bb7#9|Ebmaj7 Cm7|Fm7 Bb7|Ebmaj7 Cm7|Db7#11|Fm7 Bb7sus4|Eb6|F7#11 F7#11 Bb7sus4 E9|Ebmaj7
+x: 리얼북 3권 199쪽(칼 수스도프). 6·6·8·8 28마디. Db9#11→Db7#11, Bb+7b9→Bb7#9, Eb6/9→Eb6
+@over-the-rainbow|Over the Rainbow|발라드|3|60|4|AABA|8|3-229
+ch: Ebmaj7 Cm7|Gm7 Eb7|Abmaj7 D7|Gm7 C7|Fm7 Db7|Ebmaj7 Ebmaj7 Gm7 C7|Fm7 Bb7|Ebmaj7 Bb7sus4|Ebmaj7 Cm7|Gm7 Eb7|Abmaj7 D7|Gm7 C7|Fm7 Db7|Ebmaj7 Ebmaj7 Gm7 C7|Fm7 Bb7|Ebmaj7|Ebmaj7|Fm7 Bb7|Gm7 C7|Fm7 Bb7|Ebmaj7|Am7b5 D7b9|Gm7 C7|Fm7 Bb7|Ebmaj7 Cm7|Gm7 Eb7|Abmaj7 D7|Gm7 C7|Fm7 Db7|Ebmaj7 Ebmaj7 Gm7 C7|Fm7 Bb7|Ebmaj7
+x: 리얼북 3권 229쪽(해럴드 알렌). Fm7/Bb→Bb7sus4. 확인 필요: 브리지 4마디 Fm7 Bb7 위치(책에서 앞 마디와 겹쳐 보임)
+@sonnymoon-for-two|Sonnymoon for Two|블루스|10|180|4|A|12|3-276
+ch: Bb7|Eb7|Bb7|Bb7|Eb7|Eb7|Bb7|Bb7|Cm7|F7|Bb7 G7|Cm7 F7
+x: 리얼북 3권 276쪽(소니 롤린스). 12마디 블루스(2마디 IV)
+@stablemates|Stablemates|스윙|1|170|4|-|-|3-283
+ch: Em7 A7|Ebm7 Ab7|Dbmaj7|C7#9|Abm7|Db7|Gbmaj7|Gm7b5 C7|Fm7|Bb7|Ebm7|Ab7b9|Dbmaj7|Dbmaj7|Fm7|Gb7|G7#9|C7|B7|Bb7|A7|Ab7|Em7 A7|Ebm7 Ab7|Dbmaj7|C7#9|Abm7|Db7|Gbmaj7|Gm7b5 C7|Fm7|Bb7|Ebm7|Ab7b9|Dbmaj7|Dbmaj7
+x: 리얼북 3권 283쪽(베니 골슨). A14·B8·A14 36마디(14마디 섹션이라 형식은 4마디 단위로 근사)
+@that-old-feeling|That Old Feeling|발라드|3|90|4|ABAC|8|3-300
+ch: Eb6 Ebmaj7|Cm7 Eb6|Abm7 Db7|Gm7b5 C7b9|Fm7 C7#9|Fm7|F#m7 B7|Bb7 G7|Cm7|G7|Eb6 A7|Abmaj7|Cm7|F7|Fm7|B7#11 Bb7|Eb6 Ebmaj7|Cm7 Eb6|Abm7 Db7|Gm7b5 C7b9|Fm7 C7#9|Fm7|Am7b5|D7b9|Gm7b5|C7b9|Fm7|Abm7 Db7|Eb6 G7|Cm7 Gb7|Fm7 Fm7 Bb7sus4 Bb7|Eb6
+x: 리얼북 3권 300쪽. 베이스 하행(Eb Eb/D Eb/C Eb/Bb)은 소리대로 Eb6 Ebmaj7 Cm7 Eb6, G7/B→G7, Fm7/Eb→Fm7, C+7→C7#9, Eb6/9→Eb6
+@too-close-for-comfort|Too Close for Comfort|스윙|0|190|4|AABAC|8|3-322
+ch: Cmaj7|B7#9|Em7b5|A7|Dm7b5|G7|Cmaj7|Dm7 G7|Cmaj7|B7#9|Em7b5|A7|Dm7b5|G7|Cmaj7|Gm7 C7|F7|F#dim7|C6|Gm7 C7|F7|F#dim7|Ab7|Dm7 G7|Cmaj7|B7#9|Em7b5|A7|Dm7b5|G7|Cmaj7|Gm7 C7|F7|F#dim7|Am7b5|D7b9|Ab7|G7|Cmaj7|Cmaj7
+x: 리얼북 3권 322쪽. 반복·1/2번 엔딩 풀어 40마디. B+7→B7#9, C/G→C6
+
 // ── 보류 ──
 // 보류(첫 코드 등 표기가 흐려 확신 불가): heres-that-rainy-day 1-191
 // 보류(D.C.·코다 구조가 모호): invitation 1-234
@@ -582,3 +766,6 @@ x: 리얼북 3권 352~353쪽(J. 프레드 쿠츠). A8·A8·B8·A'16 40마디. F+
 // 보류(10마디 코드 판독 불확실): jody-grind 2-183
 // poinciana|3-240|1·2번 엔딩과 반복 기호가 두 겹이라 섹션 순서를 확정할 수 없음
 // un-poco-loco|3-327|2/4 마디와 D.S. al Coda가 섞여 있어 박자 고정 엔진에 그대로 넣을 수 없음
+// dear-old-stockholm|1-108|인트로·인터루드·D.S. al Coda·2마디 반복이 겹쳐 연주 순서를 확정할 수 없음
+// lush-life|1-278|자유 템포(루바토)에 한 마디 4코드·슬래시가 많아 박 위치를 확정하기 어려움
+// stolen-moments|1-410|헤드 9~10마디가 평행 이동 보이싱(한 박마다 다른 단3화음)으로 적혀 있고, 솔로는 'C단조 블루스'라고만 되어 있음

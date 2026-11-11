@@ -1,3 +1,22 @@
+## v0.39.0 "Clu" (2026-11-11) — 노래 프레이즈 · 노래↔비밥 조절바 · 블루스 스케일 · 리얼북 61곡 추가
+
+- **노래 프레이즈**(두호 님 통화 피드백): 일부 프레이즈를 4분·2분음표 중심 리듬 셀(예: 4분-2분-4분, 당김 4분-2분)로 만들고, 음은 프레이즈 전체를 동적 계획법(`planSong`)으로 한 번에 고른다.
+  - 긴 음은 3·7음(가이드톤) → 텐션(9·13) → 다른 코드톤 순으로 선호, 긴 음에 스케일 경과음은 쓰지 않음. 코드가 바뀌는 순간 닿는 음은 가이드톤을 강하게 선호.
+  - 정박 코드톤 규칙을 프레이즈 안에서 완화(텐션 허용), 순차·3도 진행 우선, 도약 뒤 반대 방향으로 메움, 아치·하행·상행 윤곽, 같은 음 반복에 비용.
+  - 같은 리듬 셀이 이어지면 앞 셀 음형을 옮겨 **동기 반복(시퀀스)**. 마지막 음은 2분음표 이상으로 길게.
+  - 어디에 둘지: 섹션 첫 프레이즈 · 첫 코러스 앞부분 · 곡 마지막 · 해결 프레이즈에 가산, 낮은 비율일 때는 노래 프레이즈끼리 붙지 않게 해 **화려한 비밥 라인과 번갈아** 나오게 함. 발라드 ×1.5 · 보사/라틴 ×1.15 · 블루스 ×0.8 · 빠른 곡(230+) ×0.75, 연주자 프로필의 8분음표 비율에 따라 0.6~1.6배.
+- **「노래 ↔ 비밥」 조절바**(0~100%, 5단위, 기본 30): 0이면 비밥 라인만, 100이면 노래 프레이즈만. ♡ 저장·버그 리포트에 값이 함께 기록됨. 엔진 옵션 `generateSolo(..., {lyric:0~1})`.
+  - 기본값(30)에서 8분음표 비율 약 50%, 0에서 약 63%, 100에서 약 14%(4분 50% · 2분 26%).
+- **블루스 스케일 프레이즈**: 조 기준 1·♭3·4·♭5·5·♭7 + ♭3→3 꺾기·6. ♭5는 약박 짧은 음에서만 쓰고 4나 5로 반음 해결. 하행 윤곽 위주. 블루스 곡 35% · 일반 곡 14% · 발라드 6%(난이도 2 이상, 블루스 곡이 아니면 조 안 코드 구간에서만). 끄는 옵션 `{blues:false}`.
+- 노래·블루스 음은 코드톤 정렬·크로매틱 정리 패스에서 고정(`keep`).
+- **리얼북 61곡 추가**(악보 대조, 1권 42 · 3권 19 / 스윙 37 · 발라드 10 · 블루스 9 · 라틴 5): Afro Blue · Airegin · Alice in Wonderland · Anthropology · Bessie's Blues · Black Narcissus · Blue Train · Boplicity · But Beautiful · Ceora · Cherokee · Con Alma · Countdown · Dolphin Dance · Donna Lee · Don't Get Around Much Anymore · E.S.P. · Equinox · Four on Six · Gentle Rain · Groovin' High · I Mean You · I Should Care · In Your Own Sweet Way · Inner Urge · Lazy Bird · Moment's Notice · My One and Only Love · Nefertiti · Pent-Up House · Prelude to a Kiss · Seven Steps to Heaven · The Shadow of Your Smile · Sugar · Take Five(5/4) · Walkin' · Waltz for Debby · West Coast Blues · Yes or No · Cottontail · Dexterity · Along Came Betty · Bernie's Tune · Bluebird · The Boy Next Door · Cheryl · Gone with the Wind · Dig · I'll Be Seeing You · I Concentrate on You · Isfahan · Just Squeeze Me · It's All Right with Me · The Lady Is a Tramp · Moonlight in Vermont · Over the Rainbow · Sonnymoon for Two · Stablemates · That Old Feeling · Too Close for Comfort, 그리고 기존 Au Privave를 책 판으로 교체.
+  - 「확인 필요」 3곡(□): Inner Urge(23마디 흐린 글씨) · Prelude to a Kiss(24마디 잘린 화음) · Over the Rainbow(브리지 4마디 위치).
+  - 보류 3곡 추가: Dear Old Stockholm(인트로·D.S.·반복 겹침) · Lush Life(루바토, 박 위치 불명확) · Stolen Moments(헤드가 평행 화음, 솔로는 「C단조 블루스」로만 표기).
+  - 결과: 책 대조 250곡(■ 226 · □ 24) + 책에 없는 기존 11곡 + 연습용 3 = 264곡. 5/4 박자 입력 허용(`rb_import.js`).
+- 화성 지표(test.js, 264곡, 기본 30%): 강박 코드톤 97.6 → **89.6%** · 전환 가이드톤 87.7 → **84.3%** · 크로매틱 3.0 → 2.9% · 같은 음 반복 5.6 → 5.4%. 강박 코드톤 하락은 의도한 것 — 노래 프레이즈에서 정박 텐션(9·13)을 허용하고, 블루스 스케일 음(♭3·4·♭7)이 코드 밖으로 잡히기 때문. 조절바 0 + 블루스 끔이면 97.6% · 87.9%로 v0.38과 같음. 100%에서는 74.4% · 79.2% · 반복 5.1%.
+- 테스트 조정(이유): `test_motif_v028`은 모티프 생존을 보는 검사라 `lyric:0`으로(노래 프레이즈가 모티프 자리를 대신하므로). `test_rhythm_v033`의 미해결 크로매틱 집계에서 블루스 스케일 마디 제외(♭5·♭3는 의도한 블루노트). `eval_players`는 연주자 엔진만 비교하도록 `lyric:0, blues:false`.
+- 화면: 머리말 곡 수(366 → 261, v0.37부터 갱신 안 되던 숫자)·수록 곡 안내 갱신.
+
 ## v0.38.0 "Clu" (2026-11-11) — 리얼북 1~3권 악보 대조 코드집 · 한 마디 여러 코드
 
 - **리얼북 악보 대조**: 사용자가 준 리얼북 1·2·3권 스캔을 한 장씩 보며 **코드 진행만** 옮겼다(멜로디·가사 없음). 189곡 — 1권 99 · 2권 57 · 3권 33 / 스윙 90 · 발라드 52 · 라틴 23 · 블루스 13 · 펑크 11.

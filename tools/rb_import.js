@@ -42,7 +42,7 @@ function parseSrc(){
     /* 마지막 섹션 뒤 꼬리(프레이즈보다 짧은 태그·턴어라운드)는 허용 */
     if(s.sec!=='-'&&s.ph!=='-'&&(s.nb<sec.length*P||s.nb-sec.length*P>=P))errs.push(s.id+': 형식 '+sec+'×'+P+'='+(sec.length*P)+'마디인데 '+s.nb+'마디');
     if(!(s.k>=0&&s.k<12))errs.push(s.id+': 으뜸음 '+s.k);
-    if(![3,4].includes(s.m))errs.push(s.id+': 박자 '+s.m);
+    if(![3,4,5].includes(s.m))errs.push(s.id+': 박자 '+s.m);
     s.f=[sec,P];
   });
   const seen={};out.forEach(s=>{if(seen[s.id])errs.push('중복 id '+s.id);seen[s.id]=1});

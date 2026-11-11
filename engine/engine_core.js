@@ -318,6 +318,13 @@ function classifySong(id,prog){
   if(MODAL_IDS.includes(id))return 'modal';
   return 'standard';
 }
+/* v0.39 노래 프레이즈 리듬 셀(박 단위 토큰) — 4분·2분·당김음 위주. 같은 셀을 되풀이해 동기처럼 들리게 한다 */
+const SONG_CELLS={
+  4:[['Q','H','Q','Q'],['Q','Q','Q','H'],['Ur','H','Q','Q'],['Q','H','H','Q'],['E','Q','H','R'],['Q','Ur','H','Q'],['Q','H','Q','R'],['Ur','H','H','Q']],
+  3:[['Q','H','Q'],['Q','Q','Q'],['Ur','H','Q'],['Q','H','H'],['E','Q','Q'],['Q','Ur','H']],
+  2:[['Q','H'],['Q','Q'],['Ur','H'],['E','Q'],['Q','Ur']]
+};
+const LYRIC_DEFAULT=0.3;   /* 노래↔비밥 조절바 기본값(노래 프레이즈 비율) */
 const HL_LABEL={line:'8분 라인',perc:'리듬 반복(한 음)',pivot:'피벗 패턴',hemiola:'3음 시퀀스(헤미올라)',trip:'셋잇단 런'};
 /* 직접 작성한 교육용 리듬 윤곽 — WJD 전사/파생 템플릿이 아니다. */
 const RHY_TPL=[
@@ -466,6 +473,39 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     }
   }
 
+  /* v0.39 노래 프레이즈 선택 — opts.lyric(0~1)이 노래 프레이즈 비율. 섹션 첫머리·곡 끝·첫 코러스에 더 자주,
+     낮은 비율에서는 노래 프레이즈가 연달아 붙지 않게 해 화려한 라인과 번갈아 나오게 한다 */
+  const LYR=opts.lyric==null?LYRIC_DEFAULT:Math.max(0,Math.min(1,+opts.lyric));
+  {
+    let p=topic==='auto'?LYR:0;
+    if(p>0&&p<1){let mul=feel==='ballad'?1.5:(feel==='bossa'||feel==='latin')?1.15:1;
+      if(PF&&STYLE_DATA.profiles.all)mul*=Math.min(1.6,Math.max(0.6,Math.pow((1-PF.stats.eighth)/(1-STYLE_DATA.profiles.all.stats.eighth),2)));   /* 8분 라인이 적은 연주자일수록 노래 프레이즈가 잦다 */
+      if(songType==='blues')mul*=0.8;if((opts.bpm||prog.bpm||140)>=230)mul*=0.75;p=Math.min(0.95,p*mul)}
+    const N=phrases.length;let K=p>=1?N:Math.round(p*N);if(p>0&&K===0&&rng()<p*N)K=1;
+    if(K>0){
+      const secB=P*BPB;
+      const sc=phrases.map((ph,i)=>{let v=rng()*0.6;if(ph.s%secB<=1)v+=0.35;if(ph.final)v+=0.4;if(i===0)v+=0.3;
+        const r=roles[sectionIndex(ph.s*6,P,BPB)]||'statement';if(r==='resolution')v+=0.15;if(r==='contrast')v-=0.15;
+        if(ARC.n>1)v+=0.2*(1-ARC.i/(ARC.n-1));return v});
+      for(let k=0;k<K;k++){let bi=-1;for(let i=0;i<N;i++)if(!phrases[i].song&&(bi<0||sc[i]>sc[bi]))bi=i;if(bi<0)break;
+        phrases[bi].song=true;if(p<0.6){if(bi>0)sc[bi-1]-=0.35;if(bi+1<N)sc[bi+1]-=0.35}}
+    }
+    /* v0.39 블루스 스케일 프레이즈 — 블루스 곡은 자주, 스윙·라틴 곡도 가끔(조성 안의 화음 구간에서만 — 음 선택 때 판정) */
+    if(topic==='auto'&&diff>=2&&opts.blues!==false){const pb=songType==='blues'?0.35:(feel==='ballad'?0.06:0.14);phrases.forEach(ph=>{if(!ph.song&&rng()<pb)ph.blues=true})}
+  }
+  const songRhythm=need=>{
+    const al=ALLOWED[diff],L=need>=BPB+2?BPB:2;
+    const lib=(SONG_CELLS[L]||SONG_CELLS[2]).filter(c=>c.every(k=>al[k]));
+    const toks=[],cellOf=[];let cur=null,ci=0,id=-1;
+    while(toks.length<need){
+      if(cur===null||rng()>0.7){id=Math.floor(rng()*lib.length);cur=lib[id]}
+      cur.forEach((k,q)=>{if(toks.length<need){toks.push(k);cellOf.push({c:ci,id,q})}});ci++;
+    }
+    if(!NOTE_TOK[toks[0]])toks[0]='Q';
+    if(toks[toks.length-1]==='R')toks[toks.length-1]='Q';
+    return {toks,cellOf};
+  };
+
   /* 직접 작성한 템플릿과 실측 마르코프 전이는 별개 경로로 유지한다. */
   /* ── ③ 리듬 생성(박 단위 마르코프 + 프레이즈 템플릿) ── */
   const RH=PF?PF.rhy:null;
@@ -500,11 +540,12 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   phrases.forEach((ph,pi)=>{
     const toks=[];
     const secIdx=sectionIndex(ph.s*6,P,BPB),role=roles[secIdx]||'statement';
-    const recall=motif&&role==='answer'&&ph.s%(P*BPB)<BPB&&rng()<0.65;
+    if(ph.song){const r=songRhythm(ph.e-ph.s+1);toks.push(...r.toks);ph.cellOf=r.cellOf;tag(Math.floor(ph.s/BPB),'노래 프레이즈')}
+    const recall=!ph.song&&motif&&role==='answer'&&ph.s%(P*BPB)<BPB&&rng()<0.65;
     /* v0.27 프레이즈 리듬 템플릿 선택 */
     let tpl=null;
     const need=ph.e-ph.s+1;
-    if(diff>=2&&!R2&&!recall&&need>=4&&rng()<0.55){
+    if(diff>=2&&!R2&&!recall&&!ph.song&&need>=4&&rng()<0.55){
       tpl=fitRhythmTemplate(RHY_TPL[Math.floor(rng()*RHY_TPL.length)],need,diff,FP,rng,densityAt(ph.s));
       tag(Math.floor(ph.s/BPB),'리듬 템플릿');
     }
@@ -514,7 +555,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     /* v0.35 하이라이트 장치 — 4마디 블록마다 최대 하나. line(8분 라인)·perc(한 음 리듬 반복)·pivot(피벗 패턴)·hemiola(3음 시퀀스)·trip(셋잇단 런) */
     {
       const blk=Math.floor(ph.s/(BPB*4));
-      if(R2&&!recall&&need>=6&&diff>=2&&topic==='auto'&&!hlBlocks.has(blk)&&rng()<(diff===2?0.5:0.6)){
+      if(R2&&!recall&&!ph.song&&!ph.blues&&need>=6&&diff>=2&&topic==='auto'&&!hlBlocks.has(blk)&&rng()<(diff===2?0.5:0.6)){
         const pool=[{v:'line',w:1.3*eighthTilt},{v:'perc',w:0.8},{v:'pivot',w:0.9},{v:'hemiola',w:0.9}];
         if(diff>=3)pool.push({v:'trip',w:0.8*tripTilt});
         const kind=pickW(rng,pool),s0=ph.s+1;   /* 첫 박은 실측 분포(엇박 진입이 많다)에 맡긴다 */
@@ -533,7 +574,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       }
     }
     let prev='R',prev2='R',tripNext=false;
-    for(let bt=ph.s;bt<=ph.e;bt++){
+    for(let bt=ph.s;bt<=ph.e&&!ph.song;bt++){
       const bp=(bt%BPB)+1,isFirst=bt===ph.s,isLast=bt===ph.e;
       if(recall&&bt-ph.s<motif.toks.length){
         const k=rhythmToken(motif.toks[bt-ph.s],prev,isFirst,diff,FP,rng,densityAt(bt));
@@ -596,10 +637,13 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     });
     if(!phEv.length)return;
     if(hl){let k=0;phEv.forEach(ev=>{if(ev.t>=hl.s*6&&ev.t<hl.e*6){ev.hl=hl;ev.hlK=k++;if(hl.chromatic)ev.hlx=true}})}
+    if(ph.song)phEv.forEach((ev,k)=>{ev.song=true;ev.songK=k;ev.sc=ph.cellOf[Math.max(0,Math.min(ph.cellOf.length-1,Math.floor(ev.t/6)-ph.s))]});
+    if(ph.blues)phEv.forEach((ev,k)=>{ev.blu=true;ev.bluK=k});
     /* 프레이즈 끝음 — 길게(1~2박 더) */
     const le=phEv[phEv.length-1];
     if(!le.trip){
       if(ph.final)le.d+=Math.max(0,TOT-(le.t+le.d));
+      else if(ph.song)le.d=Math.max(le.d,12);   /* 노래 프레이즈 끝음은 길게 — 숨은 다음 쉼표에서 */
       else if(R2){   /* v0.33 실측 끝음 길이(8분 단위): 짧게 끊는 끝이 대부분 */
         const L=pickW(rng,R2.lastLen.map((w,i)=>({v:i+1,w:i<4?w:w*0.5})));
         le.d=Math.max(le.d,Math.min(L*3,12));
@@ -983,6 +1027,111 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     for(let q=n-1;q>=0;q--){ms[q]=P[b];if(q>0){const bb=back[q-1][b][di];b=bb[0];di=bb[1]}}
     return ms;
   }
+  /* ── v0.39 노래 프레이즈 음 계획(동적 계획법) ──
+     긴 음(점4분 이상·끝음) = 3·7음 우선, 9·13 텐션 허용(근음·5음은 비용) · 정박 짧은 음 = 코드톤/텐션 · 약박 = 스케일
+     대부분 순차, 4도 이상 도약 뒤에는 반대 방향으로 메운다 · 프레이즈 전체는 아치(또는 하행·상행) 윤곽
+     같은 리듬 셀이 되풀이되면 앞 셀의 음형을 옮겨 다음 화음에 맞춘다(동기 시퀀스) */
+  const failSong=ph=>{const L=tagsAt[Math.floor(phrases[ph].s/BPB)],q=L?L.indexOf('노래 프레이즈'):-1;if(q>=0)L.splice(q,1);events.forEach(e=>{if(e.ph===ph)e.song=false})};
+  function planSong(i){
+    const ph=events[i].ph,span=[];for(let k=i;k<events.length&&events[k].ph===ph;k++)if(events[k].song&&!events[k].quote)span.push(k);
+    const n=span.length;if(n<2)return failSong(ph);
+    const t0=events[span[0]].t,t1=events[span[n-1]].t+events[span[n-1]].d;
+    const c0=Math.round(pitchGoal(t0)),A=3+Math.floor(rng()*3),shape=pickW(rng,[{v:'arch',w:3},{v:'desc',w:1.4},{v:'asc',w:0.8}]);
+    const goal=t=>{const x=Math.max(0,Math.min(1,(t-t0)/Math.max(1,t1-t0)));return shape==='arch'?c0-A/2+A*Math.sin(Math.PI*x):shape==='desc'?c0+A/2-A*x:c0-A/2+A*x};
+    const INF=1e9,fin=phrases[ph].final;
+    const cl=(s,x)=>isGuide(s,x)?'g':isCT(s,x)?'c':(isTens(s,x)&&inScale(s,x))?'t':inScale(s,x)?'s':null;
+    const nc=(q,m)=>{
+      const e=events[span[q]];if(!allow(m,e.t))return INF;
+      const sg=segs[segAt(e.t)],s2=segs[segAt(Math.min(TOT-1,e.t+e.d-1))],k1=cl(sg,m);if(!k1)return INF;
+      const long=e.d>=9||q===n-1,strong=e.t%6===0||e.d>=6;let c;
+      /* 코드가 바뀌는 순간에 닿는 음은 3·7음(가이드톤)으로 — 노래 선율의 뼈대 */
+      if(e.t===sg.t0&&e.t>0){if(long&&k1==='s')return INF;c=k1==='g'?0:k1==='c'?1.0:k1==='t'?1.2:2.4}
+      else if(long){if(k1==='s')return INF;c=k1==='g'?0:k1==='t'?0.25:(mod12(m-sg.root)===0?(q===n-1&&fin?0.1:1.6):0.8)}
+      else if(strong)c=k1==='g'?0:k1==='c'?0.3:k1==='t'?0.5:1.2;
+      else c=0.3;
+      if(s2!==sg){const k2=cl(s2,m);if(!k2||k2==='s')return INF;c+=0.3}
+      return c+0.22*Math.abs(m-goal(e.t));
+    };
+    const tc=(a,b,st)=>{const d=b-a,ad=Math.abs(d);if(ad>MAXLEAP)return [INF,0];
+      let c=ad===0?2.4:ad<=2?0:ad<=4?0.5:1.4;
+      if(st!==0&&(ad===0||Math.sign(d)===st))c+=2.5;   /* 도약 뒤에는 반대 방향으로 메운다 */
+      return [c,ad>=5?Math.sign(d):0]};
+    const cands=span.map((k,q)=>{const o=[];for(let m=Math.max(LO,c0-10);m<=Math.min(HI,c0+10);m++)if(nc(q,m)<INF)o.push(m);return o});
+    if(cands.some(c=>!c.length))return failSong(ph);
+    let L=new Map();
+    cands[0].forEach(m=>{if(prevM!==null&&Math.abs(m-prevM)>MAXLEAP)return;L.set(m+'|0',{c:nc(0,m)+(prevM===null?0:0.1*Math.abs(m-prevM)+(m===prevM?1.2:0)),m,st:0,bk:null})});
+    if(!L.size)return failSong(ph);
+    for(let q=1;q<n;q++){const N2=new Map();
+      for(const s0 of L.values())for(const m of cands[q]){const [t,st]=tc(s0.m,m,s0.st);if(t>=INF)continue;const c=s0.c+t+nc(q,m),key=m+'|'+st,o=N2.get(key);if(!o||c<o.c)N2.set(key,{c,m,st,bk:s0})}
+      if(!N2.size)return failSong(ph);L=N2}
+    let best=null;for(const s0 of L.values())if(!best||s0.c<best.c)best=s0;
+    let ms=new Array(n);for(let q=n-1,s0=best;q>=0;q--,s0=s0.bk)ms[q]=s0.m;
+    const dp=ms.slice();
+    /* 동기 시퀀스: 바로 앞 셀과 같은 리듬 셀이면 음형을 옮겨 맞춘다 */
+    const cellQ={};span.forEach((k,q)=>{const sc=events[k].sc;if(sc)(cellQ[sc.c]=cellQ[sc.c]||{id:sc.id,qs:[]}).qs.push(q)});
+    const cs=Object.keys(cellQ).map(Number).sort((a,b)=>a-b);let seqN=0;
+    for(let j=1;j<cs.length;j++){
+      const Ac=cellQ[cs[j-1]],Bc=cellQ[cs[j]];
+      if(Ac.id!==Bc.id||Ac.qs.length!==Bc.qs.length||cs[j]!==cs[j-1]+1||rng()>0.75)continue;
+      let bs=null;
+      for(let sh=-5;sh<=5;sh++){
+        let cost=sh===0?1:0.15*Math.abs(sh),ok=true;const out=[];
+        for(let r=0;r<Bc.qs.length;r++){
+          const q=Bc.qs[r];let m=ms[Ac.qs[r]]+sh,c=nc(q,m);
+          if(c>=INF){let bm=null;for(const d of [1,-1,2,-2]){const c2=nc(q,m+d);if(c2<INF){bm=m+d;c=c2+0.6;break}}if(bm===null){ok=false;break}m=bm}
+          out.push(m);cost+=c;
+        }
+        if(!ok)continue;
+        const pq=Bc.qs[0]-1,nq=Bc.qs[Bc.qs.length-1]+1,chain=[pq>=0?ms[pq]:null,...out,nq<n?ms[nq]:null];
+        if(chain.some((m,x)=>x>0&&m!==null&&chain[x-1]!==null&&Math.abs(m-chain[x-1])>MAXLEAP))continue;
+        if(!bs||cost<bs.cost)bs={cost,out};
+      }
+      if(bs){Bc.qs.forEach((q,r)=>ms[q]=bs.out[r]);seqN++}
+    }
+    if(ms.some((m,q)=>q>0&&Math.abs(m-ms[q-1])>MAXLEAP))ms=dp;
+    else if(seqN)tag(Math.floor(t0/TPB),'동기 반복(시퀀스)');
+    span.forEach((k,q)=>{forced.set(k,{m:ms[q],kind:'song'});motifLock.add(k);events[k].keep=true});
+    stats.song=(stats.song||0)+1;
+  }
+  /* ── v0.39 블루스 스케일 프레이즈 — 조(으뜸음) 기준 1·♭3·4·♭5·5·♭7(+3·6 경과).
+     ♭5는 약박 경과음으로만(반음으로 4·5음 해결), ♭3→3 꺾기 허용, 긴 음은 코드에 어울리는 음(1·♭3·♭7 또는 코드톤) */
+  function planBlues(i){
+    const ph=events[i].ph,span=[];for(let k=i;k<events.length&&events[k].ph===ph;k++)if(events[k].blu&&!events[k].quote)span.push(k);
+    const n=span.length,off=()=>{events.forEach(e=>{if(e.ph===ph)e.blu=false})};
+    if(n<3)return off();
+    const K=keyPc,minorKey=songIsMinor(prog);
+    const fits=sg=>{if(songType==='blues')return true;const r=mod12(sg.root-K),c=TYPE_CLS[sg.type]||'dom';
+      if(minorKey)return (r===0&&c==='min')||(r===5&&c==='min')||(r===7&&(c==='dom'||c==='domalt'))||(r===2&&c==='hdim')||(r===10&&c==='dom')||(r===8&&c==='maj');
+      return ((r===0||r===5)&&(c==='maj'||c==='dom'))||(r===7&&(c==='dom'||c==='domalt'))||((r===2||r===9||r===4)&&c==='min')};
+    if(span.some(k=>!fits(segs[segAt(events[k].t)])))return off();
+    const BL=[0,3,5,6,7,10],INF=1e9;
+    const t0=events[span[0]].t,t1=events[span[n-1]].t+events[span[n-1]].d,c0=Math.round(pitchGoal(t0));
+    const goal=t=>c0+3-6*Math.max(0,Math.min(1,(t-t0)/Math.max(1,t1-t0)));   /* 블루스 라인은 내려오는 쪽 */
+    const nc=(q,m,pr)=>{
+      const e=events[span[q]];if(!allow(m,e.t))return INF;
+      const r=mod12(m-K),sg=segs[segAt(e.t)],long=e.d>=6||q===n-1,strong=e.t%6===0;let c;
+      if(r===6){if(long||strong)return INF;c=0.5}
+      else if(BL.includes(r))c=(r===0||r===7||r===10)?0:r===3?0.3:0.5;
+      else if(r===4)c=pr!==null&&mod12(pr-K)===3&&m-pr===1?0.2:1.6;
+      else if(r===9)c=long?1.2:0.8;
+      else return INF;
+      if(long&&!isCT(sg,m)&&!(r===3||r===10))c+=1.4;
+      return c+0.2*Math.abs(m-goal(e.t));
+    };
+    const tc=(a,b)=>{const ad=Math.abs(b-a);if(ad>MAXLEAP)return INF;
+      if(mod12(a-K)===6&&!(ad===1&&(mod12(b-K)===7||mod12(b-K)===5)))return INF;
+      return ad===0?1.0:ad<=2?0:ad<=4?0.3:ad<=5?0.9:1.6};
+    let L=new Map();
+    for(let m=Math.max(LO,c0-9);m<=Math.min(HI,c0+9);m++){if(prevM!==null&&Math.abs(m-prevM)>MAXLEAP)continue;const c=nc(0,m,prevM);if(c<INF)L.set(m,{c,m,bk:null})}
+    for(let q=1;q<n&&L.size;q++){const N2=new Map();
+      for(let m=Math.max(LO,c0-9);m<=Math.min(HI,c0+9);m++)for(const s0 of L.values()){const t=tc(s0.m,m);if(t>=INF)continue;const c0b=nc(q,m,s0.m);if(c0b>=INF)continue;const c=s0.c+t+c0b,o=N2.get(m);if(!o||c<o.c)N2.set(m,{c,m,bk:s0})}
+      L=N2}
+    if(!L.size)return off();
+    let best=null;for(const s0 of L.values())if(!best||s0.c<best.c)best=s0;
+    const ms=new Array(n);for(let q=n-1,s0=best;q>=0;q--,s0=s0.bk)ms[q]=s0.m;
+    span.forEach((k,q)=>{forced.set(k,{m:ms[q],kind:'blues'});motifLock.add(k);events[k].keep=true});
+    for(let b=Math.floor(t0/TPB);b<=Math.floor((t1-1)/TPB);b++)tag(b,'블루스 스케일');stats.blues=(stats.blues||0)+1;
+  }
   function planDevice(i){
     const H=events[i].hl,span=[];
     for(let k=i;k<events.length&&events[k].hl===H;k++)span.push(k);
@@ -1143,6 +1292,8 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         if(dv&&dv!=='quote')tag(Math.floor(e.t/TPB),'주제: '+(dv==='scale'?('스케일 — '+(seg.sname||'')):dv==='dom'?('활용 스케일 — '+matName(e.ph,seg)):TOPIC_LABEL[dv]));
       }
     }
+    if(e.song&&e.songK===0)planSong(i);
+    if(e.blu&&e.bluK===0)planBlues(i);
     if(tryMotifPending){tryMotifPending=false;if(e.first)tryMotif(i)}
     if(e.hl&&e.hlK===0)planDevice(i);
     if(e.first&&phDev[e.ph]==='ct'){
@@ -1172,7 +1323,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       }
     }
     let m=null,f=forced.get(i);
-    if(f&&(f.kind==='quote'||(f.kind==='disp'&&allow(f.m,e.t))||(f.kind==='dev'&&okNote(f.m,e.t,prevM))||(f.kind==='ctl'&&allow(f.m,e.t))||(okNote(f.m,e.t,prevM)&&matOK(seg,f.m,e.ph))))m=f.m;
+    if(f&&(f.kind==='quote'||(f.kind==='disp'&&allow(f.m,e.t))||(f.kind==='dev'&&okNote(f.m,e.t,prevM))||(f.kind==='ctl'&&allow(f.m,e.t))||((f.kind==='song'||f.kind==='blues')&&okNote(f.m,e.t,prevM))||(okNote(f.m,e.t,prevM)&&matOK(seg,f.m,e.ph))))m=f.m;
     else{
       if(f){
         /* v0.38 장치 음이 도약·음역 검사에서 밀려나면 음형이 깨진다 — 그 장치의 이름표도 뗀다(악보 표시와 실제 음형이 어긋나지 않게) */
@@ -1245,7 +1396,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     for(let i=0;i<events.length;i++){
       const e=events[i];if(e.midi===null)continue;
       const seg=segs[segAt(e.t)],s2=segs[segAt(Math.min(TOT-1,e.t+e.d-1))];
-      if(!e.quote&&s2!==seg&&e.d>=6&&!isMain(s2,e.midi)){
+      if(!e.quote&&!e.keep&&s2!==seg&&e.d>=6&&!isMain(s2,e.midi)){
         const cand=[];
         let nx=null;for(let j=i+1;j<events.length;j++)if(events[j].midi!==null){nx=events[j].midi;break}
         for(let x=Math.max(LO,e.midi-4);x<=Math.min(HI,e.midi+4);x++)
@@ -1279,7 +1430,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   {
     const snd=[];events.forEach((e,i)=>{if(e.midi!==null)snd.push(i)});
     for(let q=0;q<snd.length;q++){
-      const i=snd[q],e=events[i];if(e.quote||e.hlx)continue;
+      const i=snd[q],e=events[i];if(e.quote||e.hlx||e.keep)continue;
       const seg=segs[segAt(e.t)];
       if(inScale(seg,e.midi)||isCT(seg,e.midi))continue;
       const nx=q+1<snd.length?events[snd[q+1]]:null,pv=q>0?events[snd[q-1]]:null;
@@ -1314,7 +1465,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         const pe=q>0?events[idx[q-1]]:null;
         const change=strong&&(q===0?sg.t0===e.t:segAt(pe.t)!==segAt(e.t));
         const nx=q+1<n?events[idx[q+1]]:null;
-        const pin=e.quote||e.hlx||e.trepSrc||(f&&PIN.has(f.kind)&&f.m===e.midi);
+        const pin=e.quote||e.hlx||e.trepSrc||(e.keep&&f&&f.m===e.midi)||(f&&PIN.has(f.kind)&&f.m===e.midi);
         const motif=f&&f.kind==='motif';
         const cands=[];
         if(pin)cands.push(e.midi);

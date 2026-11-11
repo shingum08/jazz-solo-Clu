@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>즉흥 악보 생성기 v0.38.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.39.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -681,9 +681,9 @@ body.fslock{overflow:hidden}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.38.0 · Clu</div>
+    <div class="eyebrow">Concept Prototype · v0.39.0 · Clu</div>
     <h1>즉흥 악보 생성기</h1>
-    <p class="sub">리얼북 필수 <b style="color:var(--brass);font-weight:500">366곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
+    <p class="sub">리얼북 필수 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
   </div>
 </header>
 
@@ -699,6 +699,7 @@ body.fslock{overflow:hidden}
     <div class="tb tbbpm"><label>속도 (BPM) <span class="bpmval" id="bpmVal">145 BPM</span></label><div class="bpmrow"><button type="button" class="bpmstep" data-d="-5" aria-label="5 느리게">−</button><input type="range" id="bpm" min="60" max="320" value="145" step="1"><button type="button" class="bpmstep" data-d="5" aria-label="5 빠르게">＋</button></div></div>
     <div class="tb"><label>코러스</label><select id="chorusSel"><option value="1">1코러스</option><option value="2" selected>2코러스</option><option value="3">3코러스</option><option value="4">4코러스</option><option value="6">6코러스</option><option value="8">8코러스</option><option value="10">10코러스</option><option value="12">12코러스</option></select></div>
     <div class="tb"><label>난이도</label><select id="diffSel"><option value="1">1 · 입문</option><option value="2" selected>2 · 중급</option><option value="3">3 · 심화</option></select></div>
+    <div class="tb tbbpm"><label>노래 ↔ 비밥 <span class="bpmval" id="lyrVal">노래 30 · 비밥 70</span></label><input type="range" id="lyric" min="0" max="100" value="30" step="5" title="노래 프레이즈(4분·2분음표로 숨 쉬는 선율)와 비밥 라인(8분음표 위주)의 비율"></div>
     <div class="tb"><label>연습 주제</label><select id="topicSel"><option value="auto" selected>자동 (다양하게)</option><option value="ct">코드톤 라인 (정박 코드톤·반음 연결)</option><option value="penta">펜타토닉</option><option value="scale">기본 스케일</option><option value="dom">활용 스케일 (리디안♭7·얼터드 등)</option><option value="gt">가이드톤 라인 (3·7음 연결)</option></select></div>
     <div class="tb btns"><button class="btn primary" id="btnGen">악보 생성</button><button class="btn play" id="btnPlay" disabled>▶ 재생</button><button class="btn ghost" id="btnSave" disabled>♡ 목록 저장</button><button class="btn ghost" id="btnExport" disabled>⬇ PNG 저장</button><button class="btn ghost" id="btnXml" disabled>⬇ MusicXML</button><button class="btn ghost" id="btnShare" disabled>📤 공유·메일</button><button class="btn ghost" id="btnFeedback" title="버그·개선 제안을 GitHub 이슈로 보냅니다">💬 피드백</button></div>
   </div>
@@ -811,7 +812,7 @@ body.fslock{overflow:hidden}
 
 <footer>
   <div class="wrap">
-    <b>수록 곡 안내</b> — 201곡의 <b>코드 진행만</b> 수록했고 원곡 멜로디·가사는 넣지 않았습니다. 그중 189곡은 리얼북 1~3권 악보와 한 마디씩 대조해 옮겼습니다(■ 악보 대조 완료 · □ 일부 마디 확인 필요). 나머지는 공통 형식(블루스 등) 기준입니다. 판본·연주자에 따라 세부가 다를 수 있습니다. <b>데이터 출처와 저작권</b> — 연주자 스타일 통계와 공통 셀은 <b>Weimar Jazz Database v2.1</b>(Jazzomat Research Project, HfM Weimar · Open Database License 1.0)에서 추출했습니다. 앱에는 원 전사 음표열이 들어 있지 않습니다. 담긴 것은 확률 분포(리듬 전이·코드 대비 음 분포·음정·프레이즈 길이·스윙비)와, 4명 이상의 연주자가 공통으로 쓴 4~5음 음형(공용 어휘)뿐입니다. 특정 솔로를 재현하지 않습니다. 상업화할 때는 ODbL의 출처 표기·동일 조건 공유 조항을 다시 검토해야 합니다. 수록 곡은 <b>코드 진행만</b> 반영했고 원곡 멜로디는 넣지 않았습니다. <b>악기 샘플</b> — midi-js-soundfonts(Benjamin Gleitzman) · FluidR3_GM(CC BY 3.0), MusyngKite(CC BY-SA 3.0). 인터넷이 없으면 내장 신스로 재생합니다. <b>한계</b> — 철자(♯/♭)는 코드 기준으로 단순화했습니다. 스윙비는 WJD 실측 템포별 중앙값(약 0.63 → 0.54)을 따릅니다.
+    <b>수록 곡 안내</b> — 261곡의 <b>코드 진행만</b> 수록했고 원곡 멜로디·가사는 넣지 않았습니다. 그중 250곡은 리얼북 1~3권 악보와 한 마디씩 대조해 옮겼습니다(■ 악보 대조 완료 · □ 일부 마디 확인 필요). 나머지는 공통 형식(블루스 등) 기준입니다. 판본·연주자에 따라 세부가 다를 수 있습니다. <b>데이터 출처와 저작권</b> — 연주자 스타일 통계와 공통 셀은 <b>Weimar Jazz Database v2.1</b>(Jazzomat Research Project, HfM Weimar · Open Database License 1.0)에서 추출했습니다. 앱에는 원 전사 음표열이 들어 있지 않습니다. 담긴 것은 확률 분포(리듬 전이·코드 대비 음 분포·음정·프레이즈 길이·스윙비)와, 4명 이상의 연주자가 공통으로 쓴 4~5음 음형(공용 어휘)뿐입니다. 특정 솔로를 재현하지 않습니다. 상업화할 때는 ODbL의 출처 표기·동일 조건 공유 조항을 다시 검토해야 합니다. 수록 곡은 <b>코드 진행만</b> 반영했고 원곡 멜로디는 넣지 않았습니다. <b>악기 샘플</b> — midi-js-soundfonts(Benjamin Gleitzman) · FluidR3_GM(CC BY 3.0), MusyngKite(CC BY-SA 3.0). 인터넷이 없으면 내장 신스로 재생합니다. <b>한계</b> — 철자(♯/♭)는 코드 기준으로 단순화했습니다. 스윙비는 WJD 실측 템포별 중앙값(약 0.63 → 0.54)을 따릅니다.
   </div>
 </footer>
 
@@ -1530,7 +1531,7 @@ STYLE_DATA.cells=STYLE_DATA.cells.concat(CURATED_CELLS.map((c,i)=>Object.assign(
 const $=s=>document.querySelector(s);
 const KEYNAMES=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
 const GRP={'스윙':'미디엄/업템포 스윙','블루스':'블루스 & 리듬 체인지','라틴':'보사노바 & 라틴','발라드':'재즈 발라드','모달':'모달·쿨·하드밥','비밥·왈츠':'비밥·왈츠·기타 필수곡','연습':'연습용 진행'};
-const cur={noteColors:'off',selProg:'blue-bossa',trUser:0,selDiff:2,selInst:'wind',selTrans:0,useLicks:true,useGroups:true,style:'all',tone:'clarinet',topic:'auto',themeOn:false,themeCh:'first',feel:'auto',solo:null,abc:'',audio:null,saved:[],view:'solo',playSolo:true,chorus:2};
+const cur={lyric:30,noteColors:'off',selProg:'blue-bossa',trUser:0,selDiff:2,selInst:'wind',selTrans:0,useLicks:true,useGroups:true,style:'all',tone:'clarinet',topic:'auto',themeOn:false,themeCh:'first',feel:'auto',solo:null,abc:'',audio:null,saved:[],view:'solo',playSolo:true,chorus:2};
 
 /* ── 곡 선택 박스 + 검색 ── */
 const SONG_MARK={ok:'✓ ',form:'✓ ',practice:'✓ ',book:'■ ',bookq:'□ ',rb:'◆ ',rbq:'◇ ',partial:'△ ',wrong:'✕ ',unknown:'? '};
@@ -1600,6 +1601,9 @@ $('#playSel').onchange=e=>{cur.playSolo=e.target.value==='1';if(cur.audio){stopA
 
 /* ── 난이도 ── */
 $('#diffSel').onchange=e=>{cur.selDiff=+e.target.value;regen()};
+/* v0.39 노래 ↔ 비밥 조절바: 0 = 비밥 라인만 · 100 = 노래 프레이즈만 */
+$('#lyric').addEventListener('input',e=>{const v=+e.target.value;$('#lyrVal').textContent='노래 '+v+' · 비밥 '+(100-v)});
+$('#lyric').addEventListener('change',e=>{cur.lyric=+e.target.value;const was=!!cur.audio;stopIfPlaying();regen();if(was){playAll();$('#btnPlay').textContent='■ 정지'}});
 
 /* ── 세부 설정 ── */
 function buildSeg(el,items,onPick){
@@ -1689,12 +1693,12 @@ function origKey(){return SONGDB[cur.selProg].key}
 function songKeyPc(){return mod12(origKey()+cur.trUser)}
 function gen(newSeed){
   const keyPc=origKey();
-  const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length].join('|');
+  const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length,cur.lyric].join('|');
   if(newSeed||cur.seed===undefined||cur.sig===undefined){cur.seed=Math.floor(Math.random()*1e6);cur.edits={};cur.sel=null}
   else if(sig!==cur.sig){cur.edits={};cur.sel=null}
   cur.sig=sig;
   const nCh=Math.max(1,Math.min(12,+$('#chorusSel').value||1));cur.chorus=nCh;
-  const op={useLicks:cur.useLicks!==false,style:cur.style,groups:cur.useGroups,feel:currentFeel(),topic:cur.topic,motif:cur.motifOn!==false,headMotifs:cur.headFrags||[]};
+  const op={useLicks:cur.useLicks!==false,style:cur.style,groups:cur.useGroups,feel:currentFeel(),topic:cur.topic,motif:cur.motifOn!==false,headMotifs:cur.headFrags||[],lyric:(cur.lyric==null?30:cur.lyric)/100,bpm:+$('#bpm').value};
   const mk=i=>Object.assign({},op,{quote:themeQuoteFor(i,nCh),arc:{i,n:nCh}});   /* v0.27 코러스 곡선 */
   if(cur.view==='drill'){cur.soloBase=null;cur.soloBases=[]}   /* 연습 악보는 applyView에서 사용자 조·기보에 맞춰 만든다 */
   else{
@@ -2059,7 +2063,7 @@ function clearPlayHl(){
 /* ── 저장 ── */
 $('#btnSave').onclick=()=>{
   const s=cur.solo,sg=SONGDB[cur.selProg];
-  cur.saved.unshift({id:s.ts,seed:cur.seed,song:cur.selProg,tr:cur.trUser,diff:cur.selDiff,inst:cur.selInst,licks:cur.useLicks!==false,groups:cur.useGroups,style:cur.style,
+  cur.saved.unshift({id:s.ts,seed:cur.seed,song:cur.selProg,tr:cur.trUser,diff:cur.selDiff,inst:cur.selInst,licks:cur.useLicks!==false,groups:cur.useGroups,style:cur.style,lyric:cur.lyric,
     name:sg.name+' · '+keyLabel(songKeyPc(),cur.trUser)+' · '+STYLE_DATA.profiles[cur.style].label+' · 난이도 '+cur.selDiff});
   renderSaved();
 };
@@ -2081,6 +2085,7 @@ function renderSaved(){
       songSel.value=cur.selProg;
       [...$('#segInst').children].forEach((c,i)=>c.classList.toggle('on',(i===0)===(cur.selInst==='wind')));
       $('#diffSel').value=cur.selDiff;
+      cur.lyric=item.lyric!=null?item.lyric:30;$('#lyric').value=cur.lyric;$('#lyrVal').textContent='노래 '+cur.lyric+' · 비밥 '+(100-cur.lyric);
       gen(false);window.scrollTo({top:0,behavior:'smooth'});
     };
     d.appendChild(b);el.appendChild(d);
@@ -2217,7 +2222,7 @@ function popAct(act){
 /* ── 피드백: 입력창 → GitHub 이슈(곡·설정 자동 첨부) 또는 내용 복사 ── */
 function fbInfo(){
   const so=songSel.selectedOptions&&songSel.selectedOptions[0]?songSel.selectedOptions[0].textContent:'-';
-  return ['버전: v0.38.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
+  return ['버전: v0.39.0','곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'노래↔비밥: '+cur.lyric,'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
 }
 $('#btnFeedback').onclick=()=>{$('#fbModal').style.display='flex';$('#fbText').focus();$('#fbMsg').textContent=''};
 $('#fbClose').onclick=()=>{$('#fbModal').style.display='none'};
