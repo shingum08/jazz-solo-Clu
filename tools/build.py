@@ -12,6 +12,7 @@ here=os.path.dirname(os.path.abspath(__file__)); root=os.path.dirname(here)
 tpl=open(os.path.join(root,'app','template.html'),encoding='utf-8').read()
 eng=open(os.path.join(root,'engine','engine_core.js'),encoding='utf-8').read()
 data=open(os.path.join(root,'engine','style_data.js'),encoding='utf-8').read()
+data+='\n'+open(os.path.join(root,'engine','licks.js'),encoding='utf-8').read()   # v0.40 릭 사전
 head=open(os.path.join(root,'engine','headabc.js'),encoding='utf-8').read()
 head+='\n'+open(os.path.join(root,'engine','drill.js'),encoding='utf-8').read()
 head+='\n'+open(os.path.join(root,'engine','locks.js'),encoding='utf-8').read()

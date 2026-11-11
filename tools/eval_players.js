@@ -14,7 +14,7 @@ for(const p of [...PL,'all']){
   for(const id of SONGS){
     const song=E.SONGDB[id];
     for(let sd=1;sd<=SEEDS;sd++){
-      const solo=E.generateSolo(id,song.key,3,sd*104729+id.length*13,'wind',{style:p,topic:'auto',lyric:0,blues:false});   /* v0.39: 연주자 통계 엔진만 평가 — 노래·블루스 프레이즈(연주자 공통 장치)는 끈다 */
+      const solo=E.generateSolo(id,song.key,3,sd*104729+id.length*13,'wind',{style:p,topic:'auto',lyric:0,blues:false,barLicks:false});   /* v0.39: 연주자 통계 엔진만 평가 — 노래·블루스 프레이즈·v0.40 한 마디 릭(연주자 공통 장치)는 끈다 */
       data[p].push(soloFeatures(E,solo,song));
     }
   }

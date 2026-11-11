@@ -673,6 +673,43 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       for(const e of events)if(e.t+e.d>TOT)e.d=TOT-e.t;}
   }
 
+  /* ── v0.40 한 마디 릭(리듬 포함) — Ⅴ7 한 마디 → 다음 마디 Ⅰ 착지 자리에 릭 사전(engine/licks.js)의 리듬을 넣는다.
+     음높이는 음 선택 단계(planLick)에서 앞 음·음역에 맞춰 옥타브만 고른다. 실패하면 그 리듬 그대로 일반 음 선택. */
+  const lickPlan=[];
+  if(typeof CURATED_LICKS!=='undefined'&&opts.useLicks!==false&&opts.barLicks!==false&&BPB===4&&(topic==='auto'||topic==='alt')&&diff>=2){
+    const rate=topic==='alt'?0.6:(LICK_RATE[diff]||0),perCh=[0];
+    for(let b=0;b<NB-1&&rate>0;b++){
+      const t0=b*TPB,t1=t0+TPB,s0=segAt(t0);
+      if(segAt(t1-1)!==s0||segs[s0].t0!==t0)continue;
+      const sg=segs[s0],nxI=segAt(t1),nx=segs[nxI];
+      if(!nx||nx.t0!==t1||mod12(nx.root-sg.root)!==5)continue;
+      const pool=CURATED_LICKS.filter(L=>!(L.minDiff&&diff<L.minDiff)&&L.cls.includes(sg.cls)&&L.to.includes(nx.cls==='domalt'?'dom':nx.cls)&&L.tr===5);
+      if(!pool.length)continue;
+      const inBar=events.filter(e=>e.t>=t0&&e.t<t1);
+      if(!inBar.length)continue;
+      const P=inBar[0].ph,ph=phrases[P];
+      if(!ph||ph.song||ph.blues||ph.quote||inBar.some(e=>e.ph!==P||e.song||e.blu||e.hl||e.quote))continue;
+      if(!events.some(e=>e.ph===P&&e.t<t0))continue;   /* 프레이즈가 이 마디 앞에서 이미 시작돼 있어야(첫 음 표시 유지) */
+      /* 착지음: 다음 마디 첫 박에 같은 프레이즈 음이 있으면 그 음, 없으면(프레이즈가 여기서 끝나면) 새로 만든다 */
+      let tgt=events.find(e=>e.t===t1),newT=null;
+      if(tgt){if(tgt.ph!==P||tgt.song||tgt.blu||tgt.hl||tgt.quote)continue}
+      else{
+        const nxE=events.filter(e=>e.t>t1).reduce((a,e)=>a===null||e.t<a.t?e:a,null);
+        const room=(nxE?nxE.t:TOT)-t1;if(room<6)continue;
+        newT={t:t1,d:Math.min(12,room),ph:P,strong:true,first:false,last:!(nxE&&nxE.ph===P),midi:null};
+      }
+      if(perCh[0]>=LICK_MAX_PER_CHORUS)continue;
+      if(rng()>=rate)continue;
+      const L=pool[Math.floor(rng()*pool.length)];
+      for(let i=events.length-1;i>=0;i--)if(events[i].t>=t0&&events[i].t<t1)events.splice(i,1);
+      const id=lickPlan.length;
+      L.n.forEach(([dt,d],k)=>events.push({t:t0+dt,d,ph:P,strong:(t0+dt)%6===0,trip:d===2?1:undefined,first:false,last:false,midi:null,lick:id,lickK:k}));
+      if(newT){events.push(newT);tgt=newT}
+      tgt.lickT=id;lickPlan.push({L,bar:b,root:sg.root});perCh[0]++;
+    }
+    if(lickPlan.length){events.sort((a,b)=>a.t-b.t);for(let i=0;i<events.length-1;i++)if(events[i].t+events[i].d>events[i+1].t)events[i].d=Math.max(1,events[i+1].t-events[i].t)}
+  }
+
   /* v0.21 헤드 인용 — 사용자가 직접 입력한 2~4마디를 원래 마디 위치에 넣는다(멜로디는 앱에 수록하지 않음).
      opts.quote={startBar, notes:[{t,d,midi,trip}]} · 원조(keyPc) 기준 음높이, 악기 음역에 맞게 옥타브만 이동 */
   let quoteInfo=null;
@@ -1032,6 +1069,26 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
      대부분 순차, 4도 이상 도약 뒤에는 반대 방향으로 메운다 · 프레이즈 전체는 아치(또는 하행·상행) 윤곽
      같은 리듬 셀이 되풀이되면 앞 셀의 음형을 옮겨 다음 화음에 맞춘다(동기 시퀀스) */
   const failSong=ph=>{const L=tagsAt[Math.floor(phrases[ph].s/BPB)],q=L?L.indexOf('노래 프레이즈'):-1;if(q>=0)L.splice(q,1);events.forEach(e=>{if(e.ph===ph)e.song=false})};
+  /* v0.40 한 마디 릭 음높이 — 릭 사전의 음정 관계를 그대로, 옥타브만 앞 음·음역·음형 중심에 맞춘다 */
+  function planLick(i){
+    const e=events[i],P=lickPlan[e.lick];if(!P)return;
+    const span=[];for(let k=i;k<events.length&&events[k].lick===e.lick;k++)span.push(k);
+    const ti=events.findIndex(x=>x.lickT===e.lick);
+    const ok=span.length===P.L.n.length&&ti>span[span.length-1];
+    let best=null;
+    if(ok)for(let o=-4;o<=4;o++){
+      const base=mod12(P.root)+60+12*o,ms=P.L.n.map(x=>base+x[2]),mt=base+P.L.t;
+      if(ms.some((m,q)=>!allow(m,events[span[q]].t))||!allow(mt,events[ti].t))continue;
+      if(prevM!==null&&Math.abs(ms[0]-prevM)>MAXLEAP)continue;
+      if(ms.some((m,q)=>q>0&&Math.abs(m-ms[q-1])>MAXLEAP)||Math.abs(mt-ms[ms.length-1])>MAXLEAP)continue;
+      const sc=Math.abs((ms[0]+mt)/2-pitchGoal(e.t))+(prevM===null?0:0.5*Math.abs(ms[0]-prevM));
+      if(!best||sc<best.sc)best={ms,mt,sc};
+    }
+    if(!best){span.concat(ti>=0?[ti]:[]).forEach(k=>{delete events[k].lick;delete events[k].lickT});return}
+    span.forEach((k,q)=>{forced.set(k,{m:best.ms[q],kind:'lick'});motifLock.add(k);events[k].keep=true});
+    forced.set(ti,{m:best.mt,kind:'lick'});motifLock.add(ti);events[ti].keep=true;
+    tag(P.bar,'릭: '+P.L.name);stats.licks=(stats.licks||0)+1;lickUse[P.L.id]=(lickUse[P.L.id]||0)+1;
+  }
   function planSong(i){
     const ph=events[i].ph,span=[];for(let k=i;k<events.length&&events[k].ph===ph;k++)if(events[k].song&&!events[k].quote)span.push(k);
     const n=span.length;if(n<2)return failSong(ph);
@@ -1294,6 +1351,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     }
     if(e.song&&e.songK===0)planSong(i);
     if(e.blu&&e.bluK===0)planBlues(i);
+    if(e.lick!==undefined&&e.lickK===0)planLick(i);
     if(tryMotifPending){tryMotifPending=false;if(e.first)tryMotif(i)}
     if(e.hl&&e.hlK===0)planDevice(i);
     if(e.first&&phDev[e.ph]==='ct'){
@@ -1323,7 +1381,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       }
     }
     let m=null,f=forced.get(i);
-    if(f&&(f.kind==='quote'||(f.kind==='disp'&&allow(f.m,e.t))||(f.kind==='dev'&&okNote(f.m,e.t,prevM))||(f.kind==='ctl'&&allow(f.m,e.t))||((f.kind==='song'||f.kind==='blues')&&okNote(f.m,e.t,prevM))||(okNote(f.m,e.t,prevM)&&matOK(seg,f.m,e.ph))))m=f.m;
+    if(f&&(f.kind==='quote'||(f.kind==='disp'&&allow(f.m,e.t))||(f.kind==='dev'&&okNote(f.m,e.t,prevM))||(f.kind==='ctl'&&allow(f.m,e.t))||((f.kind==='song'||f.kind==='blues'||f.kind==='lick')&&okNote(f.m,e.t,prevM))||(okNote(f.m,e.t,prevM)&&matOK(seg,f.m,e.ph))))m=f.m;
     else{
       if(f){
         /* v0.38 장치 음이 도약·음역 검사에서 밀려나면 음형이 깨진다 — 그 장치의 이름표도 뗀다(악보 표시와 실제 음형이 어긋나지 않게) */

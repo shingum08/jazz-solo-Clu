@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('fs'),vm=require('vm'),assert=require('assert'),cp=require('child_process');
 const root=require('path').resolve(__dirname,'..');
-const extra=['style_data.js',...fs.readdirSync(root+'/engine').filter(f=>/^songs_part\d+\.js$/.test(f)).sort()]
+const extra=['style_data.js','licks.js',...fs.readdirSync(root+'/engine').filter(f=>/^songs_part\d+\.js$/.test(f)).sort()]
   .map(f=>fs.readFileSync(root+'/engine/'+f,'utf8')).join('\n');
 function load(core,helpers=false){
   const ctx={};vm.createContext(ctx);

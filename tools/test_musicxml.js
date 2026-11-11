@@ -59,7 +59,7 @@ handler();assert.deepEqual(downloads,['A_B.musicxml']);assert.deepEqual(revoked,
 browser.cur.solos=[browser.cur.solo,browser.cur.solo];assert.equal((browser.buildMusicXml().match(/<measure /g)||[]).length,2);
 browser.cur.solos=[];assert(browser.buildMusicXml());browser.cur.solo=null;assert.equal(browser.buildMusicXml(),null);handler();assert.equal(alerts,1);
 /* 실제 엔진은 별도 VM: 변경하지 않고 현재 소스에서 로드한다. */
-const engineFiles=['engine_core.js','style_data.js',...fs.readdirSync(path.join(root,'engine')).filter(f=>/^songs_part\d+\.js$/.test(f)).sort()];
+const engineFiles=['engine_core.js','style_data.js','licks.js',...fs.readdirSync(path.join(root,'engine')).filter(f=>/^songs_part\d+\.js$/.test(f)).sort()];
 const engine=vm.createContext({});vm.runInContext(engineFiles.map(f=>fs.readFileSync(path.join(root,'engine',f),'utf8')).join('\n')+'\nthis.E={generateSolo,transposeSolo,SONGDB,songIsMinor,analyzeHarmony,barChords};',engine);
 const E=engine.E,ids=Object.keys(E.SONGDB),meters=new Set();
 for(const id of ids){

@@ -1,6 +1,6 @@
 /* 전수 테스트 — 모든 수록 곡 × 난이도 3 × 악기 3 × 시드 2 (총 1800 솔로 이상) */
 const fs=require('fs');
-const code=['engine/engine_core.js','engine/style_data.js',...require('fs').readdirSync('engine').filter(f=>/^songs_part\d+\.js$/.test(f)).sort().map(f=>'engine/'+f)]
+const code=['engine/engine_core.js','engine/style_data.js','engine/licks.js',...require('fs').readdirSync('engine').filter(f=>/^songs_part\d+\.js$/.test(f)).sort().map(f=>'engine/'+f)]
   .map(f=>fs.readFileSync(f,'utf8')).join('\n')
   +'\nmodule.exports={RAW_SONGS,generateSolo,toAbc,SONGDB,analyzeHarmony,barChords,transposeSolo};';
 fs.writeFileSync('/tmp/opencode_test.js',code);
