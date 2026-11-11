@@ -248,18 +248,26 @@ function playAllInner(acIn,banksIn,feelIn){
   rb.connect(master);
   const spb=60/bpm,t0=ac.currentTime+(useSamples?0.6:0.15),start=t0+4*spb;  /* 샘플은 카운트인 동안 로드 */
   const nb=sols[0].bars.length,barLen=bpb*spb,chLen=nb*barLen,nCh=sols.length;
-  cur.audio={ac,master,rb,lead,raf:null,timer:null,start,chLen,barLen,nCh,nb,endAt:start+nCh*chLen};
-  const jobs=[];
+  /* v0.36 구간 재생 — cur.playRange={a0,a1,loop}: 코러스를 이어 붙인 절대 마디 번호(0부터). 없으면 처음부터 끝까지 */
+  const totalBars=nCh*nb,PR=cur.playRange||null;
+  const A0=PR?Math.max(0,Math.min(totalBars-1,PR.a0)):0,A1=PR?Math.max(A0,Math.min(totalBars-1,PR.a1)):totalBars-1;
+  const LOOP=!!(PR&&PR.loop),rangeLen=(A1-A0+1)*barLen;
+  cur.audio={ac,master,rb,lead,raf:null,timer:null,start,chLen,barLen,nCh,nb,endAt:start+rangeLen,a0:A0,a1:A1,loop:LOOP};
+  let jobs=[];
   const clickG=ac.createGain();clickG.gain.value=0.08;clickG.connect(post);   /* v0.25: 카운트인 클릭은 음악과 별도 게인 — 음악에 맞춰 볼륨을 올려도 클릭이 덜 커진다 */
   for(let i=0;i<4;i++){const tt=t0+i*spb;jobs.push({t:tt,f:()=>click(ac,clickG,tt,i===0?1400:1000,i===0?0.5:0.3)})}
   const rng=mulberry32((cur.seed||1)*13+5);
   /* 컴핑: 찰스턴·푸시(4&→1)·2&·4박 등 싱커페이션 — 마디마다 확률적으로 고른다 */
   const COMP=bpb===3?[[0,1+sw],[0+sw,2],[1,2+sw],[0,1]]:(bpb===5?[[0,2+sw],[1+sw,3],[0,3+sw],[2,4],[1,4]]:[[0,1+sw],[0+sw,2+sw],[1+sw,3],[0,2+sw],[1,3+sw],[sw,3]]);
   let prevV=null;
+  const blCache={};
+  const buildPass=(P0)=>{   /* P0 = 이번 회차에서 마디 A0가 시작하는 시각 */
   sols.forEach((so,cr)=>{
-    const bl=bassLine(so,(cur.seed||1)+cr*7919);
+    if(cr*nb>A1||(cr+1)*nb-1<A0)return;
+    const bl=blCache[cr]||(blCache[cr]=bassLine(so,(cur.seed||1)+cr*7919));
     so.bars.forEach((bar,bi)=>{
-      const barStart=start+cr*chLen+bi*barLen;
+      const ab=cr*nb+bi;if(ab<A0||ab>A1)return;
+      const barStart=P0+(ab-A0)*barLen;
       jobs.push({t:barStart-0.05,f:()=>{
         const compB=banks[snd.comp],bassB=banks[snd.bass];
         const PH=(when,len,v,vol)=>{if(compB){v.forEach((m,k)=>playSample(ac,rb,compB,when+k*0.008,len,m,vol*1.25,feel==='ballad'?0.5:0.15))}else pianoHit(ac,rb,when,len,v,vol)};
@@ -298,28 +306,38 @@ function playAllInner(acIn,banksIn,feelIn){
       }});
     });
     if(cur.playSolo!==false)buildAudioEvents(so,bpm,sw).forEach(e=>{
-      const tt=start+cr*chLen+e.start;
-      jobs.push({t:tt-0.02,f:()=>{const lb=banks[LEAD_SOUND[cur.tone]];if(lb)leadSample(ac,lead,lb,tt,e.dur,e.midi,e.vel,e.end);else mel(ac,lead,tt,e.dur,e.midi,LEAD_SOUND[cur.tone]?'flugel':(cur.tone||'flugel'),e.vel,e.end)}});
+      const ab=cr*nb+Math.floor(e.start/barLen+1e-6);if(ab<A0||ab>A1)return;
+      const tt=P0+(cr*nb-A0)*barLen+e.start;
+      const dur=Math.min(e.dur,P0+rangeLen-tt);if(dur<=0.01)return;   /* 구간 끝을 넘는 음은 자른다 */
+      jobs.push({t:tt-0.02,f:()=>{const lb=banks[LEAD_SOUND[cur.tone]];if(lb)leadSample(ac,lead,lb,tt,dur,e.midi,e.vel,e.end);else mel(ac,lead,tt,dur,e.midi,LEAD_SOUND[cur.tone]?'flugel':(cur.tone||'flugel'),e.vel,e.end)}});
     });
   });
+  };
+  buildPass(start);
   jobs.sort((x,y)=>x.t-y.t);
-  let ji=0;
+  let ji=0,nextPass=start+rangeLen,passN=1;
   const LA=(typeof window!=='undefined'&&window.__PB_LOOKAHEAD)||1.0;
   const au=cur.audio;
   const pump=()=>{
     if(cur.audio!==au)return;
     const h=ac.currentTime+LA;
-    while(ji<jobs.length&&jobs[ji].t<h){try{jobs[ji].f()}catch(e){console.error('스케줄 오류:',e)}ji++}
+    for(;;){
+      while(ji<jobs.length&&jobs[ji].t<h){try{jobs[ji].f()}catch(e){console.error('스케줄 오류:',e)}ji++}
+      if(LOOP&&ji>=jobs.length&&nextPass-0.1<h){   /* 다음 회차 예약 */
+        jobs=[];ji=0;buildPass(nextPass);jobs.sort((x,y)=>x.t-y.t);nextPass+=rangeLen;passN++;au.endAt=nextPass;continue;
+      }
+      break;
+    }
   };
   pump();au.timer=setInterval(pump,50);
   const loop=()=>{
     if(cur.audio!==au)return;
     const el=ac.currentTime-start;
-    if(el>=0&&el<nCh*chLen){
-      const cr=Math.floor(el/chLen),off=el-cr*chLen,bi=Math.floor(off/barLen);
-      if(typeof onPlayPos==='function'){try{onPlayPos(cr,bi,(off-bi*barLen)/barLen)}catch(e){}}  /* 화면 갱신 오류가 재생을 멈추지 않게 */
+    if(el>=0&&(LOOP||el<rangeLen)){
+      const rel=LOOP?el%rangeLen:el,ab=A0+Math.min(A1-A0,Math.floor(rel/barLen)),cr=Math.floor(ab/nb),bi=ab%nb;
+      if(typeof onPlayPos==='function'){try{onPlayPos(cr,bi,(rel%barLen)/barLen)}catch(e){}}  /* 화면 갱신 오류가 재생을 멈추지 않게 */
     }
-    if(ac.currentTime>au.endAt+1.2){stopAll();$('#btnPlay').textContent='▶ 재생';return}
+    if(!LOOP&&ac.currentTime>au.endAt+1.2){stopAll();$('#btnPlay').textContent='▶ 재생';return}
     au.raf=requestAnimationFrame(loop);
   };
   loop();

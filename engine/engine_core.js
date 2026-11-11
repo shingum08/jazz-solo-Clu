@@ -43,8 +43,8 @@ function autoFeel(id){
   return 'swing';
 }
 /* v0.22 연습 주제 — 한 프레이즈(기본: 코러스 전체)를 한 가지 소재로만 연주하는 학습 모드.
-   코드톤=코드톤만 · 스케일=코드별 모드 스케일(도리안·믹솔리디안 등)만 · 크로매틱=반음 접근 강조 · 얼터드=도미넌트는 얼터드 스케일 */
-const TOPIC_LABEL={ct:'코드톤',penta:'펜타토닉',scale:'스케일',dom:'활용 스케일',chrom:'크로매틱',alt:'얼터드',gt:'가이드톤 라인'};
+   코드톤=정박은 코드톤, 약박은 경과음·반음 연결(v0.36 DP 라인) · 스케일=코드별 모드 스케일(도리안·믹솔리디안 등)만 · 크로매틱=반음 접근 강조 · 얼터드=도미넌트는 얼터드 스케일 */
+const TOPIC_LABEL={ct:'코드톤 라인',penta:'펜타토닉',scale:'스케일',dom:'활용 스케일',chrom:'크로매틱',alt:'얼터드',gt:'가이드톤 라인'};
 const ALT_SCALE=[0,1,3,4,6,8,10];   /* 얼터드 도미넌트 스케일: 1 b9 #9 3 b5 #5 b7 */
 /* v0.23 연습 소재 확장 — 펜타토닉(코드 성질별) · 활용 스케일(프레이즈마다 변형 선택) */
 const PENTA={maj:[0,2,4,7,9],min:[0,3,5,7,10],dom:[0,2,4,7,10],domalt:[0,2,4,7,10],hdim:[0,3,5,10],dim:[0,2,3,5,6,8,9,11]};
@@ -556,6 +556,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         if((k2==='H'||k2==='Uh')&&CUT_TOK[prev])continue;
         if(diff===2&&k2==='E')w*=0.8;
         if(diff===2&&k2==='T')w=0;
+        if(topic==='ct'){if(k2==='E')w*=2.5;else if(k2==='H')w*=0.5;else if(k2==='T')w*=0.6}   /* v0.36 코드톤 주제: 정박·엇박 구조가 들리도록 8분 위주 */
         if(diff===1&&k2==='H'&&bp%2===1)w*=0.5;
         if(role==='contrast'&&(k2==='E'||k2==='T'))w*=1.15;
         if(role==='resolution'&&(k2==='H'||k2==='Q'))w*=1.2;
@@ -652,7 +653,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   const matScaleOf=(ph,seg)=>{const L=SCALE_VARIANTS[clsOf(seg)]||SCALE_VARIANTS.dom;return L[Math.min(phVar[ph],L.length-1)]};
   const matName=(ph,seg)=>{const L=VARIANT_NAME[clsOf(seg)]||[];return L[Math.min(phVar[ph],L.length-1)]||'변형 스케일'};
   const matOK=(seg,m,ph)=>{const dev=phDev[ph];if(!dev||dev==='chrom'||dev==='quote')return true;
-    if(dev==='ct')return isCT(seg,m);
+    if(dev==='ct')return isCT(seg,m)||inScale(seg,m);
     if(dev==='gt')return isGuide(seg,m);
     if(dev==='scale')return inScale(seg,m);
     const rel=mod12(m-seg.root);
@@ -897,10 +898,89 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   /* v0.35 하이라이트 장치의 음높이 — 장치 첫 음에서 구간 전체를 정한다 */
   const scaleStep=(seg,m,n)=>{let x=m,d=Math.sign(n);for(let c=0;c<Math.abs(n);c++){let y=x+d;while(y>=LO-2&&y<=HI+2&&!(inScale(seg,y)||isCT(seg,y)))y+=d;x=y}return x};
   const fitTone=(seg,m,t)=>{for(let d=0;d<=4;d++)for(const x of [m-d,m+d])if(allow(x,t)&&(inScale(seg,x)||isCT(seg,x)))return x;return null};
+  /* ── v0.36 코드톤 라인 계획(DP) ──
+     두호 님 정의: 정박(다운비트)에는 코드톤(1·3·5·7), 엇박(업비트)은 그 사이를 잇는 경과음.
+     스케일로 가다 정박이 어긋나면 반음 경과음을 넣어 다시 코드톤을 정박에 맞춘다(비밥 스케일 원리).
+     코드가 바뀌는 첫 정박에는 새 코드의 가이드톤(3·7음)으로 착지. 구간 전체를 동적 계획법으로 한 번에 정한다. */
+  function planCTPath(idx,o){
+    o=o||{};
+    const n=idx.length;if(n<1)return null;
+    const P=[];for(let m=LO;m<=HI;m++)P.push(m);
+    const info=idx.map((k,q)=>{
+      const e=events[k],sg=segs[segAt(e.t)];
+      const crossSeg=segAt(e.t+e.d-1)!==segAt(e.t)?segs[segAt(e.t+e.d-1)]:null;
+      const strong=(e.t%6===0)||e.d>=6||!!crossSeg;
+      const prevE=q>0?events[idx[q-1]]:null;
+      const change=strong&&(q===0?(o.changeAtFirst!==false&&sg.t0===e.t):segAt(prevE.t)!==segAt(e.t));
+      const nx=q+1<n?events[idx[q+1]]:null;
+      const contig=nx&&nx.t===e.t+e.d;
+      return {e,sg,crossSeg,strong,change,contig,goal:pitchGoal(e.t),last:q===n-1};
+    });
+    const allowed=(q,m)=>{
+      const I=info[q],sg=I.sg;
+      if(!allow(m,I.e.t))return false;
+      if(I.strong){
+        if(!isCT(sg,m))return false;
+        if(I.crossSeg&&!isCT(I.crossSeg,m))return false;
+        if(q===0&&o.stableFirst&&!isStable(sg,m))return false;
+        return true;
+      }
+      if(I.last)return isCT(sg,m);
+      if(inScale(sg,m)||isCT(sg,m))return true;
+      return I.contig&&I.e.d<=3;   /* 반음 경과음: 다음 음으로 바로 반음 해결해야 하므로 짧고 이어질 때만 */
+    };
+    const chrom=(q,m)=>!inScale(info[q].sg,m)&&!isCT(info[q].sg,m);
+    const jit=info.map(()=>P.map(()=>rng()*1.1));
+    /* 상태 = (음, 진행 방향 -1/0/+1) */
+    const INF=1e9,D=[-1,0,1];
+    let cost=P.map(()=>D.map(()=>INF)),back=[];
+    for(let a=0;a<P.length;a++){
+      const m=P[a];if(!allowed(0,m))continue;
+      let c=jit[0][a]+Math.abs(m-info[0].goal)*0.18;
+      if(info[0].change&&!isGuide(info[0].sg,m))c+=o.guideHard?40:6;
+      if(o.prev!==null&&o.prev!==undefined){const d=Math.abs(m-o.prev);if(d>MAXLEAP)continue;c+=d===0?3:d<=2?0:d<=4?1:3}
+      cost[a][1]=c;
+    }
+    for(let q=1;q<n;q++){
+      const nc=P.map(()=>D.map(()=>INF)),bk=P.map(()=>D.map(()=>null));
+      const I=info[q],gap=I.e.t-(info[q-1].e.t+info[q-1].e.d);
+      for(let b=0;b<P.length;b++){
+        const m=P[b];if(!allowed(q,m))continue;
+        let base=jit[q][b]+Math.abs(m-I.goal)*0.18;
+        if(I.change&&!isGuide(I.sg,m))base+=o.guideHard?40:6;
+        if(I.strong&&isGuide(I.sg,m))base-=0.4;
+        for(let a=0;a<P.length;a++)for(let di=0;di<3;di++){
+          const pc=cost[a][di];if(pc>=INF)continue;
+          const pm=P[a],iv=m-pm,ab=Math.abs(iv);
+          if(ab>MAXLEAP)continue;
+          if(chrom(q-1,pm)&&(ab!==1||gap>0))continue;          /* 반음 경과음은 바로 반음으로 해결 */
+          if(chrom(q,m)&&ab>2)continue;                         /* 반음 경과음으로는 순차로 들어간다 */
+          let t=gap>=6?(ab===0?0.5:ab<=7?0.4:2):(ab===0?6:ab<=2?0:ab<=4?1.3:3.5);
+          const nd=Math.sign(iv),dprev=D[di];
+          if(gap<6&&nd!==0&&dprev!==0&&nd!==dprev)t+=ab<=2?0.6:0.2;   /* 방향 전환은 약간 비용(라인 유지) */
+          if(chrom(q,m))t+=1.6;   /* 반음 경과음은 정렬에 필요할 때 위주로 */
+          const v=pc+base+t,ndi=nd+1;
+          if(v<nc[b][ndi]){nc[b][ndi]=v;bk[b][ndi]=[a,di]}
+        }
+      }
+      cost=nc;back.push(bk);
+    }
+    let best=null;
+    for(let b=0;b<P.length;b++)for(let di=0;di<3;di++)if(cost[b][di]<INF&&(!best||cost[b][di]<best.c))best={c:cost[b][di],b,di};
+    if(!best)return null;
+    const ms=new Array(n);let b=best.b,di=best.di;
+    for(let q=n-1;q>=0;q--){ms[q]=P[b];if(q>0){const bb=back[q-1][b][di];b=bb[0];di=bb[1]}}
+    return ms;
+  }
   function planDevice(i){
     const H=events[i].hl,span=[];
     for(let k=i;k<events.length&&events[k].hl===H;k++)span.push(k);
-    if(H.kind==='line')return;
+    if(H.kind==='line'){   /* v0.36 8분 라인은 코드톤 라인 계획으로: 정박 코드톤 · 엇박 경과음 · 반음 정렬 */
+      if(span.some(k=>motifLock.has(k)))return;
+      const ms=planCTPath(span,{prev:prevM,changeAtFirst:true});
+      if(ms){span.forEach((k,q)=>{forced.set(k,{m:ms[q],kind:'ctl'});motifLock.add(k)});stats.hl=(stats.hl||0)+1}
+      return;
+    }
     const fail=()=>{const b=Math.floor(events[i].t/TPB),L=tagsAt[b];const q=L?L.indexOf(HL_LABEL[H.kind]):-1;if(q>=0)L.splice(q,1);return};
     if(span.length<3||span.some(k=>motifLock.has(k)||(forced.has(k)&&!/^(target|pass)$/.test(forced.get(k).kind))))return fail();
     const tgt={};span.forEach(k=>{const f=forced.get(k);if(f&&f.kind==='target')tgt[k]=f.m;forced.delete(k)});   /* 접근음은 장치가 덮어쓰되, 코드 전환 타깃(가이드톤)은 지킨다 */
@@ -1052,6 +1132,11 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     }
     if(tryMotifPending){tryMotifPending=false;if(e.first)tryMotif(i)}
     if(e.hl&&e.hlK===0)planDevice(i);
+    if(e.first&&phDev[e.ph]==='ct'){
+      const span=[];for(let k=i;k<events.length&&events[k].ph===e.ph;k++)if(!events[k].quote)span.push(k);
+      const ms=planCTPath(span,{prev:prevM,stableFirst:true,guideHard:true});
+      if(ms){span.forEach((k,q)=>{forced.set(k,{m:ms[q],kind:'ctl'});motifLock.add(k)});stats.ctPlan=(stats.ctPlan||0)+1}
+    }
     /* v0.34 셋잇단 반복: 바로 앞 박 셋잇단 3음을 그대로(새 코드의 스케일·코드톤일 때만) */
     if(e.rep&&e.repK===0&&rng()<0.8){
       const src=[events[i-3],events[i-2],events[i-1]],dst=[e,events[i+1],events[i+2]];
@@ -1074,7 +1159,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       }
     }
     let m=null,f=forced.get(i);
-    if(f&&(f.kind==='quote'||(f.kind==='disp'&&allow(f.m,e.t))||(f.kind==='dev'&&okNote(f.m,e.t,prevM))||(okNote(f.m,e.t,prevM)&&matOK(seg,f.m,e.ph))))m=f.m;
+    if(f&&(f.kind==='quote'||(f.kind==='disp'&&allow(f.m,e.t))||(f.kind==='dev'&&okNote(f.m,e.t,prevM))||(f.kind==='ctl'&&allow(f.m,e.t))||(okNote(f.m,e.t,prevM)&&matOK(seg,f.m,e.ph))))m=f.m;
     else{
       if(f)forced.delete(i);
       if(!e.first&&!e.last&&tryCell(i)){const f2=forced.get(i);if(okNote(f2.m,e.t,prevM))m=f2.m}

@@ -28,5 +28,9 @@ jobs:
         run: node tools/test_locks_v030.js
       - name: v0.33 리듬 v2 검사
         run: node tools/test_rhythm_v033.js
+      - name: 코드톤 라인 검사 (v0.36)
+        run: node tools/test_ct_v036.js
+      - name: 곡 데이터 상태 파일이 최신인지 (v0.36)
+        run: node tools/song_audit.js && git diff --exit-code engine/song_status.js
       - name: 커밋된 index.html 일치 확인
         run: git diff --exit-code -- index.html
