@@ -356,14 +356,15 @@ function irealOne(str,book){
   /* 토큰화: 마디·반복·엔딩·코드 */
   /* v0.44 글자 지시(<D.S. al Coda>·<D.C. al Fine>·<Fine>)는 길잡이 표시로 바꿔 두고 나머지 글자는 지운다 */
   const src=music.replace(/<([^>]*)>/g,(m0,w)=>{const M={};navWords(M,w);return M.ds?' ¶DS ':M.dc?' ¶DC ':M.fine?' ¶FN ':' '})
-    .replace(/\([^)]*\)/g,' ').replace(/T\d\d/g,' ').replace(/\*[A-Za-z]/g,' ');
-  const bars=[];let curB={ch:[],fwd:false,bwd:false,end:null},ending=null,pend={};
-  const push=()=>{if(curB.ch.length||curB.rep){curB.end=curB.end||ending;Object.assign(curB,pend);pend={};bars.push(curB)}curB={ch:[],fwd:false,bwd:false,end:null}};
+    .replace(/\([^)]*\)/g,' ').replace(/T\d\d/g,' ').replace(/\*([A-Za-z])/g,' ¶S$1 ');   /* v0.47 섹션 표시(*A·*B·*i 인트로·*v 버스)는 남긴다 */
+  const bars=[];let curB={ch:[],fwd:false,bwd:false,end:null},ending=null,pend={},sec=null;
+  const push=()=>{if(curB.ch.length||curB.rep){curB.end=curB.end||ending;Object.assign(curB,pend);pend={};curB.sec=sec;bars.push(curB)}curB={ch:[],fwd:false,bwd:false,end:null}};
   /* 코드: 뿌리 + 품질(- ^ h o + 숫자 sus alt add, 숫자 앞 #·b) + /베이스. S(세뇨)·Q(코다)·글자 지시는 길잡이로, 그 밖의 표시(Y·U·f·s·l 등)는 건너뜀 */
-  const re=/(\{|\}|\[|\]|\||Z|¶DS|¶DC|¶FN|S|Q|N(\d)|x|r|n|p|W(?:\/[A-G][b#]?)?|([A-G][b#]?)((?:[-^ho+]|\d|sus|alt|add|[#b](?=\d))*)(?:\/[A-G][b#]?)?)/g;let t;
+  const re=/(\{|\}|\[|\]|\||Z|¶DS|¶DC|¶FN|¶S[A-Za-z]|S|Q|N(\d)|x|r|n|p|W(?:\/[A-G][b#]?)?|([A-G][b#]?)((?:[-^ho+]|\d|sus|alt|add|[#b](?=\d))*)(?:\/[A-G][b#]?)?)/g;let t;
   while((t=re.exec(src))){
     const k=t[0];
-    if(k==='S')pend.segno=true;
+    if(k.startsWith('¶S'))sec=k[2];
+    else if(k==='S')pend.segno=true;
     else if(k==='Q')pend.codaSign=true;
     else if(k==='¶DS')pend.ds=true;
     else if(k==='¶DC')pend.dc=true;
@@ -380,28 +381,38 @@ function irealOne(str,book){
   }
   push();
   /* x(한 마디 반복)·r(두 마디 반복) 채우기 */
-  const nv=b=>({segno:b.segno,codaSign:b.codaSign,ds:b.ds,dc:b.dc,fine:b.fine});   /* 반복 마디는 코드만 베끼고 길잡이는 제 것 */
+  const nv=b=>({segno:b.segno,codaSign:b.codaSign,ds:b.ds,dc:b.dc,fine:b.fine,sec:b.sec});   /* 반복 마디는 코드만 베끼고 길잡이는 제 것 */
   const flat=[];for(const b of bars){if(b.rep===1&&!b.ch.length&&flat.length){flat.push(Object.assign({},flat[flat.length-1],{fwd:b.fwd,bwd:b.bwd,end:b.end},nv(b)));continue}
     if(b.rep===2&&!b.ch.length&&flat.length>=2){flat.push(Object.assign({},flat[flat.length-2],{fwd:b.fwd,bwd:false,end:b.end},nv(b)));flat.push(Object.assign({},flat[flat.length-2],{fwd:false,bwd:b.bwd,end:b.end},nv({})));continue}
     flat.push(b)}
   /* 반복·엔딩·D.S.·코다 펼치기(v0.44 공통 navUnroll) */
   const order=navUnroll(flat.map(b=>Object.assign({},b,{bwd:b.bwd?2:0,ending:b.end})));
-  let lastC=null;const out=[];
+  /* v0.47 인트로(*i)·버스(*v) 구간은 곡 형식에서 뺀다(솔로는 형식 위에서 돈다). 남는 마디가 너무 적으면 그대로 둔다 */
+  const isX=b=>b.sec==='i'||b.sec==='v',nI=order.filter(b=>b.sec==='i').length,nV=order.filter(b=>b.sec==='v').length;
+  const drop=(nI||nV)&&order.length-nI-nV>=4;
+  let lastC=null;const out=[],outSec=[];
   for(const b of order){
+    if(drop&&isX(b))continue;
     const cs=b.ch.map(c=>c||lastC);const real=cs.filter(Boolean);
     if(!real.length&&!lastC)continue;
     const n=Math.max(1,cs.length),beats=[];
     for(let q=0;q<bpb;q++){const c=cs[Math.min(n-1,Math.floor(q*n/bpb))]||lastC;beats.push(c)}
     beats.forEach(c=>{if(c)lastC=c});
-    out.push(barTokens(beats.map(c=>c||lastC),bpb).join(' '));
+    out.push(barTokens(beats.map(c=>c||lastC),bpb).join(' '));outSec.push(b.sec);
   }
   if(!out.length)throw new Error('코드를 읽지 못했어요');
+  if(drop&&nI)warn.push('인트로 '+nI+'마디는 곡 형식에서 뺐어요(iReal 「인트로」 구간)');
+  if(drop&&nV)warn.push('버스(verse) '+nV+'마디는 곡 형식에서 뺐어요');
   const km=keyS.match(/^([A-G][b#]?)(-)?/);let k=0;
   if(km){k=imod({C:0,D:2,E:4,F:5,G:7,A:9,B:11}[km[1][0]]+(km[1][1]==='b'?-1:km[1][1]==='#'?1:0))}
   let c='스윙';for(const [re2,cc] of IREAL_STYLE)if(re2.test(style)){c=cc;break}
   const bpm=bpmF>=40?bpmF:(c==='발라드'?70:c==='라틴'?140:c==='펑키'?100:/up/i.test(style)?220:150);
   if(order.nav||order.length!==flat.length)warn.push((order.nav?'반복·D.S.·코다를 따라 ':'반복·엔딩을 ')+'펼쳐 '+order.length+'마디로 읽었어요');
-  return {song:{n:title,c,k,bpm,m:bpb,f:detectForm(out),ch:out.join('|')},head:null,warn,style};
+  /* 형식: 코드 비교로 섹션이 하나뿐(A만)으로 나오면 iReal 섹션 표시(A·B·C·D)를 따른다 */
+  let fm=detectForm(out);
+  const marks=[...new Set(outSec.filter(x=>/^[A-D]$/.test(x||'')))];
+  if(/^(.)\1*$/.test(fm[0])&&marks.length>=2){const P=out.length%8===0?8:4;let lab='',last='A';for(let i=0;i<out.length;i+=P){const x=outSec[i];if(/^[A-D]$/.test(x||''))last=x;lab+=last}fm=[lab,P]}
+  return {song:{n:title,c,k,bpm,m:bpb,f:fm,ch:out.join('|')},head:null,warn,style};
 }
 
 /* ── 멜로디 → ABC(헤드 입력란 형식). 붙임줄로 마디를 넘긴다 ── */

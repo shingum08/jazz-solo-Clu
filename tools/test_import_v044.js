@@ -102,3 +102,12 @@ let n=0;
     for(const diff of [1,2,3])for(let sd=1;sd<=3;sd++){const so=E.generateSolo(id,s.k,diff,sd*17+diff,'wind',{style:'all'});n++;
       so.bars.forEach((b,bi)=>assert.strictEqual(b.notes.reduce((a,x)=>a+x.d,0),(s.m||4)*6,id+' 마디 '+bi))}})}
 console.log('v0.44 불러오기 보강 검사 통과 (솔로 '+n+'개)');
+/* ── 11. v0.47 iReal 인트로(*i)·버스(*v) 빼기 + 섹션 표시로 형식 ── */
+{const raw='[*iT44C^7 |F^7 |C^7 |F^7 ][*AD-7 |G7 |C^7 |A7 |D-7 |G7 |C^7 |C^7 ][*BE-7 |A7 |D-7 |G7 |E-7 |A7 |D-7 |G7 ][*AD-7 |G7 |C^7 |A7 |D-7 |G7 |C^7 |C^7 Z';
+  const url='irealb://'+encodeURIComponent('Intro Test=Me==Medium Swing=C==1r34LbKcu7'+E.irealUnscramble(raw)+'=Medium Swing=0=1===');
+  const ir=E.irealToSongs(url)[0];
+  assert.strictEqual(ir.song.ch.split('|').length,24,'인트로 4마디 빼고 24마디: '+ir.song.ch.split('|').length);
+  assert.ok(ir.warn.some(w=>/인트로 4마디/.test(w)),'경고: '+ir.warn);
+  assert.strictEqual(ir.song.ch.split('|')[0],'Dm7','첫 마디는 A 섹션');
+  eqJ(ir.song.f,['ABA',8],'형식: '+ir.song.f)}
+console.log('v0.47 iReal 인트로 검사 통과');

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!--__PWA_HEAD__-->
-<title>즉흥 악보 생성기 v0.46.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.47.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -743,6 +743,7 @@ body.fslock{overflow:hidden}
 .tooldeck .zval{min-width:44px;text-align:center;font-size:13px;color:var(--txt)}
 .emptyact{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px}
 body.setopen{overflow:hidden}
+.quotebox[hidden]{display:none}
 /* v0.46 글자 키우기(테스터 피드백: 웹에서 글자가 작음) — 설정 패널·상단 막대. 한글 라벨은 고정폭 글꼴을 쓰지 않는다 */
 .setbox .tb>label,.setbox .field>label{font-family:inherit;font-size:14px;letter-spacing:.02em;text-transform:none;font-weight:600}
 .setbox .toolbar select,.setbox .tb select,.setbox .advsel,.setbox .toolbar input[type=search]{font-size:16px;min-height:48px}
@@ -790,7 +791,7 @@ body.setopen{overflow:hidden}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.46.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">Concept Prototype · v0.47.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -851,7 +852,7 @@ body.setopen{overflow:hidden}
       <p class="hint" id="styleDesc"></p>
      </section>
   <details class="adv" id="advPanel">
-    <summary><span class="chev">▶</span>⚙ 세부 설정<span class="advsub">반주 스타일 · 악기 소리 · 테마 인용 · 반주 음량 — 눌러서 펼치기</span></summary>
+    <summary><span class="chev">▶</span>⚙ 세부 설정<span class="advsub">반주 스타일 · 악기 소리 · 헤드 멜로디 · 반주 음량 — 눌러서 펼치기</span></summary>
     <div class="advbody">
     <div class="advgrid">
       <div class="field"><label>반주 스타일</label><select id="feelSel" class="advsel"><option value="auto" selected>자동 (곡에 맞춤)</option><option value="swing">스윙</option><option value="ballad">발라드 (브러시)</option><option value="bossa">보사노바</option><option value="latin">라틴</option><option value="shuffle">블루스 셔플</option><option value="funk">펑크 · R&amp;B</option></select><span class="advnote" id="feelNote"></span></div>
@@ -864,12 +865,12 @@ body.setopen{overflow:hidden}
     <div class="quotebox">
       <div class="qhead"><label><input type="checkbox" id="motifOn" checked> 모티프 발전(기본 켬) — 앞 프레이즈의 첫머리 3~4음을 시퀀스·반진행·반복으로 되풀이</label><span class="advnote">연주자가 "말 걸고 받아치듯" 같은 동기를 변형해 다시 꺼내는 흐름을 만듭니다. 악보 태그에 「모티프 발전: 시퀀스↑」처럼 표시됩니다. 끄면 이전과 같은 생성.</span></div>
       <div class="qrow">
-        <div class="qcol"><label class="qlab">헤드 멜로디 ABC 직접 입력(선택) — 넣으면 일부 프레이즈가 헤드의 한 토막을 코드에 맞춰 변형해 인용합니다</label>
+        <div class="qcol"><label class="qlab">헤드 멜로디(불러온 곡은 자동으로 채워짐) — 「헤드 연주」로 첫·마지막 코러스에 그대로 싣고, 솔로의 일부 프레이즈는 헤드 조각의 음 모양을 코드에 맞춰 빌려 씁니다</label>
           <textarea id="headAbcIn" rows="3" spellcheck="false" placeholder="M:4/4&#10;L:1/8&#10;K:C&#10;E2 G c2 B A|G2 E D2 C D|…" style="background:var(--panel-2);color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:13px;width:100%"></textarea>
           <span class="advnote" id="headMsg">직접 가진 악보·직접 채보한 선율만 넣으세요. 앱은 원곡 멜로디를 수록하지 않으며, 입력한 내용은 브라우저 밖으로 전송되지 않습니다. 셋잇단·화음 구간은 건너뜁니다.</span></div>
       </div>
     </div>
-    <div class="quotebox">
+    <div class="quotebox" hidden>   <!-- v0.47 테마 인용(앱이 만든 4마디 가이드 멜로디) 숨김 — 테스터 피드백: 이상하게 들림. 헤드 연주·헤드 차용으로 대신 -->
       <div class="qhead"><label><input type="checkbox" id="themeOn"> 테마 인용(기본 끔) — 앱이 이 곡의 코드톤으로 만든 4마디 가이드 멜로디를 솔로에 넣기</label><span class="advnote">원곡의 실제 멜로디가 아닙니다. 앱이 코드 진행에서 새로 만든 연습용 테마라 저작권 걱정이 없고, 솔로가 같은 동기를 반복해 노래처럼 들립니다. 악보에 「테마 인용」 태그로 표시됩니다.</span></div>
       <div class="qrow">
         <div class="qcol qsm"><label class="qlab">넣을 코러스</label><select id="themeCh"><option value="first" selected>첫 코러스</option><option value="all">모든 코러스</option><option value="last">마지막 코러스</option></select></div>
@@ -1891,6 +1892,7 @@ function chorusLabel(c){   /* 코러스 탭·악보 머리 이름 — 헤드 코
   const h=cur.solos&&cur.solos[0]&&cur.solos[0].head?1:0;return (c-h+1)+'코러스';
 }
 function gen(newSeed){
+  cur.themeOn=false;   /* v0.47 테마 인용 끔(숨김) */
   const keyPc=origKey();
   const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length,cur.lyric,cur.headMode,$('#headAbcIn').value.length].join('|');
   if(newSeed||cur.seed===undefined||cur.sig===undefined){cur.seed=Math.floor(Math.random()*1e6);cur.edits={};cur.sel=null}

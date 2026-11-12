@@ -1293,8 +1293,8 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       const ok=dd.every(d=>{const r=(t%6===0)||(d===3||d===6||d===9);t+=d;return r&&d>=3});
       if(ok)rhy=true;
     }
-    if(!rhy&&from==='head')return false;
-    if(!rhy&&rng()<0.4)return false;      /* 윤곽만 닮은 모티프는 덜 쓴다 */
+    /* v0.47 헤드 조각은 리듬 길이가 안 맞아도 음 윤곽(음정 모양)은 빌려 쓴다 — 예전에는 포기해서 헤드 차용이 거의 안 들렸다 */
+    if(!rhy&&from!=='head'&&rng()<0.4)return false;      /* 윤곽만 닮은 자기 모티프는 덜 쓴다 */
     const t0=e0.t;
     const times=[],durs=[];
     {let t=t0;for(let k=0;k<K;k++){times.push(t);const d=rhy?dd[k]:events[i+k].d;durs.push(d);t+=d}}
@@ -1600,6 +1600,41 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       }else stats.ctAlignFail=(stats.ctAlignFail||0)+1;
       lastFixed=events[idx[n-1]].midi;q0=q1+1;
     }
+  }
+  /* ── ⑥-b v0.47 첫 음 정리 — 코드 밖 음(악보 색 빨강)이 「들어가는 자리」에 오지 않게 ──
+     테스터 피드백: 1·5·9·13마디처럼 프레이즈가 시작되는 자리를 코드 밖 음으로 열면 어색하게 들린다.
+     ① 마디선을 넘어 붙임줄로 이어지는 음: 새 마디 첫 박에서 울리므로 새 코드의 코드톤으로(당겨 친 음 = 다음 코드 음)
+     ② 4마디 단위 첫 박(1·5·9·13…)에 치는 음: 코드톤(없으면 스케일음)
+     ③ 쉼(8분 이상) 뒤 들어가는 음·프레이즈 첫 음: 스케일음 이상(코드톤 우선). 블루스·릭 마디는 ③에서 빼고, 릭 마디는 전부 뺀다
+     후보는 원래 음 ±1·±2·±3반음 중 가까운 것, 음역 안, 다음 음과 같은 음(반복)은 피한다 */
+  if(topic!=='ct'){   /* 코드톤 라인 연습은 계획 단계에서 이미 코드톤으로 들어간다 — 손대지 않는다 */
+    const chAt=t=>{const b=Math.min(NB-1,Math.floor(t/TPB));return chordAtBeat(bars[b],(t-b*TPB)/6,BPB)||bars[b][0]};
+    const kind=(m,c)=>{const r=mod12(m-c.root),T=CHORD_TYPES[c.type];return T.iv.includes(r)?2:T.scale.includes(r)?1:0};
+    const has=(b,re)=>(tagsAt[b]||[]).some(x=>re.test(x));
+    const fix=(k,c,need,why)=>{
+      const e=events[k],nx=events.slice(k+1).find(x=>x.midi!==null),pv=events.slice(0,k).reverse().find(x=>x.midi!==null);
+      let best=null,bs=1e9;
+      for(const o of [1,-1,2,-2,3,-3]){
+        const m=e.midi+o;if(m<LO||m>HI)continue;const kd=kind(m,c);if(kd<need)continue;
+        const lp=x=>x&&Math.abs(x.midi-m)>MAXLEAP&&!(x===pv&&e.disp&&m>pv.midi&&m-pv.midi<=12);if(lp(pv)||lp(nx))continue;   /* 도약 한도 지킴 */
+        let sc=Math.abs(o)*2+(kd===2?0:1.5)+(nx&&nx.midi===m?4:0);
+        if(sc<bs){bs=sc;best=m}
+      }
+      if(best===null)return false;
+      e.midi=best;stats.redFix=(stats.redFix||0)+1;stats['redFix_'+why]=(stats['redFix_'+why]||0)+1;return true;
+    };
+    events.forEach((e,k)=>{
+      if(e.midi===null||e.trip)return;
+      const b0=Math.floor(e.t/TPB),b1=Math.floor((e.t+e.d-1)/TPB);
+      if(has(b0,/릭/))return;
+      if(b1>b0&&!has(b1,/릭/)){   /* ① 마디선을 넘는 음 */
+        const B=b1*TPB,c=chAt(B);
+        if(kind(e.midi,c)===0&&(!has(b1,/블루스/)||b1%4===0)){fix(k,c,2,'tie')||fix(k,c,1,'tie');return}
+      }
+      if(e.t%TPB===0&&b0%4===0){const c=chAt(e.t);if(kind(e.midi,c)===0){fix(k,c,2,'db4')||fix(k,c,1,'db4');return}}   /* ② */
+      const pv=events.slice(0,k).reverse().find(x=>x.midi!==null),entry=e.first||!pv||pv.t+pv.d<=e.t-3;   /* 쉼 뒤 들어가는 음 */
+      if(entry&&!has(b0,/블루스/)){const c=chAt(e.t);if(kind(e.midi,c)===0)fix(k,c,1,'ph')}   /* ③ */
+    });
   }
   /* ── ⑦ 마디 분할 · 붙임줄 · 표기용 길이 정리 ── */
   const pieces=[];
