@@ -254,6 +254,7 @@ function playAllInner(acIn,banksIn,feelIn){
   /* v0.18 — 룩어헤드 스케줄러: 모든 음을 한 번에 만들지 않고 1초 앞까지만 예약(브라우저 부하·무음 방지)
      코러스마다 서로 다른 솔로(cur.solos[c])를 이어서 재생 */
   stopAll();silentKeepAlive(true);   /* v0.39.2 stopAll이 끈 무음 세션 유지를 다시 켠다 */
+  cur.playReq=true;
   const sols=(cur.solos&&cur.solos.length)?cur.solos:[cur.solo];
   const bpm=+$('#bpm').value;
   const bpb=sols[0].bpb||4;
@@ -298,6 +299,7 @@ function playAllInner(acIn,banksIn,feelIn){
   const A0=PR?Math.max(0,Math.min(totalBars-1,PR.a0)):0,A1=PR?Math.max(A0,Math.min(totalBars-1,PR.a1)):totalBars-1;
   const LOOP=!!(PR&&PR.loop),rangeLen=(A1-A0+1)*barLen;
   cur.audio={ac,master,rb,lead,out:lim,raf:null,timer:null,start,chLen,barLen,nCh,nb,endAt:start+rangeLen,a0:A0,a1:A1,loop:LOOP};
+  if(typeof syncPlay==='function')try{syncPlay()}catch(e){}   /* v0.45 상단 막대 버튼 글자 */
   let jobs=[];
   const clickG=ac.createGain();clickG.gain.value=0.08;clickG.connect(post);   /* v0.25: 카운트인 클릭은 음악과 별도 게인 — 음악에 맞춰 볼륨을 올려도 클릭이 덜 커진다 */
   for(let i=0;i<4;i++){const tt=t0+i*spb;jobs.push({t:tt,f:()=>click(ac,clickG,tt,i===0?1400:1000,i===0?0.5:0.3)})}
@@ -383,7 +385,7 @@ function playAllInner(acIn,banksIn,feelIn){
       const rel=LOOP?el%rangeLen:el,ab=A0+Math.min(A1-A0,Math.floor(rel/barLen)),cr=Math.floor(ab/nb),bi=ab%nb;
       if(typeof onPlayPos==='function'){try{onPlayPos(cr,bi,(rel%barLen)/barLen)}catch(e){}}  /* 화면 갱신 오류가 재생을 멈추지 않게 */
     }
-    if(!LOOP&&ac.currentTime>au.endAt+1.2){stopAll();$('#btnPlay').textContent='▶ 재생';return}
+    if(!LOOP&&ac.currentTime>au.endAt+1.2){stopAll();(typeof syncPlay==='function'?syncPlay():$('#btnPlay').textContent='▶ 재생');return}
     au.raf=requestAnimationFrame(loop);
   };
   loop();
@@ -552,7 +554,7 @@ function pauseAll(){if(cur.audio&&!cur.paused){cur.paused=true;try{cur.audio.ac.
 function resumeAll(){if(cur.audio&&cur.paused){cur.paused=false;try{cur.audio.ac.resume()}catch(e){}}}
 function togglePause(){if(!cur.audio)return false;if(cur.paused)resumeAll();else pauseAll();return true}
 function stopAll(){
-  cur.paused=false;
+  cur.paused=false;cur.playReq=false;   /* v0.45 재생 요청 상태(샘플 로딩 중에도 「재생 중」으로 본다) */
   cur._playTok=(cur._playTok||0)+1;
   if(cur.audio){
     if(cur.audio.raf)cancelAnimationFrame(cur.audio.raf);
@@ -569,13 +571,14 @@ function stopAll(){
 
 /* ── 재생 예외 복구: 조용한 실패 대신 화면에 원인을 표시 ── */
 function playAll(){
+  cur.playReq=true;
   try{
     const p=playAllInnerAsync();
-    if(p&&p.catch)p.catch(e=>{console.error('재생 오류:',e);stopAll();$('#btnPlay').textContent='▶ 재생';try{$('#paperTitle').textContent='⚠ 재생 오류: '+e.message}catch(_){}});
+    if(p&&p.catch)p.catch(e=>{console.error('재생 오류:',e);stopAll();(typeof syncPlay==='function'?syncPlay():$('#btnPlay').textContent='▶ 재생');try{$('#paperTitle').textContent='⚠ 재생 오류: '+e.message}catch(_){}});
   }
   catch(e){
     console.error('재생 오류:',e);
-    stopAll();$('#btnPlay').textContent='▶ 재생';
+    stopAll();(typeof syncPlay==='function'?syncPlay():$('#btnPlay').textContent='▶ 재생');
     try{$('#paperTitle').textContent='⚠ 재생 오류: '+e.message}catch(_){}
   }
 }

@@ -9,4 +9,14 @@ const RAW_SONGS = [
    ch:'F7|Bb7|F7|Cm7 F7|Bb7|Bb7|F7|Am7b5 D7|Gm7|C7|F7 D7|Gm7 C7'},
   {id:'form-minorblues',n:'마이너 블루스 C (형식)',c:'블루스',k:0,bpm:140,m:4,f:['AAB',4],
    ch:'Cm7|Cm7|Cm7|Cm7|Fm7|Fm7|Cm7|Cm7|Ab7|G7|Cm7|G7'},
+  /* ── 퍼블릭 도메인 곡(미국 1930년까지 발행 · 한국 저작권법 제3조 제4항) — v0.45 초안: 재즈에서 흔히 쓰는 진행으로 적음.
+     원 악보(초판) 대조 전이라 곡 상태 'draft'. 대조하면 출처 대장(코어 곡셋 후보 대장)에 채보 근거를 적고 상태를 올린다 ── */
+  {id:'pd-i-got-rhythm',n:'I Got Rhythm',c:'스윙',k:10,bpm:200,m:4,f:['AABA',8],
+   ch:'Bb6 Gm7|Cm7 F7|Bb6 Gm7|Cm7 F7|Bb6 Bb7|Eb6 Ebm6|Cm7 F7|Bb6 F7|Bb6 Gm7|Cm7 F7|Bb6 Gm7|Cm7 F7|Bb6 Bb7|Eb6 Ebm6|Cm7 F7|Bb6|D7|D7|G7|G7|C7|C7|F7|F7|Bb6 Gm7|Cm7 F7|Bb6 Gm7|Cm7 F7|Bb6 Bb7|Eb6 Ebm6|Cm7 F7|Bb6'},
+  {id:'pd-honeysuckle-rose',n:'Honeysuckle Rose',c:'스윙',k:5,bpm:160,m:4,f:['AABA',8],
+   ch:'Gm7 C7|Gm7 C7|Gm7 C7|Gm7 C7|F6|F6 D7|Gm7 C7|F6 C7|Gm7 C7|Gm7 C7|Gm7 C7|Gm7 C7|F6|F6 D7|Gm7 C7|F6|Cm7 F7|Cm7 F7|Bb6|Bb6|Dm7 G7|Dm7 G7|Gm7|C7|Gm7 C7|Gm7 C7|Gm7 C7|Gm7 C7|F6|F6 D7|Gm7 C7|F6'},
+  {id:'pd-tea-for-two',n:'Tea for Two',c:'스윙',k:8,bpm:170,m:4,f:['ABAC',8],
+   ch:'Bbm7 Eb7|Bbm7 Eb7|Abmaj7|Abmaj7|Bbm7 Eb7|Bbm7 Eb7|Abmaj7|Abmaj7|Dm7 G7|Dm7 G7|Cmaj7|Cmaj7|Dm7 G7|Dm7 G7|Cmaj7|Bbm7 Eb7|Bbm7 Eb7|Bbm7 Eb7|Abmaj7|Abmaj7|Bbm7 Eb7|Bbm7 Eb7|Abmaj7|Abmaj7|Bbm7 Eb7|Abmaj7 F7|Bbm7 Eb7|Abmaj7 F7|Bbm7|Eb7|Ab6|Ab6'},
+  {id:'pd-it-had-to-be-you',n:'It Had to Be You',c:'스윙',k:7,bpm:130,m:4,f:['ABAC',8],
+   ch:'Gmaj7|Gmaj7|E7|E7|A7|A7|D7|D7|Gmaj7|Gmaj7|B7|B7|E7|E7|A7|Am7 D7|Gmaj7|Gmaj7|E7|E7|A7|A7|D7|D7|Gmaj7|Gmaj7|Cmaj7|Cm6|Bm7 E7|Am7 D7|G6|Am7 D7'},
 ];

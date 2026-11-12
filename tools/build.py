@@ -86,7 +86,11 @@ if '--web' in sys.argv:
     if web.count(p1)!=1 or web.count(st)!=1: raise RuntimeError('웹 빌드: 곡 데이터 블록을 찾지 못했습니다')
     web=web.replace(p1,open(os.path.join(root,'engine','songs_web.js'),encoding='utf-8').read())
     wst={'p251':('practice','앱 연습용 진행'),'blues12':('practice','앱 연습용 진행'),'m25':('practice','앱 연습용 진행'),
-         'form-rhythm':('form','공통 형식 — 재즈에서 널리 쓰는 리듬 체인지 진행'),'form-jazzblues':('form','공통 형식 — 재즈 블루스 12마디'),'form-minorblues':('form','공통 형식 — 마이너 블루스 12마디')}
+         'form-rhythm':('form','공통 형식 — 재즈에서 널리 쓰는 리듬 체인지 진행'),'form-jazzblues':('form','공통 형식 — 재즈 블루스 12마디'),'form-minorblues':('form','공통 형식 — 마이너 블루스 12마디'),
+         'pd-i-got-rhythm':('draft','거슈윈 1930 · 퍼블릭 도메인. 재즈에서 흔히 치는 32마디(원곡 끝 2마디 꼬리는 뺌)'),
+         'pd-honeysuckle-rose':('draft','팻츠 월러 1929 · 퍼블릭 도메인. A 5~8마디 확인 필요'),
+         'pd-tea-for-two':('draft','빈센트 유먼스 1924 · 퍼블릭 도메인. B 끝 턴어라운드·마지막 8마디 확인 필요'),
+         'pd-it-had-to-be-you':('draft','아이셤 존스 1924 · 퍼블릭 도메인. 9~16마디·마지막 8마디 확인 필요')}
     import json
     web=web.replace(st,'/* 웹 빌드 곡 상태 */\nconst SONG_STATUS='+json.dumps({k:{'s':a,'n':b,'a':[]} for k,(a,b) in wst.items()},ensure_ascii=False)+';')
     def rep(old,new):
