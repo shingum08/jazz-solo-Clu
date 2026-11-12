@@ -719,12 +719,15 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   const lickPlan=[];
   if(typeof CURATED_LICKS!=='undefined'&&opts.useLicks!==false&&opts.barLicks!==false&&BPB===4&&(topic==='auto'||topic==='alt')&&diff>=2){
     const rate=topic==='alt'?0.6:(LICK_RATE[diff]||0),perCh=[0];
-    for(let b=0;b<NB-1&&rate>0;b++){
+    const rateC=topic==='alt'?0:(typeof CHORD_LICK_RATE!=='undefined'&&CHORD_LICK_RATE[diff])||0;
+    for(let b=0;b<NB&&(rate>0||rateC>0);b++){
       const t0=b*TPB,t1=t0+TPB,s0=segAt(t0);
       if(segAt(t1-1)!==s0||segs[s0].t0!==t0)continue;
-      const sg=segs[s0],nxI=segAt(t1),nx=segs[nxI];
-      if(!nx||nx.t0!==t1||mod12(nx.root-sg.root)!==5)continue;
-      const pool=CURATED_LICKS.filter(L=>!(L.minDiff&&diff<L.minDiff)&&L.cls.includes(sg.cls)&&L.to.includes(nx.cls==='domalt'?'dom':nx.cls)&&L.tr===5);
+      const sg=segs[s0],nxI=b<NB-1?segAt(t1):-1,nx=nxI>=0?segs[nxI]:null;
+      const res=!!(nx&&nx.t0===t1&&mod12(nx.root-sg.root)===5);   /* Ⅴ→Ⅰ 자리면 해결 릭, 아니면 v0.49 코드 릭 */
+      const pool=CURATED_LICKS.filter(L=>!(L.minDiff&&diff<L.minDiff)&&L.cls.includes(sg.cls)&&
+        (res?(L.to&&L.to.includes(nx.cls==='domalt'?'dom':nx.cls)&&L.tr===5):
+          (!L.to&&L.n.every(x=>sg.scale.includes(mod12(x[2]))||(sg.ct||[]).includes(mod12(x[2]))))));   /* 코드 릭은 그 코드 스케일 안 음만(예: 6음은 도리안 마이너에서만) */
       if(!pool.length)continue;
       const inBar=events.filter(e=>e.t>=t0&&e.t<t1);
       if(!inBar.length)continue;
@@ -732,21 +735,29 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       if(!ph||ph.song||ph.blues||ph.quote||inBar.some(e=>e.ph!==P||e.song||e.blu||e.hl||e.quote))continue;
       if(!events.some(e=>e.ph===P&&e.t<t0))continue;   /* 프레이즈가 이 마디 앞에서 이미 시작돼 있어야(첫 음 표시 유지) */
       /* 착지음: 다음 마디 첫 박에 같은 프레이즈 음이 있으면 그 음, 없으면(프레이즈가 여기서 끝나면) 새로 만든다 */
-      let tgt=events.find(e=>e.t===t1),newT=null;
-      if(tgt){if(tgt.ph!==P||tgt.song||tgt.blu||tgt.hl||tgt.quote)continue}
-      else{
-        const nxE=events.filter(e=>e.t>t1).reduce((a,e)=>a===null||e.t<a.t?e:a,null);
-        const room=(nxE?nxE.t:TOT)-t1;if(room<6)continue;
-        newT={t:t1,d:Math.min(12,room),ph:P,strong:true,first:false,last:!(nxE&&nxE.ph===P),midi:null};
+      let tgt=null,newT=null;
+      if(res){
+        tgt=events.find(e=>e.t===t1);
+        if(tgt){if(tgt.ph!==P||tgt.song||tgt.blu||tgt.hl||tgt.quote)continue}
+        else{
+          const nxE=events.filter(e=>e.t>t1).reduce((a,e)=>a===null||e.t<a.t?e:a,null);
+          const room=(nxE?nxE.t:TOT)-t1;if(room<6)continue;
+          newT={t:t1,d:Math.min(12,room),ph:P,strong:true,first:false,last:!(nxE&&nxE.ph===P),midi:null};
+        }
+      }else{
+        /* 코드 릭은 마디를 꽉 채우므로 다음 마디 첫 박에 다른 프레이즈가 바로 붙어 있으면 건너뛴다 */
+        const nx1=events.find(e=>e.t===t1);if(nx1&&nx1.ph!==P)continue;
       }
       if(perCh[0]>=LICK_MAX_PER_CHORUS)continue;
-      if(rng()>=rate)continue;
+      if(rng()>=(res?rate:rateC))continue;
       const L=pool[Math.floor(rng()*pool.length)];
+      const wasLast=inBar.some(e=>e.last);
       for(let i=events.length-1;i>=0;i--)if(events[i].t>=t0&&events[i].t<t1)events.splice(i,1);
       const id=lickPlan.length;
-      L.n.forEach(([dt,d],k)=>events.push({t:t0+dt,d,ph:P,strong:(t0+dt)%6===0,trip:d===2?1:undefined,first:false,last:false,midi:null,lick:id,lickK:k}));
+      L.n.forEach(([dt,d],k)=>events.push({t:t0+dt,d,ph:P,strong:(t0+dt)%6===0,trip:d===2?1:undefined,first:false,last:!res&&wasLast&&k===L.n.length-1,midi:null,lick:id,lickK:k}));
       if(newT){events.push(newT);tgt=newT}
-      tgt.lickT=id;lickPlan.push({L,bar:b,root:sg.root});perCh[0]++;
+      if(tgt)tgt.lickT=id;
+      lickPlan.push({L,bar:b,root:sg.root});perCh[0]++;
     }
     if(lickPlan.length){events.sort((a,b)=>a.t-b.t);for(let i=0;i<events.length-1;i++)if(events[i].t+events[i].d>events[i+1].t)events[i].d=Math.max(1,events[i+1].t-events[i].t)}
   }
@@ -1114,20 +1125,21 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   function planLick(i){
     const e=events[i],P=lickPlan[e.lick];if(!P)return;
     const span=[];for(let k=i;k<events.length&&events[k].lick===e.lick;k++)span.push(k);
-    const ti=events.findIndex(x=>x.lickT===e.lick);
-    const ok=span.length===P.L.n.length&&ti>span[span.length-1];
+    const noT=P.L.t===null||P.L.t===undefined;   /* v0.49 코드 릭 — 착지음 없음 */
+    const ti=noT?-1:events.findIndex(x=>x.lickT===e.lick);
+    const ok=span.length===P.L.n.length&&(noT||ti>span[span.length-1]);
     let best=null;
     if(ok)for(let o=-4;o<=4;o++){
-      const base=mod12(P.root)+60+12*o,ms=P.L.n.map(x=>base+x[2]),mt=base+P.L.t;
-      if(ms.some((m,q)=>!allow(m,events[span[q]].t))||!allow(mt,events[ti].t))continue;
+      const base=mod12(P.root)+60+12*o,ms=P.L.n.map(x=>base+x[2]),mt=noT?null:base+P.L.t;
+      if(ms.some((m,q)=>!allow(m,events[span[q]].t))||(!noT&&!allow(mt,events[ti].t)))continue;
       if(prevM!==null&&Math.abs(ms[0]-prevM)>MAXLEAP)continue;
-      if(ms.some((m,q)=>q>0&&Math.abs(m-ms[q-1])>MAXLEAP)||Math.abs(mt-ms[ms.length-1])>MAXLEAP)continue;
-      const sc=Math.abs((ms[0]+mt)/2-pitchGoal(e.t))+(prevM===null?0:0.5*Math.abs(ms[0]-prevM));
+      if(ms.some((m,q)=>q>0&&Math.abs(m-ms[q-1])>MAXLEAP)||(!noT&&Math.abs(mt-ms[ms.length-1])>MAXLEAP))continue;
+      const sc=Math.abs((ms[0]+(noT?ms[ms.length-1]:mt))/2-pitchGoal(e.t))+(prevM===null?0:0.5*Math.abs(ms[0]-prevM));
       if(!best||sc<best.sc)best={ms,mt,sc};
     }
     if(!best){span.concat(ti>=0?[ti]:[]).forEach(k=>{delete events[k].lick;delete events[k].lickT});return}
     span.forEach((k,q)=>{forced.set(k,{m:best.ms[q],kind:'lick'});motifLock.add(k);events[k].keep=true});
-    forced.set(ti,{m:best.mt,kind:'lick'});motifLock.add(ti);events[ti].keep=true;
+    if(!noT){forced.set(ti,{m:best.mt,kind:'lick'});motifLock.add(ti);events[ti].keep=true}
     tag(P.bar,'릭: '+P.L.name);stats.licks=(stats.licks||0)+1;lickUse[P.L.id]=(lickUse[P.L.id]||0)+1;
   }
   function planSong(i){

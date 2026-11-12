@@ -272,7 +272,9 @@ function playAllInner(acIn,banksIn,feelIn){
   try{comp.threshold.value=-8;comp.knee.value=4;comp.ratio.value=20;comp.attack.value=0.002;comp.release.value=0.15}catch(e){}
   const post=ac.createGain();post.gain.value=Object.keys(banks).length?4.0:1.6;   /* v0.25: 여전히 작다는 피드백 → 샘플 4배·신스 1.6배. 리미터가 클리핑 방지 */
   const lim=ac.createDynamicsCompressor();try{lim.threshold.value=-1;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=0.002;lim.release.value=0.1}catch(e){}
-  master.connect(comp);comp.connect(post);post.connect(lim);lim.connect(ac.destination);
+  /* v0.49 음소거 — 출력 맨 끝 게인(카운트인 클릭까지). 재생 중에도 setMute()로 바로 바뀐다(악보 커서는 그대로 흐름) */
+  const muteG=ac.createGain();muteG.gain.value=cur.mute?0:1;
+  master.connect(comp);comp.connect(post);post.connect(lim);lim.connect(muteG);muteG.connect(ac.destination);
   /* v0.29 믹스: 솔로 버스(lead)와 반주 버스(rb)를 나누고, 솔로를 앞으로. 공간감은 생성한 임펄스 응답 리버브로(외부 파일 없음) */
   const lead=ac.createGain();
   const lvRaw=$('#leadvol')?+$('#leadvol').value:100;
@@ -292,17 +294,20 @@ function playAllInner(acIn,banksIn,feelIn){
   if(revIn){try{const bs=ac.createGain();bs.gain.value=0.1;rb.connect(bs);bs.connect(revIn)}catch(e){}}
   master.gain.value*=feel==='ballad'?1.3:1;   /* 발라드는 성긴 편성이라 전체 레벨 보정 */
   rb.connect(master);
-  const spb=60/bpm,t0=ac.currentTime+(useSamples?0.6:0.15),start=t0+4*spb;  /* 샘플은 카운트인 동안 로드 */
-  const nb=sols[0].bars.length,barLen=bpb*spb,chLen=nb*barLen,nCh=sols.length;
+  const nb=sols[0].bars.length,nCh=sols.length;
   /* v0.36 구간 재생 — cur.playRange={a0,a1,loop}: 코러스를 이어 붙인 절대 마디 번호(0부터). 없으면 처음부터 끝까지 */
   const totalBars=nCh*nb,PR=cur.playRange||null;
   const A0=PR?Math.max(0,Math.min(totalBars-1,PR.a0)):0,A1=PR?Math.max(A0,Math.min(totalBars-1,PR.a1)):totalBars-1;
-  const LOOP=!!(PR&&PR.loop),rangeLen=(A1-A0+1)*barLen;
-  cur.audio={ac,master,rb,lead,out:lim,raf:null,timer:null,start,chLen,barLen,nCh,nb,endAt:start+rangeLen,a0:A0,a1:A1,loop:LOOP};
+  const LOOP=!!(PR&&PR.loop);
+  /* v0.49 카운트인 — 맨 처음(1코러스 1마디)부터일 때만 4번. 중간 마디에서 시작·건너뛰기는 바로 시작(구간 반복은 그대로 카운트인) */
+  const NCOUNT=(A0===0||LOOP)?4:0;
+  const spb=60/bpm,t0=ac.currentTime+(useSamples?0.6:0.15),start=t0+NCOUNT*spb;  /* 샘플은 카운트인 동안 로드 */
+  const barLen=bpb*spb,chLen=nb*barLen,rangeLen=(A1-A0+1)*barLen;
+  cur.audio={ac,master,rb,lead,out:muteG,mute:muteG,raf:null,timer:null,start,chLen,barLen,nCh,nb,endAt:start+rangeLen,a0:A0,a1:A1,loop:LOOP};
   if(typeof syncPlay==='function')try{syncPlay()}catch(e){}   /* v0.45 상단 막대 버튼 글자 */
   let jobs=[];
   const clickG=ac.createGain();clickG.gain.value=0.08;clickG.connect(post);   /* v0.25: 카운트인 클릭은 음악과 별도 게인 — 음악에 맞춰 볼륨을 올려도 클릭이 덜 커진다 */
-  for(let i=0;i<4;i++){const tt=t0+i*spb;jobs.push({t:tt,f:()=>click(ac,clickG,tt,i===0?1400:1000,i===0?0.5:0.3)})}
+  for(let i=0;i<NCOUNT;i++){const tt=t0+i*spb;jobs.push({t:tt,f:()=>click(ac,clickG,tt,i===0?1400:1000,i===0?0.5:0.3)})}
   const rng=mulberry32((cur.seed||1)*13+5);
   /* 컴핑: 찰스턴·푸시(4&→1)·2&·4박 등 싱커페이션 — 마디마다 확률적으로 고른다 */
   const COMP=bpb===3?[[0,1+sw],[0+sw,2],[1,2+sw],[0,1]]:(bpb===5?[[0,2+sw],[1+sw,3],[0,3+sw],[2,4],[1,4]]:[[0,1+sw],[0+sw,2+sw],[1+sw,3],[0,2+sw],[1,3+sw],[sw,3]]);
@@ -552,6 +557,10 @@ function mel(ac,out,when,dur,midi,tone,vel,isEnd){
 /* v0.31 일시정지·이어서 — AudioContext suspend/resume로 전체(솔로+반주)를 그 자리에서 멈춘다 */
 function pauseAll(){if(cur.audio&&!cur.paused){cur.paused=true;try{cur.audio.ac.suspend()}catch(e){}}}
 function resumeAll(){if(cur.audio&&cur.paused){cur.paused=false;try{cur.audio.ac.resume()}catch(e){}}}
+function setMute(on){   /* v0.49 */
+  cur.mute=!!on;
+  if(cur.audio&&cur.audio.mute){try{const g=cur.audio.mute.gain,t=cur.audio.ac.currentTime;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(cur.mute?0:1,t+0.03)}catch(e){cur.audio.mute.gain.value=cur.mute?0:1}}
+}
 function togglePause(){if(!cur.audio)return false;if(cur.paused)resumeAll();else pauseAll();return true}
 function stopAll(){
   cur.paused=false;cur.playReq=false;   /* v0.45 재생 요청 상태(샘플 로딩 중에도 「재생 중」으로 본다) */
