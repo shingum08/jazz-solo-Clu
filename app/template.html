@@ -1581,7 +1581,9 @@ function shareBlobFile(blob,name){if(window.AndroidBridge&&AndroidBridge.shareFi
 window.saveBlobFile=saveBlobFile;
 const KEYNAMES=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
 const GRP={'스윙':'미디엄/업템포 스윙','블루스':'블루스 & 리듬 체인지','라틴':'보사노바 & 라틴','발라드':'재즈 발라드','모달':'모달·쿨·하드밥','비밥·왈츠':'비밥·왈츠·기타 필수곡','연습':'연습용 진행'};
-const cur={lyric:30,noteColors:'off',selProg:'blue-bossa',trUser:0,selDiff:2,selInst:'wind',selTrans:0,useLicks:true,useGroups:true,style:'all',tone:'clarinet',topic:'auto',themeOn:false,themeCh:'first',feel:'auto',solo:null,abc:'',audio:null,saved:[],view:'solo',playSolo:true,chorus:2};
+/* v0.44 기본 곡 — 웹 테스트 빌드에는 내장 곡이 없어 연습 진행으로 */
+const DEFAULT_PROG=(typeof SONGDB!=='undefined'&&SONGDB['blue-bossa'])?'blue-bossa':(typeof SONGDB!=='undefined'&&SONGDB['form-jazzblues'])?'form-jazzblues':'blues12';
+const cur={lyric:30,noteColors:'off',selProg:DEFAULT_PROG,trUser:0,selDiff:2,selInst:'wind',selTrans:0,useLicks:true,useGroups:true,style:'all',tone:'clarinet',topic:'auto',themeOn:false,themeCh:'first',feel:'auto',solo:null,abc:'',audio:null,saved:[],view:'solo',playSolo:true,chorus:2};
 
 /* ── 곡 선택 박스 + 검색 ── */
 const SONG_MARK={mine:'♪ ',ok:'✓ ',form:'✓ ',practice:'✓ ',book:'■ ',bookq:'□ ',rb:'◆ ',rbq:'◇ ',partial:'△ ',wrong:'✕ ',unknown:'? '};
@@ -2263,7 +2265,7 @@ function renderMySongs(){
       cur.mySongs=cur.mySongs.filter(q=>q.id!==m.id);storeMySongs();
       cur.saved=cur.saved.filter(it=>it.song!==m.id);cur.snips=cur.snips.filter(it=>it.song!==m.id);storeSaved();storeSnips();renderSaved();renderSnips();
       delete SONGDB[m.id];if(typeof SONG_STATUS!=='undefined')delete SONG_STATUS[m.id];
-      if(cur.selProg===m.id){cur.selProg='blue-bossa';buildSongOptions();songSel.value='blue-bossa';songSel.onchange()}else buildSongOptions();
+      if(cur.selProg===m.id){cur.selProg=DEFAULT_PROG;buildSongOptions();songSel.value=DEFAULT_PROG;songSel.onchange()}else buildSongOptions();
       filterSongs();renderMySongs();
     };
     acts.appendChild(b);acts.appendChild(x);d.appendChild(acts);el.appendChild(d);
@@ -2470,7 +2472,7 @@ function fbBody(){return $('#fbText').value.trim()+'\n\n--- 자동 정보 ---\n'
 $('#fbSend').onclick=()=>{
   const t=$('#fbText').value.trim();if(!t){$('#fbMsg').textContent='내용을 입력해 주세요.';return}
   const kind=$('#fbKind').value;
-  const url='https://github.com/shingum08/jazz-solo-generator/issues/new?title='+encodeURIComponent('['+kind+'] '+t.split('\n')[0].slice(0,50))+'&body='+encodeURIComponent(fbBody());
+  const url='https://github.com/shingum08/jazz-solo-Clu/issues/new?title='+encodeURIComponent('['+kind+'] '+t.split('\n')[0].slice(0,50))+'&body='+encodeURIComponent(fbBody());
   const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
   $('#fbMsg').textContent='GitHub 이슈 작성 창을 열었습니다. 창이 안 열리면 「내용 복사」 후 개발자에게 전달해 주세요.';
 };

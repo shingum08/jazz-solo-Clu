@@ -34,6 +34,7 @@ out=out.replace(marker, '<script id="musicxml">\n'+xml+'\n</script>', 1)
 # v0.41.1 공개 빌드(GitHub에 올라가는 index.html)는 앱 기능(설치·오프라인·업데이트)을 끈다.
 #   python3 tools/build.py --app     → dist/app/ 에 테스트용 PWA 빌드(설치 가능) + dist/clu-app-v버전.zip
 #   python3 tools/build.py --android → dist/android/CluJazz/ 안드로이드 프로젝트(앱 안에 index.html) + dist/clu-android-v버전.zip
+#   python3 tools/build.py --web     → dist/web/ 웹 테스트 빌드(공통 형식만 · noindex) + dist/clu-web-v버전.zip
 #   (dist/는 커밋하지 않음 — 직접 전달)
 import sys, shutil, zipfile
 ver=re.search(r'<title>[^<]*?v(\d+\.\d+\.\d+)',tpl).group(1)
@@ -75,3 +76,37 @@ if '--android' in sys.argv:
             for f in fs:
                 full=os.path.join(d,f); z.write(full,os.path.join('CluJazz',os.path.relpath(full,out_dir)))
     print('android build →',out_dir,'·',zp,os.path.getsize(zp),'bytes · versionCode',vcode)
+if '--web' in sys.argv:
+    # v0.44 웹 테스트 빌드 — Cloudflare Pages에 올려 초대한 사람만 쓰는 판(dist/는 커밋하지 않음)
+    #   · 출판 리드시트에서 옮긴 곡(songs_part1.js)과 곡 검수 메모(song_status.js)를 빼고 engine/songs_web.js(공통 형식)만 넣는다
+    #   · 검색 엔진에 안 잡히게(noindex · robots.txt), GitHub로 가는 피드백 버튼 숨김
+    web=pub
+    p1=open(os.path.join(root,'engine','songs_part1.js'),encoding='utf-8').read()
+    st=open(os.path.join(root,'engine','song_status.js'),encoding='utf-8').read()
+    if web.count(p1)!=1 or web.count(st)!=1: raise RuntimeError('웹 빌드: 곡 데이터 블록을 찾지 못했습니다')
+    web=web.replace(p1,open(os.path.join(root,'engine','songs_web.js'),encoding='utf-8').read())
+    wst={'p251':('practice','앱 연습용 진행'),'blues12':('practice','앱 연습용 진행'),'m25':('practice','앱 연습용 진행'),
+         'form-rhythm':('form','공통 형식 — 재즈에서 널리 쓰는 리듬 체인지 진행'),'form-jazzblues':('form','공통 형식 — 재즈 블루스 12마디'),'form-minorblues':('form','공통 형식 — 마이너 블루스 12마디')}
+    import json
+    web=web.replace(st,'/* 웹 빌드 곡 상태 */\nconst SONG_STATUS='+json.dumps({k:{'s':a,'n':b,'a':[]} for k,(a,b) in wst.items()},ensure_ascii=False)+';')
+    def rep(old,new):
+        global web
+        if web.count(old)!=1: raise RuntimeError('웹 빌드: 문구를 찾지 못했습니다 — '+old[:40])
+        web=web.replace(old,new)
+    sub_old=re.search(r'<p class="sub">재즈 스탠더드 .*?</p>',web).group(0)
+    rep(sub_old,'<p class="sub">코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 연습 진행·공통 형식으로 바로 시작하고, 갖고 있는 곡은 📥 곡 불러오기로 이 기기에 담아 쓰세요. 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>')
+    foot_old=re.search(r'<b>수록 곡 안내</b>.*?(?=<b>데이터 출처와 저작권</b>)',web,re.S).group(0)
+    rep(foot_old,'<b>수록 곡 안내</b> — 기본으로 담긴 것은 연습용 진행과 공통 형식(블루스·리듬 체인지 등)입니다. 저작권 보호기간이 끝난 스탠더드는 원 악보에서 새로 옮겨 차례로 추가합니다. 갖고 있는 곡은 📥 곡 불러오기로 이 기기에만 담아 쓸 수 있고, 불러온 곡은 어디로도 보내지 않습니다. ')
+    rep(' 수록 곡은 <b>코드 진행만</b> 반영했고 원곡 멜로디는 넣지 않았습니다.','')
+    rep('placeholder="예: night, bossa, moon, 별"','placeholder="예: 블루스, 리듬"')
+    rep('</head>','<meta name="robots" content="noindex,nofollow">\n<style>#btnFeedback{display:none!important}</style>\n</head>')
+    for bad in ['리얼북','261곡','대조해 옮겼','정오표']:
+        if bad in web: raise RuntimeError('웹 빌드에 남은 문구: '+bad)
+    wd=os.path.join(root,'dist','web'); shutil.rmtree(wd,ignore_errors=True); os.makedirs(wd)
+    open(os.path.join(wd,'index.html'),'w',encoding='utf-8').write(web)
+    open(os.path.join(wd,'_headers'),'w',encoding='utf-8').write('/*\n  X-Robots-Tag: noindex, nofollow\n')
+    open(os.path.join(wd,'robots.txt'),'w',encoding='utf-8').write('User-agent: *\nDisallow: /\n')
+    zp=os.path.join(root,'dist','clu-web-v'+ver+'.zip')
+    with zipfile.ZipFile(zp,'w',zipfile.ZIP_DEFLATED) as z:
+        for f in sorted(os.listdir(wd)): z.write(os.path.join(wd,f),f)
+    print('web build →',wd,'·',zp,os.path.getsize(zp),'bytes')
