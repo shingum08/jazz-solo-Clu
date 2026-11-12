@@ -336,9 +336,9 @@ function irealToSongs(text){
   try{s=decodeURIComponent(s.replace(/^irealb(?:ook)?:\/\//,''))}catch(e){throw new Error('링크가 깨졌어요(일부만 복사됐을 수 있어요)')}
   const chunks=s.split('===').filter(x=>x.trim());
   const out=[];
-  const last=chunks[chunks.length-1];if(chunks.length>1&&!/=/.test(last))chunks.pop();   /* 끝의 플레이리스트 이름 */
+  const last=chunks[chunks.length-1];let playlist='';if(chunks.length>1&&!/=/.test(last)){playlist=chunks.pop().trim()}   /* 끝의 플레이리스트 이름(v0.48 폴더 이름으로 씀) */
   for(const ch of chunks){
-    try{out.push(irealOne(ch,book))}catch(e){out.push({error:e.message,title:ch.split('=')[0]})}
+    try{out.push(Object.assign(irealOne(ch,book),{playlist}))}catch(e){out.push({error:e.message,title:ch.split('=')[0]})}
   }
   return out;
 }
