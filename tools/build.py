@@ -99,9 +99,6 @@ if '--web' in sys.argv:
         web=web.replace(old,new)
     sub_old=re.search(r'<p class="sub">재즈 스탠더드 .*?</p>',web).group(0)
     rep(sub_old,'<p class="sub">코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 연습 진행·공통 형식으로 바로 시작하고, 갖고 있는 곡은 📥 곡 불러오기로 이 기기에 담아 쓰세요. 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>')
-    foot_old=re.search(r'<b>수록 곡 안내</b>.*?(?=<b>데이터 출처와 저작권</b>)',web,re.S).group(0)
-    rep(foot_old,'<b>수록 곡 안내</b> — 기본으로 담긴 것은 연습용 진행과 공통 형식(블루스·리듬 체인지 등)입니다. 저작권 보호기간이 끝난 스탠더드는 원 악보에서 새로 옮겨 차례로 추가합니다. 갖고 있는 곡은 📥 곡 불러오기로 이 기기에만 담아 쓸 수 있고, 불러온 곡은 어디로도 보내지 않습니다. ')
-    rep(' 수록 곡은 <b>코드 진행만</b> 반영했고 원곡 멜로디는 넣지 않았습니다.','')
     rep('placeholder="예: night, bossa, moon, 별"','placeholder="예: 블루스, 리듬"')
     rep('</head>','<meta name="robots" content="noindex,nofollow">\n<style>#btnFeedback{display:none!important}</style>\n</head>')
     for bad in ['리얼북','261곡','대조해 옮겼','정오표']:

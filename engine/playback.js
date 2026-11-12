@@ -272,9 +272,7 @@ function playAllInner(acIn,banksIn,feelIn){
   try{comp.threshold.value=-8;comp.knee.value=4;comp.ratio.value=20;comp.attack.value=0.002;comp.release.value=0.15}catch(e){}
   const post=ac.createGain();post.gain.value=Object.keys(banks).length?4.0:1.6;   /* v0.25: 여전히 작다는 피드백 → 샘플 4배·신스 1.6배. 리미터가 클리핑 방지 */
   const lim=ac.createDynamicsCompressor();try{lim.threshold.value=-1;lim.knee.value=0;lim.ratio.value=20;lim.attack.value=0.002;lim.release.value=0.1}catch(e){}
-  /* v0.49 음소거 — 출력 맨 끝 게인(카운트인 클릭까지). 재생 중에도 setMute()로 바로 바뀐다(악보 커서는 그대로 흐름) */
-  const muteG=ac.createGain();muteG.gain.value=cur.mute?0:1;
-  master.connect(comp);comp.connect(post);post.connect(lim);lim.connect(muteG);muteG.connect(ac.destination);
+  master.connect(comp);comp.connect(post);post.connect(lim);lim.connect(ac.destination);
   /* v0.29 믹스: 솔로 버스(lead)와 반주 버스(rb)를 나누고, 솔로를 앞으로. 공간감은 생성한 임펄스 응답 리버브로(외부 파일 없음) */
   const lead=ac.createGain();
   const lvRaw=$('#leadvol')?+$('#leadvol').value:100;
@@ -297,13 +295,16 @@ function playAllInner(acIn,banksIn,feelIn){
   const nb=sols[0].bars.length,nCh=sols.length;
   /* v0.36 구간 재생 — cur.playRange={a0,a1,loop}: 코러스를 이어 붙인 절대 마디 번호(0부터). 없으면 처음부터 끝까지 */
   const totalBars=nCh*nb,PR=cur.playRange||null;
-  const A0=PR?Math.max(0,Math.min(totalBars-1,PR.a0)):0,A1=PR?Math.max(A0,Math.min(totalBars-1,PR.a1)):totalBars-1;
+  /* v0.51 떨어진 마디 모아 재생 — PR.list=[절대 마디…](예: 1·4·5·6·8마디)를 이어 붙여 연주. 없으면 a0~a1 연속 */
+  const LIST=PR&&Array.isArray(PR.list)&&PR.list.length?[...new Set(PR.list.map(x=>Math.max(0,Math.min(totalBars-1,x|0))))].sort((x,y)=>x-y):null;
+  const A0=LIST?LIST[0]:PR?Math.max(0,Math.min(totalBars-1,PR.a0)):0,A1=LIST?LIST[LIST.length-1]:PR?Math.max(A0,Math.min(totalBars-1,PR.a1)):totalBars-1;
+  const ORDER=LIST||Array.from({length:A1-A0+1},(_,k)=>A0+k),SLOT={};ORDER.forEach((ab,k)=>SLOT[ab]=k);
   const LOOP=!!(PR&&PR.loop);
   /* v0.49 카운트인 — 맨 처음(1코러스 1마디)부터일 때만 4번. 중간 마디에서 시작·건너뛰기는 바로 시작(구간 반복은 그대로 카운트인) */
   const NCOUNT=(A0===0||LOOP)?4:0;
   const spb=60/bpm,t0=ac.currentTime+(useSamples?0.6:0.15),start=t0+NCOUNT*spb;  /* 샘플은 카운트인 동안 로드 */
-  const barLen=bpb*spb,chLen=nb*barLen,rangeLen=(A1-A0+1)*barLen;
-  cur.audio={ac,master,rb,lead,out:muteG,mute:muteG,raf:null,timer:null,start,chLen,barLen,nCh,nb,endAt:start+rangeLen,a0:A0,a1:A1,loop:LOOP};
+  const barLen=bpb*spb,chLen=nb*barLen,rangeLen=ORDER.length*barLen;
+  cur.audio={ac,master,rb,lead,out:lim,raf:null,timer:null,start,chLen,barLen,nCh,nb,endAt:start+rangeLen,a0:A0,a1:A1,loop:LOOP};
   if(typeof syncPlay==='function')try{syncPlay()}catch(e){}   /* v0.45 상단 막대 버튼 글자 */
   let jobs=[];
   const clickG=ac.createGain();clickG.gain.value=0.08;clickG.connect(post);   /* v0.25: 카운트인 클릭은 음악과 별도 게인 — 음악에 맞춰 볼륨을 올려도 클릭이 덜 커진다 */
@@ -316,10 +317,11 @@ function playAllInner(acIn,banksIn,feelIn){
   const buildPass=(P0)=>{   /* P0 = 이번 회차에서 마디 A0가 시작하는 시각 */
   sols.forEach((so,cr)=>{
     if(cr*nb>A1||(cr+1)*nb-1<A0)return;
+    if(LIST&&!LIST.some(ab=>ab>=cr*nb&&ab<(cr+1)*nb))return;
     const bl=blCache[cr]||(blCache[cr]=bassLine(so,(cur.seed||1)+cr*7919));
     so.bars.forEach((bar,bi)=>{
-      const ab=cr*nb+bi;if(ab<A0||ab>A1)return;
-      const barStart=P0+(ab-A0)*barLen;
+      const ab=cr*nb+bi;if(SLOT[ab]===undefined)return;
+      const barStart=P0+SLOT[ab]*barLen;
       jobs.push({t:barStart-0.05,f:()=>{
         const compB=banks[snd.comp],bassB=banks[snd.bass];
         const PH=(when,len,v,vol)=>{if(compB){v.forEach((m,k)=>playSample(ac,rb,compB,when+k*0.008,len,m,vol*1.25,feel==='ballad'?0.5:0.15))}else pianoHit(ac,rb,when,len,v,vol)};
@@ -359,9 +361,10 @@ function playAllInner(acIn,banksIn,feelIn){
       }});
     });
     if(cur.playSolo!==false)buildAudioEvents(so,bpm,sw).forEach(e=>{
-      const ab=cr*nb+Math.floor(e.start/barLen+1e-6);if(ab<A0||ab>A1)return;
-      const tt=P0+(cr*nb-A0)*barLen+e.start;
-      const dur=Math.min(e.dur,P0+rangeLen-tt);if(dur<=0.01)return;   /* 구간 끝을 넘는 음은 자른다 */
+      const bi=Math.floor(e.start/barLen+1e-6),ab=cr*nb+bi,k=SLOT[ab];if(k===undefined)return;
+      const tt=P0+k*barLen+(e.start-bi*barLen);
+      let kk=k;while(kk+1<ORDER.length&&ORDER[kk+1]===ORDER[kk]+1)kk++;   /* 이어지는 마디 묶음의 끝 — 떨어진 마디로 넘어가는 음은 거기서 자른다 */
+      const dur=Math.min(e.dur,P0+(kk+1)*barLen-tt);if(dur<=0.01)return;   /* 구간 끝을 넘는 음은 자른다 */
       jobs.push({t:tt-0.02,f:()=>{const lb=banks[LEAD_SOUND[cur.tone]];if(lb)leadSample(ac,leadLP,lb,tt,dur,e.midi,e.vel,e.end);else mel(ac,lead,tt,dur,e.midi,LEAD_SOUND[cur.tone]?'flugel':(cur.tone||'flugel'),e.vel,e.end)}});
     });
   });
@@ -387,7 +390,7 @@ function playAllInner(acIn,banksIn,feelIn){
     if(cur.audio!==au)return;
     const el=ac.currentTime-start;
     if(el>=0&&(LOOP||el<rangeLen)){
-      const rel=LOOP?el%rangeLen:el,ab=A0+Math.min(A1-A0,Math.floor(rel/barLen)),cr=Math.floor(ab/nb),bi=ab%nb;
+      const rel=LOOP?el%rangeLen:el,ab=ORDER[Math.min(ORDER.length-1,Math.floor(rel/barLen))],cr=Math.floor(ab/nb),bi=ab%nb;
       if(typeof onPlayPos==='function'){try{onPlayPos(cr,bi,(rel%barLen)/barLen)}catch(e){}}  /* 화면 갱신 오류가 재생을 멈추지 않게 */
     }
     if(!LOOP&&ac.currentTime>au.endAt+1.2){stopAll();(typeof syncPlay==='function'?syncPlay():$('#btnPlay').textContent='▶ 재생');return}
@@ -557,10 +560,6 @@ function mel(ac,out,when,dur,midi,tone,vel,isEnd){
 /* v0.31 일시정지·이어서 — AudioContext suspend/resume로 전체(솔로+반주)를 그 자리에서 멈춘다 */
 function pauseAll(){if(cur.audio&&!cur.paused){cur.paused=true;try{cur.audio.ac.suspend()}catch(e){}}}
 function resumeAll(){if(cur.audio&&cur.paused){cur.paused=false;try{cur.audio.ac.resume()}catch(e){}}}
-function setMute(on){   /* v0.49 */
-  cur.mute=!!on;
-  if(cur.audio&&cur.audio.mute){try{const g=cur.audio.mute.gain,t=cur.audio.ac.currentTime;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(cur.mute?0:1,t+0.03)}catch(e){cur.audio.mute.gain.value=cur.mute?0:1}}
-}
 function togglePause(){if(!cur.audio)return false;if(cur.paused)resumeAll();else pauseAll();return true}
 function stopAll(){
   cur.paused=false;cur.playReq=false;   /* v0.45 재생 요청 상태(샘플 로딩 중에도 「재생 중」으로 본다) */
