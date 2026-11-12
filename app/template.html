@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!--__PWA_HEAD__-->
-<title>즉흥 악보 생성기 v0.49.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.50.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -459,6 +459,11 @@ input[type=range]{width:100%;accent-color:var(--brass);cursor:pointer}
 .chips .bar.sel{outline:2px solid var(--brass);outline-offset:1px}
 .chips .bar.lock{background:var(--ink);color:var(--paper)}
 .zbtn.lockmode.on{background:var(--ink);color:var(--paper)}
+.sheettools{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+.sheettools .zbtn{min-height:42px;padding:0 14px;font-size:15px;background:transparent;color:var(--ink);border:1px solid rgba(37,42,34,.45);border-radius:8px;cursor:pointer;font-family:inherit}
+.sheettools .zbtn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.rangebar>label{display:none}   /* v0.50 구간 반복은 악보 위 버튼으로 */
+.paper:fullscreen .sheettools,.paper.fs .sheettools{display:none}
 .zbtn.loopmode{font-size:14px;padding:0 10px}
 .zbtn.loopmode.on{background:var(--ink);color:var(--paper)}
 svg .playcursor{fill:var(--brass);opacity:.22;pointer-events:none}
@@ -493,6 +498,14 @@ svg .selbar{fill:rgba(209,165,69,.10);stroke:var(--brass);stroke-width:2;stroke-
   border-color:var(--brass);font-weight:600;
 }
 .analysis{margin-top:22px}
+.fold2>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 0}
+.fold2>summary::-webkit-details-marker{display:none}
+.fold2>summary::before{content:'▸';color:var(--brass);font-size:15px;width:14px}
+.fold2[open]>summary::before{content:'▾'}
+.fold2>summary h3{margin:0}
+.fold2>summary::after{content:'펼치기';white-space:nowrap;flex:0 0 auto;margin-left:auto;font-size:13px;color:var(--mut);border:1px solid var(--line);border-radius:7px;padding:4px 10px}
+.fold2[open]>summary::after{content:'접기'}
+.fold2[open]>summary{margin-bottom:10px}
 .analysis h3{
   font-family:'Gowun Batang',serif;font-size:16px;
   color:var(--paper);font-weight:700;margin-bottom:10px;
@@ -758,6 +771,9 @@ body.setopen{overflow:hidden}
 #mineActs{display:inline-flex;flex-wrap:wrap;gap:8px;align-items:center}
 #mineActs[hidden]{display:none}
 #mySongList[hidden]{display:none}
+.forumbtn{display:inline-flex;align-items:center;gap:6px;background:var(--panel-2);border:1px solid var(--brass-deep);color:var(--brass);border-radius:8px;padding:9px 14px;font-size:15px;text-decoration:none;min-height:42px}
+.forumbtn:hover{border-color:var(--brass)}
+.impnote{font-size:13px;color:var(--mut);flex:1 1 220px}
 .impcat input{background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:7px;padding:6px 8px;font-family:inherit;font-size:14px;width:12em}
 .mylisthead{position:sticky;top:-4px;z-index:6;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);padding:10px 0 8px;border-bottom:1px solid var(--line);margin-top:6px}
 .mylisthead[hidden]{display:none}
@@ -803,6 +819,9 @@ details.fold[open]>summary::before{content:'▾'}
 .paper-head .m{font-size:13px}
 .newbtn{color:var(--txt);border-color:var(--line)}
 .paper-head .t{min-width:0}
+.tapbtn{background:transparent;border:1px solid rgba(37,42,34,.45);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;min-height:38px;touch-action:manipulation;user-select:none;white-space:nowrap}
+.tapbtn.on{background:var(--ink);color:var(--paper)}
+svg .abcjs-tempo{cursor:pointer}
 .paper-head .fsctl{flex:0 0 auto}
 .fsbtn{white-space:nowrap}
 @media(max-width:600px){
@@ -829,7 +848,7 @@ details.fold[open]>summary::before{content:'▾'}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.49.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">Concept Prototype · v0.50.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -866,6 +885,7 @@ details.fold[open]>summary::before{content:'▾'}
       <label class="impcat">폴더 <input id="impFolder" type="text" maxlength="40" placeholder="비우면 iReal 목록 이름"></label>
       <label class="impcat">분류 <select id="impCat"><option value="auto">자동</option><option>스윙</option><option>발라드</option><option>라틴</option><option>블루스</option><option>펑키</option></select></label></div>
     <div class="improw"><textarea id="impLink" rows="2" spellcheck="false" placeholder="iReal Pro 링크를 붙여 넣으세요 (irealb://… 또는 irealbook://…)"></textarea><button id="impLinkBtn" type="button">링크 불러오기</button></div>
+    <div class="improw"><a class="forumbtn" href="https://forums.irealpro.com" target="_blank" rel="noopener noreferrer">🌐 iReal Pro 포럼에서 곡 목록 찾기 ↗</a><span class="impnote">포럼의 곡·목록 링크를 눌러 iReal Pro로 열지 말고 링크 주소를 복사해 위 칸에 붙여 넣으세요</span></div>
     <div class="impmsg" id="impMsg"></div>
     <div class="mylist" id="myListBox">
       <div class="mylisthead" id="myListHead" hidden><b id="myListTitle">불러온 곡</b><span class="mlacts"><button type="button" id="myFoldAll">폴더 모두 접기</button><button type="button" id="myListToggle">▲ 목록 접기</button></span></div>
@@ -955,6 +975,7 @@ details.fold[open]>summary::before{content:'▾'}
   <div class="paper" id="paper">
     <div class="paper-head">
       <span class="t" id="paperTitle">악보를 고르세요</span>
+      <button class="tapbtn" id="btnTap" type="button" title="박자에 맞춰 여러 번 누르면 BPM을 잡습니다">♩ 탭</button>
       <span class="m" id="paperMeta"></span>
       <span class="fsctl"><button class="fsplay" id="fsNew" type="button" title="같은 설정으로 새 솔로">↻ 새 솔로</button><button class="fsplay" id="fsPlay" type="button" aria-label="재생/정지">▶</button><button class="fsplay" id="fsMute" type="button" aria-label="소리 끄기/켜기" title="소리 끄기 — 악보는 그대로 흐릅니다">🔊</button><button class="fsbtn" id="btnFull" type="button" aria-label="전체화면" title="악보 전체화면">⛶ 전체화면</button></span>
     </div>
@@ -966,6 +987,7 @@ details.fold[open]>summary::before{content:'▾'}
         <div class="chpage" data-ch="0"><div class="seclab sololab">SOLO · 1코러스</div><div class="sheetwrap"><div id="staff"><div class="empty">⚙ 설정에서 곡을 고르고 「▶ 만들고 재생」을 누르면<br>이 종이 위에 새로운 솔로가 쓰입니다.</div></div></div></div>
       </div>
     </div>
+    <div class="sheettools" id="sheetTools"><button class="zbtn lockmode" type="button" title="마디를 골라 고정하고 나머지만 새로 만듭니다">🔒 마디 고정</button><button class="zbtn loopmode" type="button" title="시작·끝 마디를 고르면 그 구간을 반복 재생합니다">🔁 구간 반복</button></div>
     <div class="chips" id="chips"></div>
     <div class="rangebar" id="rangeBar"><label><input type="checkbox" id="loopOn"> 🔁 구간 반복</label><span class="rhint" id="rangeHint">악보나 아래 마디를 눌러 고르면 ▶ 재생이 그 마디부터</span><button class="btn ghost sm" id="btnRangeClr" style="display:none">구간 지우기</button></div>
     <div class="lockbar" id="lockBar" style="display:none">
@@ -990,36 +1012,18 @@ details.fold[open]>summary::before{content:'▾'}
     </div>
   </div>
 
-  <div class="analysis" id="analysisBox" style="display:none">
-    <h3>이 솔로가 사용한 기법</h3>
+  <!-- v0.50 기법·화성 분석은 접었다 펴기(기본 접힘, 이 기기에서 펼침 상태 기억) -->
+  <details class="analysis fold2" id="analysisBox" style="display:none">
+    <summary><h3>이 솔로가 사용한 기법</h3></summary>
     <div class="tagrow" id="tagRow"></div>
-  </div>
-  <div class="analysis" id="harmBox" style="display:none">
-    <h3>화성 분석 — 엔진이 읽은 코드의 기능과 스케일</h3>
+  </details>
+  <details class="analysis fold2" id="harmBox" style="display:none">
+    <summary><h3>화성 분석 — 엔진이 읽은 코드의 기능과 스케일</h3></summary>
     <div class="harmlist" id="harmList"></div>
-  </div>
+  </details>
 </main>
 
-<section class="how">
-  <div class="wrap">
-    <h2>v0.27.1 엔진이 한 소절을 만드는 순서</h2>
-    <p class="lead">v0.11까지는 "지금 이 코드에 어울리는 음"을 한 음씩 확률로 골랐습니다. 이 방식에서는 라인에 방향이 생기지 않습니다. 실제 연주자는 <b style="color:var(--txt)">다음 코드에서 어디에 도착할지</b>를 먼저 정하고 그쪽으로 걸어갑니다. v0.27.1는 이 순서를 그대로 따릅니다.</p>
-    <div class="layers">
-      <div class="layer"><div class="n">STEP 1 · 화성 분석</div><h4>코드의 기능 읽기</h4><p>D7→Gm이면 "단조로 가는 Ⅴ" → ♭9·♭13 사용. G♭7→F면 트라이톤 대리 → 리디안 ♭7. 해결되는 maj7은 Ⅰ, Ⅳ 자리는 리디안. 같은 7th 코드라도 가는 곳에 따라 스케일이 달라집니다.</p></div>
-      <div class="layer"><div class="n">STEP 2 · 호흡</div><h4>프레이즈·쉼 계획</h4><p>연주자별 실측 프레이즈 길이와 쉼 길이 분포로 호흡을 정하고, 8마디 형식 경계 직전에 종지하도록 맞춥니다. 목관은 최대 2마디마다 숨을 쉽니다.</p></div>
-      <div class="layer"><div class="n">STEP 3 · 리듬</div><h4>박 단위 마르코프</h4><p>WJD 전사에서 잰 "이 박에서 다음 박으로 어떤 리듬이 오나" 확률로 리듬을 만듭니다. 붙임줄로 마디선을 넘는 당김음과 엇박 진입이 자연스럽게 생깁니다.</p></div>
-      <div class="layer"><div class="n">STEP 4 · 타깃음</div><h4>가이드톤에 착지</h4><p>코드가 바뀌는 다운비트에 3음·7음을 먼저 정합니다. 직전 음과 반음·온음 거리면 가중치를 높여 보이스리딩이 이어지게 합니다.</p></div>
-      <div class="layer"><div class="n">STEP 5 · 역산</div><h4>어프로치 · 인클로저</h4><p>타깃 앞 1~2음을 반음 아래 어프로치, 스케일 위 어프로치, 위-아래 감싸기(인클로저)로 채웁니다. 크로매틱음은 약박에서 반음 진행으로만 씁니다.</p></div>
-      <div class="layer"><div class="n">STEP 6 · 어휘</div><h4>공통 셀 + 음 분포</h4><p>남은 자리는 연주자 프로필의 "코드 대비 음 분포(강박·약박)"와 "음정 분포"로 채우고, 4명 이상 연주자가 공통으로 쓴 셀을 음형 그대로 넣습니다.</p></div>
-    </div>
-    <table class="lvl">
-      <tr><th>난이도</th><th>리듬</th><th>음 선택</th><th>목표</th></tr>
-      <tr><td>1 · 입문</td><td>4분·2분음표, 2박 단위 진입</td><td>코드톤만 · 코드 전환점에서 가이드톤으로</td><td>3·7음 보이스리딩을 귀와 손에 익히기</td></tr>
-      <tr><td>2 · 중급</td><td>8분음표 라인, 엇박 진입, 붙임줄 당김음</td><td>강박 = 코드톤/텐션, 약박 = 스케일음 · 반음·스케일 어프로치</td><td>"도착하는" 라인 만들기</td></tr>
-      <tr><td>3 · 심화</td><td>비밥 밀도, 8분 3연음</td><td>인클로저, 크로매틱 통과음, 얼터드 텐션, 실측 셀</td><td>비밥 어법의 실전 밀도</td></tr>
-    </table>
-  </div>
-</section>
+<!-- v0.50 「엔진이 한 소절을 만드는 순서」 설명 섹션 삭제(테스터 피드백) -->
 
 <footer>
   <div class="wrap">
@@ -1962,7 +1966,29 @@ $('#fsPlay').addEventListener('click',()=>{$('#btnPlay').click();setTimeout(setF
 $('#notSel').addEventListener('change',e=>{cur.selTrans=+e.target.value;if(cur.soloBase)applyView()});
 document.querySelectorAll('.bpmstep').forEach(b=>b.addEventListener('click',()=>{const r=$('#bpm');r.value=Math.max(60,Math.min(320,+r.value+(+b.dataset.d)));r.dispatchEvent(new Event('input'));r.dispatchEvent(new Event('change'))}));
 $('#bpm').addEventListener('input',e=>{$('#bpmVal').textContent=e.target.value+' BPM'});
-$('#bpm').addEventListener('change',()=>{if(cur.audio){stopAll();playAll();syncPlay()}});
+$('#bpm').addEventListener('change',()=>{if(!cur.audio)return;
+  /* v0.50 재생 중 템포를 바꾸면 처음으로 돌아가지 않고 지금 마디부터(구간 반복은 그 구간 처음부터) */
+  const pr=cur.playRange,pp=(cur._pp||'').split(':').map(Number),nb=cur.solo?cur.solo.bars.length:0,nCh=cur.solos?cur.solos.length:1;
+  if(pr&&pr.loop||pp.length<2||!nb){stopAll();playAll();syncPlay();return}
+  startPlayRange({a0:pp[0]*nb+pp[1],a1:nCh*nb-1,loop:false});
+});
+/* ── v0.50 탭 템포 — 악보 머리 「♩ 탭」이나 악보의 템포 표시(♩ = 120)를 박자에 맞춰 여러 번 누르면 BPM을 잡는다 ── */
+const TAP={RESET_MS:2000,KEEP:6,SETTLE_MS:1500,MIN:60,MAX:320};
+function tapTempo(){
+  const now=performance.now(),T=cur._taps||(cur._taps=[]);
+  if(T.length&&now-T[T.length-1]>TAP.RESET_MS)T.length=0;
+  T.push(now);if(T.length>TAP.KEEP+1)T.shift();
+  const b=$('#btnTap');b.classList.add('on');clearTimeout(cur._tapT);
+  if(T.length<2){b.textContent='♩ 탭 …';cur._tapT=setTimeout(tapDone,TAP.RESET_MS);return}
+  const avg=(T[T.length-1]-T[0])/(T.length-1),bpm=Math.max(TAP.MIN,Math.min(TAP.MAX,Math.round(60000/avg)));
+  b.textContent='♩ '+bpm;
+  const r=$('#bpm');r.value=bpm;$('#bpmVal').textContent=bpm+' BPM';
+  document.querySelectorAll('#chPages svg .abcjs-tempo text').forEach(t=>{const tx=t.textContent;if(/\d/.test(tx))t.textContent=tx.replace(/\d+/,bpm)});   /* 악보 템포 표시도 바로 */
+  cur._tapT=setTimeout(tapDone,TAP.SETTLE_MS);
+}
+function tapDone(){const b=$('#btnTap');b.classList.remove('on');b.textContent='♩ 탭';const T=cur._taps||[];cur._taps=[];if(T.length>=2){$('#bpm').dispatchEvent(new Event('change'))}}
+$('#btnTap').addEventListener('pointerdown',e=>{e.preventDefault();tapTempo()});
+$('#btnTap').addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();tapTempo()}});
 $('#backvol').addEventListener('input',e=>{
   $('#bvVal').textContent=e.target.value+' %';
   if(cur.audio&&cur.audio.rb){try{cur.audio.rb.gain.value=Math.max(0,+e.target.value/100)*BACK_GAIN*(cur.audioBanks&&cur.audioBanks.length?1.15:1)}catch(_){}}
@@ -2112,7 +2138,7 @@ function renderSheet(){
   const s=SONGDB[cur.selProg];
   $('#paperTitle').textContent=s.name;
   const kOrig=keyLabel(origKey(),0),kNow=keyLabel(songKeyPc(),cur.trUser);
-  $('#paperMeta').textContent=(cur.trUser?kNow+' (원곡 '+kOrig+')':kNow)+(cur.selTrans?' · '+(cur.selTrans===9?'E♭ 악기 기보':'B♭ 악기 기보'):'')+' · '+s.bpm+' BPM 기본 · '+STYLE_DATA.profiles[cur.style].label+' · 난이도 '+cur.selDiff+' · '+INSTRUMENTS.find(x=>x.id===cur.selInst).name+(cur.topic&&cur.topic!=='auto'?' · 주제 '+TOPIC_L[cur.topic]:'')+' · 반주 '+FEEL_LABEL[currentFeel()]+(cur.solo&&cur.solo.quote?' · 테마 인용 '+(cur.solo.quote.bar+1)+'~'+(cur.solo.quote.bar+cur.solo.quote.bars)+'마디':'');
+  $('#paperMeta').textContent=(cur.trUser?kNow+' (원곡 '+kOrig+')':kNow)+(cur.selTrans?' · '+(cur.selTrans===9?'E♭ 악기 기보':'B♭ 악기 기보'):'')+' · '+s.bpm+' BPM 기본 · '+STYLE_DATA.profiles[cur.style].label+' · 난이도 '+cur.selDiff+/* v0.50 악기 분류(목관·금관)는 악보 머리에서 숨김 — 목관·금관 스타일을 따로 만들 때 다시 표시 */(cur.topic&&cur.topic!=='auto'?' · 주제 '+TOPIC_L[cur.topic]:'')+' · 반주 '+FEEL_LABEL[currentFeel()]+(cur.solo&&cur.solo.quote?' · 테마 인용 '+(cur.solo.quote.bar+1)+'~'+(cur.solo.quote.bar+cur.solo.quote.bars)+'마디':'');
   $('#chartWrap').style.display=cur.view==='both'?'block':'none';
   updDrill();
   if(cur.view==='both'&&typeof ABCJS!=='undefined'){
@@ -2169,7 +2195,7 @@ function renderChips(){
     if(cur.loopSel&&cur.loopSel.ch===ch&&i>=cur.loopSel.a&&i<=(cur.loopSel.b===null?cur.loopSel.a:cur.loopSel.b))c.classList.add('rng');
     chips.appendChild(c);
   });
-  updLockBar();updRangeBar();drawSelBars();
+  updLockBar();updRangeBar();drawSelBars();try{syncPlay()}catch(e){}
 }
 /* ── v0.49 마디 고르기 — 악보 마디 ↔ 아래 마디 번호 줄 동기화 · 고른 마디부터 재생 · 재생 중 누르면 그 마디로 건너뛰기 ──
    고정 모드: 고정할 마디 고르기 · 구간 반복: 구간 정하기 · 그 밖: 한 마디 고르기(▶ 재생이 거기서 시작, 맨 처음이 아니면 카운트 없이) */
@@ -2312,11 +2338,13 @@ document.addEventListener('click',e=>{
   renderSheet();
   if(cur.lockMode){const el=$('#chips');if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}
 });
+document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('#chPages .abcjs-tempo')){e.preventDefault();tapTempo()}});
 /* v0.49 악보 마디를 누르면 그 마디를 고른다(아래 마디 번호 줄도 같이 표시) · 재생 중이면 그 마디로 건너뜀.
    (v0.31~0.48의 「악보 누르면 일시정지」는 상단 ∥ 일시정지 버튼으로. 1코러스 음표 편집은 멈춰 있을 때 그대로) */
 document.addEventListener('click',e=>{
   const sw=e.target.closest('.sheetwrap');if(!sw)return;
   const pg=sw.closest('.chpage');if(!pg||!cur.solo)return;
+  if(e.target.closest('.abcjs-tempo'))return;   /* v0.50 템포 표시는 탭 템포(pointerdown에서 처리) */
   const ch=+pg.dataset.ch||0,bi=barAtPoint(ch,e.clientX,e.clientY);
   if(bi>=0)barPick(ch,bi);
 });
@@ -2816,7 +2844,7 @@ function fallbackCopy(t){const ta=document.createElement('textarea');ta.value=t;
 function syncPlay(){
   const b=$('#btnPlay');if(!b)return;const on=!!cur.playReq;
   b.textContent=!on?'▶ 재생':cur.paused?'▶ 이어서':'∥ 일시정지';
-  const st=$('#btnStop');if(st)st.disabled=!on;
+  const st=$('#btnStop');if(st)st.disabled=!on&&!selBarOK();
   try{setFsLabel()}catch(e){}
 }
 function startPlay(){
@@ -2831,7 +2859,9 @@ $('#btnPlay').onclick=()=>{
   if(cur.playReq){if(cur.audio){togglePause();document.querySelectorAll('.paper').forEach(p=>p.classList.toggle('paused',!!cur.paused))}syncPlay();return}
   startPlay();
 };
-$('#btnStop').onclick=()=>{stopAll();syncPlay()};
+/* v0.50 기법·화성 분석 접기 상태 — 이 기기에만 기억 */
+document.querySelectorAll('details.fold2').forEach(d=>{const k='clu.fold.'+d.id;try{d.open=localStorage.getItem(k)==='1'}catch(e){}d.addEventListener('toggle',()=>{try{localStorage.setItem(k,d.open?'1':'0')}catch(e){}})});
+$('#btnStop').onclick=()=>{stopAll();cur.selBar=null;if(cur.solo)renderChips();syncPlay()};   /* v0.50 ■ = 처음으로(고른 마디도 지움) · 마디부터는 ∥ 일시정지 뒤 마디 누르기 */
 /* v0.49 음소거 — 소리만 끄고 악보 커서·건너뛰기는 그대로(실제 잼에서 악보만 따라가기) */
 function syncMute(){const on=!!cur.mute;['#btnMute','#fsMute'].forEach(id=>{const b=$(id);if(!b)return;b.textContent=on?'🔇':'🔊';b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');b.title=on?'소리 켜기':'소리 끄기 — 악보는 그대로 흐릅니다'})}
 function toggleMute(){if(typeof setMute==='function')setMute(!cur.mute);else cur.mute=!cur.mute;syncMute()}
