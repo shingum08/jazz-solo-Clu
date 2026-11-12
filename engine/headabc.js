@@ -119,3 +119,73 @@ function headFragments(parsed,maxFrag){
   for(const f of out){const key=f.off.join(',')+'|'+f.d.join(',');if(seen.has(key))continue;seen.add(key);res.push(f)}
   return res.slice(0,maxFrag||24);
 }
+
+/* ── v0.46 헤드 연주 — 불러온(또는 직접 입력한) 헤드 멜로디를 첫(·마지막) 코러스에 그대로 싣는다 ─────────────
+   앱이 멜로디를 지어내지 않는다: 헤드 음이 있는 마디는 입력 그대로, 음이 없는 마디만 일반 솔로 생성을 따른다.
+   틱 그리드(8분음표 = 3틱)에 맞춘다: 한 박 안에 0·2·4틱에서 시작하는 2틱 음 셋이면 셋잇단(trip), 나머지는 8분 격자로 반올림.
+   반환: {마디번호: [{t,d,midi,tie?,trip?}] (합 = 박 × 6)} — 음이 하나도 없는 마디는 빠진다 */
+const HEAD_GRID=3;
+function headLockBars(notes,nb,bpb){
+  const T=(bpb||4)*6,out={};
+  if(!notes||!notes.length)return out;
+  const ns=notes.filter(n=>n.midi!==null&&n.d>0).map(n=>({t:n.t,e:n.t+n.d,midi:n.midi})).sort((a,b)=>a.t-b.t);
+  /* 셋잇단 박: 박 시작 B에 B·B+2·B+4 시작 음이 있고 앞의 둘이 2틱 */
+  const tripBeat=new Set();
+  for(let k=0;k+2<ns.length;k++){const a=ns[k],b=ns[k+1],c=ns[k+2];
+    if(a.t%6===0&&b.t===a.t+2&&c.t===a.t+4&&a.e===b.t&&b.e===c.t)tripBeat.add(a.t)}
+  const inTrip=t=>tripBeat.has(t-t%6);
+  const q=[];
+  for(const n of ns){
+    let s,e;
+    if(inTrip(n.t)){s=n.t;e=n.e;if(!inTrip(e)&&e%6!==0)e=Math.round(e/HEAD_GRID)*HEAD_GRID}
+    else{s=Math.round(n.t/HEAD_GRID)*HEAD_GRID;e=inTrip(n.e)?n.e:Math.round(n.e/HEAD_GRID)*HEAD_GRID}
+    if(e<=s)e=s+(inTrip(s)?2:HEAD_GRID);
+    const p=q[q.length-1];
+    if(p&&s<p.e){if(s<=p.s)continue;p.e=s}   /* 겹치면 앞 음을 줄인다(같은 자리 둘째 음은 버림) */
+    q.push({s,e,midi:n.midi});
+  }
+  /* 마디 안 칸: 셋잇단 박은 2틱 칸 셋, 나머지 박은 3틱 칸 둘. 칸마다 울리는 음(또는 쉼)을 정해 이어 붙인다 */
+  for(let b=0;b<nb;b++){
+    const a=b*T,z=a+T;
+    if(!q.some(n=>n.s<z&&n.e>a))continue;
+    const slots=[];
+    for(let bt=a;bt<z;bt+=6){if(tripBeat.has(bt))[0,2,4].forEach(o=>slots.push({t:bt+o,d:2,trip:true}));else[0,3].forEach(o=>slots.push({t:bt+o,d:3}))}
+    const bar=[];
+    slots.forEach(sl=>{
+      const n=q.find(x=>x.s<=sl.t&&x.e>sl.t)||null;
+      const prev=bar[bar.length-1],same=prev&&prev._n===n;
+      if(same&&!sl.trip&&!prev.trip){prev.d+=sl.d;return}             /* 같은 음·같은 격자면 길이만 늘림 */
+      if(same&&n===null&&!sl.trip&&!prev.trip){prev.d+=sl.d;return}
+      const o={t:sl.t-a,d:sl.d,midi:n?n.midi:null,_n:n};if(sl.trip)o.trip=true;
+      if(same&&n)prev.tie=true;                                         /* 셋잇단 경계를 넘는 같은 음은 붙임줄 */
+      bar.push(o);
+    });
+    if(!bar.some(x=>x.midi!==null))continue;
+    /* 마디를 넘어가는 음: 다음 마디 첫 칸이 같은 음이면 붙임줄 */
+    const last=bar[bar.length-1];
+    if(last._n&&last._n.e>z)last.tie=true;
+    bar.forEach(x=>delete x._n);
+    out[b]=bar;
+  }
+  return out;
+}
+/* 생성한 솔로에 헤드 마디를 끼운다. 헤드는 적힌 옥타브를 지키고, 악기 음역 rg=[낮은,높은]을 많이 벗어날 때만 옥타브를 옮긴다(조는 곡 원조 그대로) */
+function spliceHeadBars(solo,lock,rg){
+  const T=(solo.bpb||4)*6,ks=Object.keys(lock||{}).map(Number).filter(b=>b>=0&&b<solo.bars.length);
+  if(!ks.length)return solo;
+  const hs=ks.flatMap(b=>lock[b].filter(n=>n.midi!==null).map(n=>n.midi)),R=rg||[52,86];
+  let sh=0,bestOut=1e9;
+  [0,-12,12,-24,24].forEach(o=>{const out=hs.filter(m=>m+o<R[0]||m+o>R[1]).length;if(out<bestOut){bestOut=out;sh=o}});
+  ks.forEach(b=>{
+    const ns=lock[b];if(ns.reduce((s,n)=>s+n.d,0)!==T)return;
+    solo.bars[b].notes=ns.map(n=>Object.assign({},n,n.midi===null?{}:{midi:n.midi+sh}));
+    solo.bars[b].head=true;solo.bars[b].tags=['헤드'];
+  });
+  /* 이음매: 붙임줄은 다음 마디 첫 음이 같은 음일 때만 */
+  for(let b=0;b<solo.bars.length;b++){
+    const ns=solo.bars[b].notes,last=ns[ns.length-1],nx=solo.bars[b+1];
+    if(last&&last.tie&&(!nx||nx.notes[0].midi===null||nx.notes[0].midi!==last.midi))delete last.tie;
+  }
+  solo.head=true;
+  return solo;
+}

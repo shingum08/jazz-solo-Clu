@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>즉흥 악보 생성기 v0.45.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.46.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -1054,6 +1054,27 @@ body.fslock{overflow:hidden}
 .tooldeck .zval{min-width:44px;text-align:center;font-size:13px;color:var(--txt)}
 .emptyact{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px}
 body.setopen{overflow:hidden}
+/* v0.46 글자 키우기(테스터 피드백: 웹에서 글자가 작음) — 설정 패널·상단 막대. 한글 라벨은 고정폭 글꼴을 쓰지 않는다 */
+.setbox .tb>label,.setbox .field>label{font-family:inherit;font-size:14px;letter-spacing:.02em;text-transform:none;font-weight:600}
+.setbox .toolbar select,.setbox .tb select,.setbox .advsel,.setbox .toolbar input[type=search]{font-size:16px;min-height:48px}
+.setbox .bpmval{font-size:14px}
+.setbox .trbox span{font-size:15px}
+.setbox .songstatus{font-size:15px}
+.setbox .hint{font-size:14.5px}
+.setsec h4{font-size:19px}
+.setsec .note,.setbox .saved .note,.setbox .advnote{font-size:14px}
+.setbox .btn{font-size:16px}
+.setbox .zbtn{min-height:44px;font-size:15px}
+.sethead b{font-size:21px}
+.impbig .ib1{font-size:19px}
+.impbig .ib2{font-size:14.5px}
+.setbox{width:min(640px,100%)}
+.topbar .btn{font-size:16px;min-height:48px}
+.nowsong b{font-size:20px}
+.nowsong span{font-size:14px}
+.topsel{font-size:14.5px;min-height:48px}
+.paper-head .m{font-size:13px}
+.newbtn{color:var(--txt);border-color:var(--line)}
 .paper-head .t{min-width:0}
 .paper-head .fsctl{flex:0 0 auto}
 .fsbtn{white-space:nowrap}
@@ -1061,15 +1082,18 @@ body.setopen{overflow:hidden}
   .setbox{width:100%;border-left:none}
   header.site .sub{display:none}
   .topbar{gap:6px;padding:8px 0}
-  .nowsong{flex:1 1 100%;order:-1;flex-direction:row;align-items:baseline;gap:8px}
-  .nowsong b{font-size:16px;flex:0 1 auto;min-width:0}
+  .nowsong{flex-direction:row;align-items:baseline;gap:8px}
+  .nowsong b{flex:0 0 auto;max-width:62%}
+  .nowsong span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .nowsong b{font-size:16px}
   .nowsong span{white-space:nowrap}
   .topctl{display:contents}
-  .topbar .btn{padding:9px 6px;font-size:14px;min-height:42px}
-  .topbar .setbtn{flex:1 1 0}
-  #btnPlay{flex:1.4 1 0;min-width:0}
+  .nowsong{flex:1 1 calc(100% - 156px);order:-2}
+  .topsel{order:-1;flex:0 0 148px;min-width:0;min-height:40px;font-size:13px;padding:0 6px}
+  .topbar .btn{padding:9px 4px;font-size:14.5px;min-height:46px}
+  .topbar .setbtn,.newbtn{flex:1 1 0}
+  #btnPlay{flex:1.3 1 0;min-width:0}
   #btnStop{flex:1 1 0}
-  .topsel{flex:1.2 1 0;min-width:0;min-height:42px;font-size:12.5px;padding:0 6px}
   .paper-head{flex-wrap:wrap}
 }
 </style>
@@ -1077,7 +1101,7 @@ body.setopen{overflow:hidden}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.45.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">Concept Prototype · v0.46.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -1090,6 +1114,7 @@ body.setopen{overflow:hidden}
     <button class="btn setbtn" id="btnSettings" type="button" aria-haspopup="dialog">⚙ 설정</button>
     <div class="nowsong"><b id="nowSong">—</b><span id="nowMeta"></span></div>
     <div class="topctl">
+      <button class="btn ghost newbtn" id="btnNew" type="button" title="같은 설정으로 새 솔로를 만듭니다">↻ 새 솔로</button>
       <button class="btn play" id="btnPlay" disabled>▶ 재생</button>
       <button class="btn ghost" id="btnStop" type="button" disabled>■ 정지</button>
       <select class="zsel topsel" data-color="1" aria-label="음표색"><option value="off">음표색: 끔</option><option value="role">음표색: 코드톤·스케일</option><option value="pitch">음표색: 음이름 12색</option></select>
@@ -1127,6 +1152,7 @@ body.setopen{overflow:hidden}
     <div class="tb"><label>악보 악기</label><select id="notSel"><option value="0" selected>콘서트 (C)</option><option value="2">B♭ 테너 색소폰 · 트럼펫</option><option value="9">E♭ 알토 색소폰</option></select></div>
     <div class="tb tbbpm"><label>속도 (BPM) <span class="bpmval" id="bpmVal">145 BPM</span></label><div class="bpmrow"><button type="button" class="bpmstep" data-d="-5" aria-label="5 느리게">−</button><input type="range" id="bpm" min="60" max="320" value="145" step="1"><button type="button" class="bpmstep" data-d="5" aria-label="5 빠르게">＋</button></div></div>
     <div class="tb"><label>코러스</label><select id="chorusSel"><option value="1">1코러스</option><option value="2" selected>2코러스</option><option value="3">3코러스</option><option value="4">4코러스</option><option value="6">6코러스</option><option value="8">8코러스</option><option value="10">10코러스</option><option value="12">12코러스</option></select></div>
+<div class="tb"><label>헤드 연주</label><select id="headSel" title="불러온 곡에 멜로디가 있을 때 — 헤드 음이 있는 마디는 입력 그대로, 빈 마디는 솔로로"><option value="inout" selected>처음과 끝</option><option value="in">처음만</option><option value="off">끔</option></select></div>
     <div class="tb"><label>난이도</label><select id="diffSel"><option value="1">1 · 입문</option><option value="2" selected>2 · 중급</option><option value="3">3 · 심화</option></select></div>
     <div class="tb tbbpm"><label>노래 ↔ 비밥 <span class="bpmval" id="lyrVal">노래 30 · 비밥 70</span></label><input type="range" id="lyric" min="0" max="100" value="30" step="5" title="노래 프레이즈(4분·2분음표로 숨 쉬는 선율)와 비밥 라인(8분음표 위주)의 비율"></div>
     <div class="tb"><label>연습 주제</label><select id="topicSel"><option value="auto" selected>자동 (다양하게)</option><option value="ct">코드톤 라인 (정박 코드톤·반음 연결)</option><option value="penta">펜타토닉</option><option value="scale">기본 스케일</option><option value="dom">활용 스케일 (리디안♭7·얼터드 등)</option><option value="gt">가이드톤 라인 (3·7음 연결)</option></select></div>
@@ -3163,6 +3189,76 @@ function headFragments(parsed,maxFrag){
   return res.slice(0,maxFrag||24);
 }
 
+/* ── v0.46 헤드 연주 — 불러온(또는 직접 입력한) 헤드 멜로디를 첫(·마지막) 코러스에 그대로 싣는다 ─────────────
+   앱이 멜로디를 지어내지 않는다: 헤드 음이 있는 마디는 입력 그대로, 음이 없는 마디만 일반 솔로 생성을 따른다.
+   틱 그리드(8분음표 = 3틱)에 맞춘다: 한 박 안에 0·2·4틱에서 시작하는 2틱 음 셋이면 셋잇단(trip), 나머지는 8분 격자로 반올림.
+   반환: {마디번호: [{t,d,midi,tie?,trip?}] (합 = 박 × 6)} — 음이 하나도 없는 마디는 빠진다 */
+const HEAD_GRID=3;
+function headLockBars(notes,nb,bpb){
+  const T=(bpb||4)*6,out={};
+  if(!notes||!notes.length)return out;
+  const ns=notes.filter(n=>n.midi!==null&&n.d>0).map(n=>({t:n.t,e:n.t+n.d,midi:n.midi})).sort((a,b)=>a.t-b.t);
+  /* 셋잇단 박: 박 시작 B에 B·B+2·B+4 시작 음이 있고 앞의 둘이 2틱 */
+  const tripBeat=new Set();
+  for(let k=0;k+2<ns.length;k++){const a=ns[k],b=ns[k+1],c=ns[k+2];
+    if(a.t%6===0&&b.t===a.t+2&&c.t===a.t+4&&a.e===b.t&&b.e===c.t)tripBeat.add(a.t)}
+  const inTrip=t=>tripBeat.has(t-t%6);
+  const q=[];
+  for(const n of ns){
+    let s,e;
+    if(inTrip(n.t)){s=n.t;e=n.e;if(!inTrip(e)&&e%6!==0)e=Math.round(e/HEAD_GRID)*HEAD_GRID}
+    else{s=Math.round(n.t/HEAD_GRID)*HEAD_GRID;e=inTrip(n.e)?n.e:Math.round(n.e/HEAD_GRID)*HEAD_GRID}
+    if(e<=s)e=s+(inTrip(s)?2:HEAD_GRID);
+    const p=q[q.length-1];
+    if(p&&s<p.e){if(s<=p.s)continue;p.e=s}   /* 겹치면 앞 음을 줄인다(같은 자리 둘째 음은 버림) */
+    q.push({s,e,midi:n.midi});
+  }
+  /* 마디 안 칸: 셋잇단 박은 2틱 칸 셋, 나머지 박은 3틱 칸 둘. 칸마다 울리는 음(또는 쉼)을 정해 이어 붙인다 */
+  for(let b=0;b<nb;b++){
+    const a=b*T,z=a+T;
+    if(!q.some(n=>n.s<z&&n.e>a))continue;
+    const slots=[];
+    for(let bt=a;bt<z;bt+=6){if(tripBeat.has(bt))[0,2,4].forEach(o=>slots.push({t:bt+o,d:2,trip:true}));else[0,3].forEach(o=>slots.push({t:bt+o,d:3}))}
+    const bar=[];
+    slots.forEach(sl=>{
+      const n=q.find(x=>x.s<=sl.t&&x.e>sl.t)||null;
+      const prev=bar[bar.length-1],same=prev&&prev._n===n;
+      if(same&&!sl.trip&&!prev.trip){prev.d+=sl.d;return}             /* 같은 음·같은 격자면 길이만 늘림 */
+      if(same&&n===null&&!sl.trip&&!prev.trip){prev.d+=sl.d;return}
+      const o={t:sl.t-a,d:sl.d,midi:n?n.midi:null,_n:n};if(sl.trip)o.trip=true;
+      if(same&&n)prev.tie=true;                                         /* 셋잇단 경계를 넘는 같은 음은 붙임줄 */
+      bar.push(o);
+    });
+    if(!bar.some(x=>x.midi!==null))continue;
+    /* 마디를 넘어가는 음: 다음 마디 첫 칸이 같은 음이면 붙임줄 */
+    const last=bar[bar.length-1];
+    if(last._n&&last._n.e>z)last.tie=true;
+    bar.forEach(x=>delete x._n);
+    out[b]=bar;
+  }
+  return out;
+}
+/* 생성한 솔로에 헤드 마디를 끼운다. 헤드는 적힌 옥타브를 지키고, 악기 음역 rg=[낮은,높은]을 많이 벗어날 때만 옥타브를 옮긴다(조는 곡 원조 그대로) */
+function spliceHeadBars(solo,lock,rg){
+  const T=(solo.bpb||4)*6,ks=Object.keys(lock||{}).map(Number).filter(b=>b>=0&&b<solo.bars.length);
+  if(!ks.length)return solo;
+  const hs=ks.flatMap(b=>lock[b].filter(n=>n.midi!==null).map(n=>n.midi)),R=rg||[52,86];
+  let sh=0,bestOut=1e9;
+  [0,-12,12,-24,24].forEach(o=>{const out=hs.filter(m=>m+o<R[0]||m+o>R[1]).length;if(out<bestOut){bestOut=out;sh=o}});
+  ks.forEach(b=>{
+    const ns=lock[b];if(ns.reduce((s,n)=>s+n.d,0)!==T)return;
+    solo.bars[b].notes=ns.map(n=>Object.assign({},n,n.midi===null?{}:{midi:n.midi+sh}));
+    solo.bars[b].head=true;solo.bars[b].tags=['헤드'];
+  });
+  /* 이음매: 붙임줄은 다음 마디 첫 음이 같은 음일 때만 */
+  for(let b=0;b<solo.bars.length;b++){
+    const ns=solo.bars[b].notes,last=ns[ns.length-1],nx=solo.bars[b+1];
+    if(last&&last.tie&&(!nx||nx.notes[0].midi===null||nx.notes[0].midi!==last.midi))delete last.tie;
+  }
+  solo.head=true;
+  return solo;
+}
+
 /* ── v0.29 연습 악보 생성 — 「연습」 보기에서는 솔로 대신 주제별 연습 음형을 만든다 ──
    · 코드톤: 4분음표로 1·3·5·7음        · 스케일/펜타토닉/활용 스케일: 8분음표
    · 코드마다 상행·하행을 시드 난수로 고른다(같은 시드 → 같은 악보)
@@ -4541,7 +4637,7 @@ const KEYNAMES=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
 const GRP={'스윙':'미디엄/업템포 스윙','블루스':'블루스 & 리듬 체인지','라틴':'보사노바 & 라틴','발라드':'재즈 발라드','모달':'모달·쿨·하드밥','비밥·왈츠':'비밥·왈츠·기타 필수곡','연습':'연습용 진행'};
 /* v0.44 기본 곡 — 웹 테스트 빌드에는 내장 곡이 없어 연습 진행으로 */
 const DEFAULT_PROG=(typeof SONGDB!=='undefined'&&SONGDB['blue-bossa'])?'blue-bossa':(typeof SONGDB!=='undefined'&&SONGDB['form-jazzblues'])?'form-jazzblues':'blues12';
-const cur={lyric:30,noteColors:'off',selProg:DEFAULT_PROG,trUser:0,selDiff:2,selInst:'wind',selTrans:0,useLicks:true,useGroups:true,style:'all',tone:'clarinet',topic:'auto',themeOn:false,themeCh:'first',feel:'auto',solo:null,abc:'',audio:null,saved:[],view:'solo',playSolo:true,chorus:2};
+const cur={lyric:30,noteColors:'off',selProg:DEFAULT_PROG,trUser:0,headMode:'inout',selDiff:2,selInst:'wind',selTrans:0,useLicks:true,useGroups:true,style:'all',tone:'clarinet',topic:'auto',themeOn:false,themeCh:'first',feel:'auto',solo:null,abc:'',audio:null,saved:[],view:'solo',playSolo:true,chorus:2};
 
 /* ── 곡 선택 박스 + 검색 ── */
 const SONG_MARK={mine:'♪ ',ok:'✓ ',form:'✓ ',practice:'✓ ',book:'■ ',bookq:'□ ',rb:'◆ ',rbq:'◇ ',draft:'□ ',partial:'△ ',wrong:'✕ ',unknown:'? '};
@@ -4711,30 +4807,48 @@ $('#leadvol').addEventListener('input',e=>{
 /* ── 생성 ── */
 function origKey(){return SONGDB[cur.selProg].key}
 function songKeyPc(){return mod12(origKey()+cur.trUser)}
+/* v0.46 헤드 연주 계획 — 헤드 입력(불러온 곡의 멜로디 또는 직접 입력)이 있으면 {lock, mode}. 앱이 멜로디를 지어내지 않는다 */
+function headPlan(){
+  if(cur.view==='drill'||cur.headMode==='off')return null;
+  const txt=($('#headAbcIn')||{}).value||'';if(!txt.trim())return null;
+  const s=SONGDB[cur.selProg];if(!s)return null;
+  let p;try{p=parseHeadAbc(txt)}catch(e){return null}
+  if(!p.notes.length||(p.bpb||4)!==(s.bpb||4))return null;
+  const lock=headLockBars(p.notes,s.bars.length,s.bpb||4);
+  return Object.keys(lock).length?{lock,mode:cur.headMode,rg:{brass:[59,82],wind:[59,82],free:[52,86]}[cur.selInst]||[52,86]}:null;
+}
+function chorusLabel(c){   /* 코러스 탭·악보 머리 이름 — 헤드 코러스가 있으면 솔로 번호를 따로 센다 */
+  const so=cur.solos&&cur.solos[c];
+  if(so&&so.head)return c===0?'헤드':'헤드 아웃';
+  const h=cur.solos&&cur.solos[0]&&cur.solos[0].head?1:0;return (c-h+1)+'코러스';
+}
 function gen(newSeed){
   const keyPc=origKey();
-  const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length,cur.lyric].join('|');
+  const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length,cur.lyric,cur.headMode,$('#headAbcIn').value.length].join('|');
   if(newSeed||cur.seed===undefined||cur.sig===undefined){cur.seed=Math.floor(Math.random()*1e6);cur.edits={};cur.sel=null}
   else if(sig!==cur.sig){cur.edits={};cur.sel=null}
   cur.sig=sig;
   const nCh=Math.max(1,Math.min(12,+$('#chorusSel').value||1));cur.chorus=nCh;
   const op={useLicks:cur.useLicks!==false,style:cur.style,groups:cur.useGroups,feel:currentFeel(),topic:cur.topic,motif:cur.motifOn!==false,headMotifs:cur.headFrags||[],lyric:(cur.lyric==null?30:cur.lyric)/100,bpm:+$('#bpm').value};
   const mk=i=>Object.assign({},op,{quote:themeQuoteFor(i,nCh),arc:{i,n:nCh}});   /* v0.27 코러스 곡선 */
+  const hp=headPlan(),NT=nCh+(hp?(hp.mode==='inout'?2:1):0);cur.headCh=hp?{first:true,last:hp.mode==='inout'}:null;   /* v0.46 헤드 코러스(코러스 수는 솔로만 셈) */
   if(cur.view==='drill'){cur.soloBase=null;cur.soloBases=[]}   /* 연습 악보는 applyView에서 사용자 조·기보에 맞춰 만든다 */
   else{
     /* v0.30 고정 마디: 새 솔로에 고정한 마디를 끼워 넣고, 이음매 도약이 가장 작은 시드를 고른다 */
     if(cur.lockSong!==cur.selProg){cur.locks={};cur.barSel=new Set();cur.lockSong=cur.selProg}
     const lkAll=cur.locks||{},hasLk=c=>lkAll[c]&&Object.keys(lkAll[c]).length;
     const lk=hasLk(0)?lkAll[0]:null;
-    const mkBase=sd=>{const so=generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,mk(0));if(lk)spliceLockedBars(so,lk);return so};
+    const mkBase=sd=>{const so=generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,hp?Object.assign(mk(0),{quote:null}):mk(0));if(hp)spliceHeadBars(so,hp.lock,hp.rg);if(lk)spliceLockedBars(so,lk);return so};
     if(lk&&newSeed){
       let best=null;
       for(let k=0;k<12;k++){const sd=k===0?cur.seed:Math.floor(Math.random()*1e6);const so=mkBase(sd),c=lockSeamCost(so);if(!best||c<best.c)best={so,sd,c};if(c===0)break}
       cur.seed=best.sd;cur.soloBase=best.so;
     }else cur.soloBase=mkBase(cur.seed);
     cur.soloBases=[cur.soloBase];}
-  for(let c=1;c<nCh&&cur.view!=='drill';c++){
-    const so=generateSolo(cur.selProg,keyPc,cur.selDiff,(cur.seed+c*7919)%1000003,cur.selInst,mk(c));
+  for(let c=1;c<NT&&cur.view!=='drill';c++){
+    const sd=(cur.seed+c*7919)%1000003,isOut=hp&&hp.mode==='inout'&&c===NT-1;
+    const so=isOut?spliceHeadBars(generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,Object.assign(mk(nCh-1),{quote:null})),hp.lock,hp.rg)
+                  :generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,mk(hp?c-1:c));
     if(cur.locks&&cur.locks[c]&&Object.keys(cur.locks[c]).length)spliceLockedBars(so,cur.locks[c]);
     cur.soloBases.push(so);
   }
@@ -4841,13 +4955,13 @@ function renderSheet(){
   pages.innerHTML='';nav.innerHTML='';
   cur.solos.forEach((so,c)=>{
     const pg=document.createElement('div');pg.className='chpage';pg.dataset.ch=c;
-    pg.innerHTML='<div class="seclab sololab">'+(so.drill?'DRILL · 연습 — '+DRILL_WHAT[so.topic]+' · 상·하행 무작위(새로 만들기로 바뀜)':'SOLO · '+(c+1)+'코러스'+(N>1?' / '+N:'')+(c===0?' · 음을 눌러 편집':''))+'</div>'+ZOOMBAR_HTML+'<div class="sheetwrap"><div id="'+(c===0?'staff':'staff'+c)+'"></div></div>';
+    pg.innerHTML='<div class="seclab sololab">'+(so.drill?'DRILL · 연습 — '+DRILL_WHAT[so.topic]+' · 상·하행 무작위(새로 만들기로 바뀜)':(so.head?'HEAD · '+chorusLabel(c)+' — 불러온 멜로디 그대로, 빈 마디는 솔로':'SOLO · '+chorusLabel(c))+(c===0?' · 음을 눌러 편집':''))+'</div>'+ZOOMBAR_HTML+'<div class="sheetwrap"><div id="'+(c===0?'staff':'staff'+c)+'"></div></div>';
     pages.appendChild(pg);
     const box=pg.lastChild;
     if(typeof ABCJS!=='undefined'){ABCJS.renderAbc(box,cur.abcs[c],{responsive:'resize',paddingtop:0,paddingbottom:0,paddingleft:0,paddingright:0});colorNotes(so,box.querySelector('svg'))}
     else box.innerHTML='<div class="fallback">[오프라인 모드 · 음 이름 나열]\n'+so.bars.map(bar=>bar.notes.map(n=>n.midi===null?'쉼':n.midi).join(' ')).join('\n')+'</div>';
     document.querySelectorAll('.zsel').forEach(x=>x.value=cur.noteColors||'off');
-    if(N>1){const b=document.createElement('button');b.textContent=(c+1)+'코러스';b.onclick=()=>goPage(c);nav.appendChild(b)}
+    if(N>1){const b=document.createElement('button');b.textContent=chorusLabel(c);b.onclick=()=>goPage(c);nav.appendChild(b)}
   });
   if(N>1){const h=document.createElement('span');h.className='chhint';h.textContent='← 좌우로 스크롤해 다음 코러스 →';nav.appendChild(h)}
   pages.onscroll=()=>{const i=Math.round(pages.scrollLeft/Math.max(1,pages.clientWidth));if(i!==cur.pageIdx){cur.pageIdx=i;markNav();cur.barSel=new Set();renderChips()}};
@@ -5477,12 +5591,16 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('#savedList button,#snipList button');
   if(b&&/불러/.test(b.textContent))setTimeout(()=>{closeSet();toPaper()},0);
 });
+/* v0.46 상단 막대 「↻ 새 솔로」— 재생 중이면 새 솔로로 바로 이어서 재생 */
+$('#btnNew').onclick=()=>{const was=!!cur.playReq;stopIfPlaying();gen(true);if(was)startPlay()};
+/* v0.46 헤드 연주(처음과 끝 · 처음만 · 끔) */
+$('#headSel').onchange=e=>{cur.headMode=e.target.value;const was=!!cur.playReq;stopIfPlaying();if(cur.soloBase)gen(false);if(was)startPlay()};
 /* 상단 막대의 지금 곡 이름 */
 function syncNow(){
   const s=SONGDB[cur.selProg];if(!s)return;
   $('#nowSong').textContent=s.name||s.n||cur.selProg;
   const o=$('#songSel').selectedOptions[0],tv=$('#trVal');
-  $('#nowMeta').textContent=[tv&&tv.textContent&&tv.textContent!=='—'?tv.textContent:'',$('#bpm').value+' BPM',$('#chorusSel').value+'코러스'].filter(Boolean).join(' · ');
+  $('#nowMeta').textContent=[tv&&tv.textContent&&tv.textContent!=='—'?tv.textContent:'',$('#bpm').value+' BPM',(cur.headCh?'헤드 + ':'')+$('#chorusSel').value+'코러스'].filter(Boolean).join(' · ');
 }
 ['#songSel','#bpm','#chorusSel'].forEach(q=>$(q).addEventListener('change',()=>setTimeout(syncNow,0)));
 ['#btnTrDn','#btnTrUp'].forEach(q=>$(q).addEventListener('click',()=>setTimeout(syncNow,0)));
