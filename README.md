@@ -5,12 +5,13 @@
 코드 진행을 고르면 **매번 새로운** 연습용 즉흥 솔로 악보를 만들어 주고, 반주와 함께 들려 주는 단일 HTML 웹앱.
 규칙 기반 엔진이 **Weimar Jazz Database 실측 통계**를 확률로 사용해 "사람 같은" 라인을 만든다.
 
-수정 작업 버전 **v0.63.0 "EzImprovJazz"**. 배포 여부와 검증 결과는 별도로 확인해야 한다. 버전 이력 전체는 [CHANGELOG.md](CHANGELOG.md), 되돌릴 수 있는 시점은 [CHECKPOINTS.md](CHECKPOINTS.md)에 있다 — 이 README에는 현재 기능 요약만 둔다.
+수정 작업 버전 **v0.64.0 "EzImprovJazz"**. 배포 여부와 검증 결과는 별도로 확인해야 한다. 버전 이력 전체는 [CHANGELOG.md](CHANGELOG.md), 되돌릴 수 있는 시점은 [CHECKPOINTS.md](CHECKPOINTS.md)에 있다 — 이 README에는 현재 기능 요약만 둔다.
 
 > 마스터 기획안: [docs/blueprint-v1.0.pdf](docs/blueprint-v1.0.pdf) — 프로젝트 전체 로드맵(v1~v4), ML·RAG 확장 설계, 비용·법무 프레임.
 
 ## 주요 기능
 
+- **v0.64 EzImprovJazz**: 문장이 이어지게 — 목관 프레이즈 최대 2마디 → 3~4마디, 코러스 곡선 따라 문장 길이 증가, 코러스 사이 물고 이어 가기, 불필요한 쉼 줄임
 - **v0.63 EzImprovJazz**: 리듬 비율 다시 맞춤(8분 셋잇단 되살림·2박 셋잇단 줄임) · 코러스 빌드업 되살림(첫 코러스 성기게 → 둘째부터 화려하게) · 장르 리듬도 코러스 곡선 따라감
 - **v0.62 EzImprovJazz**: 장르 리듬·리프 반복 · 스케일 색(리디안 ♭7·얼터드·리디안) · 블루스 상행 · Harmony V2 병렬 분석(생성 미사용, 일치 98%) · 악보 안내 줄 정리
 - **v0.61 EzImprovJazz**: 난이도 5단계(3단계부터 중급) · 2박 셋잇단 · 셋잇단 연달아 2묶음까지 · iReal 12/8·9/8 박자 버그 수정 · 외부 AI 검토 대조표(docs/v061_ai_feedback_audit.md)

@@ -16,8 +16,8 @@ assert.ok(!nm('7').some(x=>/^Db/.test(x)),'C7: ♭9 든 3화음 안 씀');
 let used=0,bad=0;
 for(const id of Object.keys(E.SONGDB).slice(0,120))for(let sd=1;sd<=3;sd++){
   const s=E.SONGDB[id],so=E.generateSolo(id,s.key,3,sd,'wind',{style:'all'});
-  so.bars.forEach(b=>{if(!(b.tags||[]).some(x=>/어퍼 스트럭처 /.test(x)))return;used++;
-    b.notes.forEach(n=>{if(n.midi===null)return;const c=E.chordAtBeat(b.chords,n.t/6,so.bpb||4)||b.chords[0],T=E.CHORD_TYPES[c.type],r=((n.midi-c.root)%12+12)%12;if(!T.iv.includes(r)&&!T.scale.includes(r))bad++})});
+  so.bars.forEach(b=>{if(!(b.tags||[]).some(x=>/어퍼 스트럭처 /.test(x)))return;used++;if((b.tags||[]).some(x=>/^스케일 색/.test(x)))return;   /* v0.64 스케일 색 마디는 코드 기본 스케일과 다르게 쓰는 게 의도 */
+    b.notes.forEach((n,k)=>{if(n.midi===null)return;const nx=b.notes[k+1];if(nx&&nx.midi!==null&&Math.abs(nx.midi-n.midi)===1)return;   /* v0.64 반음으로 바로 풀리는 경과음은 장치 음이 아님(프레이즈가 길어져 같은 마디에 함께 들어옴) */const c=E.chordAtBeat(b.chords,n.t/6,so.bpb||4)||b.chords[0],T=E.CHORD_TYPES[c.type],r=((n.midi-c.root)%12+12)%12;if(!T.iv.includes(r)&&!T.scale.includes(r))bad++})});
 }
 assert.ok(used>20,'어퍼 스트럭처가 거의 안 쓰임: '+used);
 assert.ok(bad<=used*0.15,'어퍼 스트럭처 마디의 스케일 밖 음이 많음: '+bad+'/'+used);
