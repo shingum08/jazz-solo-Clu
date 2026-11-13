@@ -1,9 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -32 300 282">
-  <!-- EzImprovJazz 심볼(v0.56) — 글자 E의 가운데 줄이 8분음표로 이어진다. 크림(--paper) + 놋쇠(--brass). 배경 없음 -->
-  <g stroke="#f3eee2" stroke-width="30" stroke-linecap="round">
-    <path d="M15 22H183M15 128H119M15 234H183M15 22V234" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- EzImprovJazz 심볼(v0.58) — 사용자가 가져온 시안(밤 남색 + 놋쇠 EIJ)을 다듬음: E·I를 8° 기울이고 가로획 끝을 비스듬히, 오선 5줄을 또렷하게.
+       J의 점은 맨 윗줄 위의 음표 머리. 같은 파일이 앱 아이콘(app/pwa/icon.svg)·파비콘·앱 머리·로딩 화면·홈페이지에 쓰인다.
+       한 페이지에 여러 번 넣을 때는 그라디언트 id(brass·glow)가 겹치지 않게 빌드가 뒤에 글자를 붙인다 -->
+
+  <defs>
+    <linearGradient id="brass" x1="0" y1="112" x2="0" y2="362" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f8d98a"/><stop offset="0.5" stop-color="#e9b44c"/><stop offset="1" stop-color="#c98a2e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.75">
+      <stop offset="0" stop-color="#1d2a4d"/><stop offset="1" stop-color="#0d1428"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+  <g stroke="#4a5d8c" stroke-width="4" stroke-linecap="round" opacity=".85">
+    <line x1="40" y1="134" x2="472" y2="134"/><line x1="40" y1="196" x2="472" y2="196"/><line x1="40" y1="258" x2="472" y2="258"/><line x1="40" y1="320" x2="472" y2="320"/><line x1="40" y1="382" x2="472" y2="382"/>
   </g>
-  <ellipse cx="183" cy="134" rx="44" ry="33" transform="rotate(-24 183 134)" fill="#d1a545"/>
-  <rect x="208" y="-16" width="20" height="150" rx="10" fill="#d1a545"/>
-  <path d="M218 -14c18 40 72 50 70 112-1 22-10 36-20 46 5-46-16-72-50-76z" fill="#d1a545"/>
+  <g fill="url(#brass)">
+    <g transform="translate(36 0) skewX(-8)"><rect x="96" y="160" width="26" height="192" rx="13"/><path d="M109.0,160H204L194,186H109.0A13.0,13.0 0 0 1 109.0,160Z"/><path d="M109.0,243H182L172,269H109.0A13.0,13.0 0 0 1 109.0,243Z"/><path d="M109.0,326H204L194,352H109.0A13.0,13.0 0 0 1 109.0,326Z"/></g>
+    <g transform="translate(36 0) skewX(-8)"><rect x="240" y="160" width="26" height="192" rx="13"/><path d="M222,173a13,13 0 0 1 13,-13H288L278,186H235a13,13 0 0 1 -13,-13Z"/><path d="M222,339a13,13 0 0 1 13,-13H288L278,352H235a13,13 0 0 1 -13,-13Z"/></g>
+    <rect x="384" y="160" width="26" height="136" rx="13"/>
+    <path d="M384,282 a49,49 0 0 1 -98,0 l26,0 a23,23 0 0 0 46,0 z"/>
+    <circle cx="397" cy="134" r="20"/>
+  </g>
+  <path d="M100,436 Q256,474 404,436" stroke="#e9b44c" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.9"/>
+  <g class="nt"><ellipse cx="434" cy="430" rx="13" ry="10" fill="#e9b44c" transform="rotate(-18 434 430)"/>
+  <path d="M446,428 V396 Q460,400 465,409" stroke="#e9b44c" stroke-width="6" fill="none" stroke-linecap="round"/></g>
 </svg>

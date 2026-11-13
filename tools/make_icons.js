@@ -13,7 +13,7 @@ const svg=fs.readFileSync(path.join(root,'app/pwa/icon.svg'),'utf8');
   for(const [name,px,scale] of jobs){
     const p=await b.newPage({viewport:{width:px,height:px}});
     const inner=Math.round(px*scale),off=Math.round((px-inner)/2);
-    await p.setContent('<html><body style="margin:0;background:#10161f"><div style="position:absolute;left:'+off+'px;top:'+off+'px;width:'+inner+'px;height:'+inner+'px">'+svg.replace('<svg ','<svg width="'+inner+'" height="'+inner+'" ')+'</div></body></html>');
+    await p.setContent('<html><body style="margin:0;background:#0d1428"><div style="position:absolute;left:'+off+'px;top:'+off+'px;width:'+inner+'px;height:'+inner+'px">'+svg.replace('<svg ','<svg width="'+inner+'" height="'+inner+'" ')+'</div></body></html>');
     await p.screenshot({path:path.join(dir,name)});await p.close();
   }
   await b.close();console.log('icons →',dir);

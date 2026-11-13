@@ -34,7 +34,7 @@ const PICKS=[[2,22002]];   /* [난이도, 시드] — 앱 데모(EMB_DEMOS) 2번
   await og.setContent(`<html><body style="margin:0;width:1200px;height:630px;overflow:hidden;background:#10161f;font-family:'Noto Serif CJK KR',serif;color:#f6f2e8">
     <div style="position:absolute;inset:0;background:radial-gradient(55% 70% at 78% 40%,rgba(209,165,69,.16),transparent 70%)"></div>
     <div style="position:absolute;left:72px;top:96px;width:470px">
-      <div style="display:flex;align-items:center;gap:16px;font-size:44px;font-weight:700;letter-spacing:-.01em">${mark.replace('<svg ','<svg style="height:46px;width:auto" ')}EzImprovJazz</div>
+      <div style="display:flex;align-items:center;gap:16px;font-size:44px;font-weight:700;letter-spacing:-.01em">${mark.replace('<svg ','<svg style="height:68px;width:auto" ')}EzImprovJazz</div>
       <div style="margin-top:56px;font-size:40px;line-height:1.35;font-weight:700">코드 진행만 고르세요.<br>솔로는 매번<br>새로 써 드려요.</div>
       <div style="margin-top:28px;font-size:22px;color:#97a3b3;font-family:'Noto Sans CJK KR',sans-serif">재즈 즉흥연주 연습용 솔로 악보 생성기</div>
     </div>

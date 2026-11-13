@@ -56,7 +56,7 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;color:#f6f2e8;letter-spacing:-
 .top.scrolled{border-bottom-color:var(--line)}
 .topin{display:flex;align-items:center;gap:12px;min-height:64px;padding-top:env(safe-area-inset-top)}
 .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:700 21px/1 var(--serif);color:#f6f2e8;letter-spacing:-.01em;margin-right:auto}
-.brand svg{height:26px;width:auto}
+.brand svg{height:32px;width:auto}
 .who{font-size:13.5px;color:var(--fog);max-width:22ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .topin .btn{min-height:40px;padding:0 16px;font-size:14.5px}
 
@@ -145,7 +145,7 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;color:#f6f2e8;letter-spacing:-
 .foot{padding:44px 0 calc(44px + env(safe-area-inset-bottom));border-top:1px solid var(--line);color:var(--fog);font-size:14px}
 .footin{display:flex;flex-wrap:wrap;gap:16px 40px;justify-content:space-between}
 .foot .brand{font-size:17px;margin:0 0 8px}
-.foot .brand svg{height:20px}
+.foot .brand svg{height:24px}
 .foot ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 22px}
 .foot p{margin:4px 0 0}
 
@@ -171,9 +171,9 @@ dialog.login::backdrop{background:rgba(5,8,12,.66)}
 .boot{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:var(--night);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
 .boot.on{opacity:1;visibility:visible}
 .bootin{display:flex;flex-direction:column;align-items:center;gap:14px;color:#f6f2e8}
-.bootin svg{width:76px;height:auto}
-.bootin svg ellipse,.bootin svg rect,.bootin svg g~path{transform-box:view-box;transform-origin:183px 134px;animation:bootswing 1.1s ease-in-out infinite alternate}
-@keyframes bootswing{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+.bootin svg{width:84px;height:auto}
+.bootin svg .nt{animation:bootswing .55s ease-in-out infinite alternate}
+@keyframes bootswing{from{transform:translateY(0)}to{transform:translateY(-14px)}}
 .bootin b{font:700 22px/1 'Gowun Batang',serif;letter-spacing:-.01em}
 .bootbar{width:168px;height:3px;border-radius:2px;background:rgba(209,165,69,.18);overflow:hidden}
 .bootbar i{display:block;width:40%;height:100%;border-radius:2px;background:var(--brass);animation:bootbar 1.2s ease-in-out infinite}

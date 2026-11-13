@@ -132,13 +132,15 @@ if '--web' in sys.argv:
     open(os.path.join(wd,'app','index.html'),'w',encoding='utf-8').write(web)
     ld=os.path.join(root,'app','landing')
     land=open(os.path.join(ld,'index.html'),encoding='utf-8').read()
-    mark=re.sub(r'\s*<!--.*?-->','',open(os.path.join(root,'app','brand','mark.svg'),encoding='utf-8').read())
+    mark=re.sub(r'\s*<!--.*?-->','',open(os.path.join(root,'app','brand','mark.svg'),encoding='utf-8').read(),flags=re.S)
     mark=re.sub(r'\n\s*','',mark).strip().replace('<svg ','<svg aria-hidden="true" ')
     def lrep(old,new,n=1):
         global land
         if land.count(old)!=n: raise RuntimeError('홈페이지 마커를 찾지 못했습니다 — '+old)
         land=land.replace(old,new)
-    lrep('<!--__MARK__-->',mark,3)
+    # v0.58 심볼을 세 번 넣는다(위·아래·로딩) — 그라디언트 id가 겹치지 않게 차례로 글자를 붙인다
+    if land.count('<!--__MARK__-->')!=3: raise RuntimeError('홈페이지 심볼 마커는 3개여야 합니다')
+    for k in range(3): land=land.replace('<!--__MARK__-->',re.sub(r'(id="|url\(#)(brass|glow)',lambda m:m.group(1)+m.group(2)+str(k),mark),1)
     lrep('/*__SB_CONFIG__*/null','/*__SB_CONFIG__*/'+(json.dumps(sb_cfg) if sb_cfg else 'null'))
     lrep('</head>','<meta name="robots" content="noindex,nofollow">\n</head>')   # 공개 출시(개인정보처리방침·약관 게시) 전까지
     open(os.path.join(wd,'index.html'),'w',encoding='utf-8').write(land)
