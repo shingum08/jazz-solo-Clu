@@ -6,7 +6,7 @@ function loadEngine(coreFile){
     ...fs.readdirSync(root+'/engine').filter(f=>/^songs_part\d+\.js$/.test(f)).sort().map(f=>'engine/'+f)]
     .filter(f=>fs.existsSync(path.join(root,f)));
   const code=files.map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n')
-    +'\nthis.E={RAW_SONGS,generateSolo,SONGDB,STYLE_DATA,barChords,analyzeHarmony,classifySong'+
+    +'\nthis.E={RAW_SONGS,generateSolo,SONGDB,STYLE_DATA,barChords,analyzeHarmony,classifySong,LEVELS'+
     (files.includes('engine/headabc.js')?',parseHeadAbc,headFragments':'')+(files.includes('engine/drill.js')?',generateDrill,toAbc,CHORD_TYPES,TYPE_CLS,transposeSolo':'')+(files.includes('engine/locks.js')?',spliceLockedBars,lockSeamCost':'')+(files.includes('engine/song_status.js')?',SONG_STATUS':'')+'};';
   const ctx={};vm.createContext(ctx);vm.runInContext(code,ctx);return ctx.E;
 }

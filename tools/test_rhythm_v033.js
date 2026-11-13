@@ -8,7 +8,7 @@ function measure(opts,diffs){
   for(const id of ids)for(const d of diffs)for(let k=0;k<3;k++){
     const song=E.SONGDB[id],s=E.generateSolo(id,song.key,d,777+k*31+d,'wind',opts);
     const ns=[];let pv=false;
-    s.bars.forEach((b,bi)=>b.notes.forEach(n=>{const tie=pv;pv=!!n.tie;if(n.midi===null)return;if(tie&&ns.length){ns[ns.length-1].d+=n.d;return}ns.push({T:bi*24+n.t,d:n.d,trip:!!n.trip});if(d===2&&n.trip)trip2++}));
+    s.bars.forEach((b,bi)=>b.notes.forEach(n=>{const tie=pv;pv=!!n.tie;if(n.midi===null)return;if(tie&&ns.length){ns[ns.length-1].d+=n.d;return}ns.push({T:bi*24+n.t,d:n.d,trip:!!n.trip});if(d===2&&n.trip&&n.d===2)trip2++   /* v0.61 2박 셋잇단(4틱)은 난이도 2(단계 3)에 허용 */}));
     beats+=s.bars.length*4;
     let cur=[ns[0]];const P=[];
     for(let i=1;i<ns.length;i++){const a=ns[i-1],b=ns[i];if(b.T-(a.T+a.d)>=6){P.push(cur);cur=[b]}else{cur.push(b);pairs++;if(b.T-(a.T+a.d)>=1)inGap++}}

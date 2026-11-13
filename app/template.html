@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- v0.55.0 화면 테마는 잠시 닫음(사용자 요청) — 다시 열 때 THEME_ON=true + 여기서 저장된 테마를 그리기 전에 적용 -->
 <!--__PWA_HEAD__-->
-<title>EzImprovJazz v0.60.0 — 즉흥 재즈 솔로 연습 악보</title>
+<title>EzImprovJazz v0.61.0 — 즉흥 재즈 솔로 연습 악보</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -929,7 +929,7 @@ svg .abcjs-tempo{cursor:pointer}
 <script>setTimeout(function(){var b=document.getElementById('boot');if(b)b.classList.add('done')},8000)/* v0.56 로딩 화면 안전장치 — 무슨 일이 있어도 8초 뒤에는 걷는다 */</script>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.60.0<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.61.0<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1 class="brand"><a class="brandlink" id="brandLink"><svg class="bmark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="brassH" x1="0" y1="112" x2="0" y2="362" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f8d98a"/><stop offset="0.5" stop-color="#e9b44c"/><stop offset="1" stop-color="#c98a2e"/></linearGradient><radialGradient id="glowH" cx="0.5" cy="0.42" r="0.75"><stop offset="0" stop-color="#1d2a4d"/><stop offset="1" stop-color="#0d1428"/></radialGradient></defs><rect width="512" height="512" rx="112" fill="url(#glowH)"/><g stroke="#4a5d8c" stroke-width="4" stroke-linecap="round" opacity=".85"><line x1="40" y1="134" x2="472" y2="134"/><line x1="40" y1="196" x2="472" y2="196"/><line x1="40" y1="258" x2="472" y2="258"/><line x1="40" y1="320" x2="472" y2="320"/><line x1="40" y1="382" x2="472" y2="382"/></g><g fill="url(#brassH)"><g transform="translate(36 0) skewX(-8)"><rect x="96" y="160" width="26" height="192" rx="13"/><path d="M109.0,160H204L194,186H109.0A13.0,13.0 0 0 1 109.0,160Z"/><path d="M109.0,243H182L172,269H109.0A13.0,13.0 0 0 1 109.0,243Z"/><path d="M109.0,326H204L194,352H109.0A13.0,13.0 0 0 1 109.0,326Z"/></g><g transform="translate(36 0) skewX(-8)"><rect x="240" y="160" width="26" height="192" rx="13"/><path d="M222,173a13,13 0 0 1 13,-13H288L278,186H235a13,13 0 0 1 -13,-13Z"/><path d="M222,339a13,13 0 0 1 13,-13H288L278,352H235a13,13 0 0 1 -13,-13Z"/></g><rect x="384" y="160" width="26" height="136" rx="13"/><path d="M384,282 a49,49 0 0 1 -98,0 l26,0 a23,23 0 0 0 46,0 z"/><circle cx="397" cy="134" r="20"/></g><path d="M100,436 Q256,474 404,436" stroke="#e9b44c" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.9"/><g class="nt"><ellipse cx="434" cy="430" rx="13" ry="10" fill="#e9b44c" transform="rotate(-18 434 430)"/><path d="M446,428 V396 Q460,400 465,409" stroke="#e9b44c" stroke-width="6" fill="none" stroke-linecap="round"/></g></svg><span>EzImprovJazz</span></a></h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -993,7 +993,7 @@ svg .abcjs-tempo{cursor:pointer}
     <div class="tb tbbpm"><label>속도 (BPM) <span class="bpmval" id="bpmVal">145 BPM</span></label><div class="bpmrow"><button type="button" class="bpmstep" data-d="-5" aria-label="5 느리게">−</button><input type="range" id="bpm" min="60" max="320" value="145" step="1"><button type="button" class="bpmstep" data-d="5" aria-label="5 빠르게">＋</button></div></div>
     <div class="tb"><label>코러스</label><select id="chorusSel"><option value="1">1코러스</option><option value="2" selected>2코러스</option><option value="3">3코러스</option><option value="4">4코러스</option><option value="6">6코러스</option><option value="8">8코러스</option><option value="10">10코러스</option><option value="12">12코러스</option></select></div>
 <div class="tb"><label>헤드 연주</label><select id="headSel" title="불러온 곡에 멜로디가 있을 때 — 헤드 음이 있는 마디는 입력 그대로, 빈 마디는 솔로로"><option value="inout" selected>처음과 끝</option><option value="in">처음만</option><option value="off">끔</option></select></div>
-    <div class="tb"><label>난이도</label><select id="diffSel"><option value="1">1 · 입문</option><option value="2" selected>2 · 중급</option><option value="3">3 · 심화</option></select></div>
+    <div class="tb"><label>난이도</label><select id="diffSel"><option value="1">1 · 입문</option><option value="2">2 · 초급</option><option value="3" selected>3 · 중급</option><option value="4">4 · 중상급</option><option value="5">5 · 심화</option></select></div>
     <div class="tb tbbpm"><label>노래 ↔ 비밥 <span class="bpmval" id="lyrVal">노래 10 · 비밥 90</span></label><input type="range" id="lyric" min="0" max="100" value="10" step="5" title="노래 프레이즈(4분·2분음표로 숨 쉬는 선율)와 비밥 라인(8분음표 위주)의 비율"></div>
     <div class="tb"><label>연습 주제</label><select id="topicSel"><option value="auto" selected>자동 (다양하게)</option><option value="ct">코드톤 라인 (정박 코드톤·반음 연결)</option><option value="penta">펜타토닉</option><option value="scale">기본 스케일</option><option value="dom">활용 스케일 (리디안♭7·얼터드 등)</option><option value="gt">가이드톤 라인 (3·7음 연결)</option></select></div>
     <div class="tb"><label>악보 표시</label><select id="viewSel"><option value="solo" selected>솔로</option><option value="drill">연습</option></select></div>
@@ -1866,7 +1866,7 @@ const KEYNAMES=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
 const GRP={'스윙':'미디엄/업템포 스윙','블루스':'블루스 & 리듬 체인지','라틴':'보사노바 & 라틴','발라드':'재즈 발라드','모달':'모달·쿨·하드밥','비밥·왈츠':'비밥·왈츠·기타 필수곡','연습':'연습용 진행'};
 /* v0.44 기본 곡 — 웹 테스트 빌드에는 내장 곡이 없어 연습 진행으로 */
 const DEFAULT_PROG=(typeof SONGDB!=='undefined'&&SONGDB['blue-bossa'])?'blue-bossa':(typeof SONGDB!=='undefined'&&SONGDB['form-jazzblues'])?'form-jazzblues':'blues12';
-const cur={lyric:10,noteColors:'off',selProg:DEFAULT_PROG,trUser:0,headMode:'inout',selDiff:2,selInst:'wind',selTrans:0,useLicks:true,useGroups:true,style:'all',tone:'clarinet',topic:'auto',themeOn:false,themeCh:'first',feel:'auto',solo:null,abc:'',audio:null,saved:[],view:'solo',playSolo:true,chorus:2};
+const cur={lyric:10,noteColors:'off',selProg:DEFAULT_PROG,trUser:0,headMode:'inout',selDiff:2,selLv:3,selInst:'wind',selTrans:0,useLicks:true,useGroups:true,style:'all',tone:'clarinet',topic:'auto',themeOn:false,themeCh:'first',feel:'auto',solo:null,abc:'',audio:null,saved:[],view:'solo',playSolo:true,chorus:2};
 
 /* ── 곡 선택 박스 + 검색 ── */
 const SONG_MARK={mine:'♪ ',ok:'✓ ',form:'✓ ',practice:'✓ ',book:'■ ',bookq:'□ ',rb:'◆ ',rbq:'◇ ',draft:'□ ',partial:'△ ',wrong:'✕ ',unknown:'? '};
@@ -1999,7 +1999,10 @@ $('#chorusSel').onchange=e=>{cur.chorus=Math.max(1,Math.min(12,+e.target.value||
 $('#playSel').onchange=e=>{cur.playSolo=e.target.value==='1';if(cur.audio){stopAll();playAll();syncPlay()}};
 
 /* ── 난이도 ── */
-$('#diffSel').onchange=e=>{cur.selDiff=+e.target.value;regen()};
+/* v0.61 난이도 5단계 — 화면의 단계(selLv 1~5) → 엔진 난이도(selDiff 1~3, LEVELS) */
+function setLevel(lv){lv=Math.max(1,Math.min(5,+lv||3));cur.selLv=lv;cur.selDiff=LEVELS[lv].diff;$('#diffSel').value=String(lv)}
+function lvFromItem(it){return it.lv?it.lv:LEVEL_OF_DIFF[it.diff]||3}   /* v0.60까지 저장한 난이도(1~3) → 단계 */
+$('#diffSel').onchange=e=>{setLevel(e.target.value);regen()};
 /* v0.39 노래 ↔ 비밥 조절바: 0 = 비밥 라인만 · 100 = 노래 프레이즈만 */
 $('#lyric').addEventListener('input',e=>{const v=+e.target.value;$('#lyrVal').textContent='노래 '+v+' · 비밥 '+(100-v)});
 $('#lyric').addEventListener('change',e=>{cur.lyric=+e.target.value;const was=!!cur.audio;stopIfPlaying();regen();if(was){playAll();syncPlay()}});
@@ -2135,12 +2138,12 @@ function chorusLabel(c){   /* 코러스 탭·악보 머리 이름 — 헤드 코
 function gen(newSeed){
   cur.themeOn=false;   /* v0.47 테마 인용 끔(숨김) */
   const keyPc=origKey();
-  const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length,cur.lyric,cur.headMode,$('#headAbcIn').value.length].join('|');
+  const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selLv,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length,cur.lyric,cur.headMode,$('#headAbcIn').value.length].join('|');
   if(newSeed||cur.seed===undefined||cur.sig===undefined){cur.seed=Math.floor(Math.random()*1e6);cur.edits={};cur.sel=null}
   else if(sig!==cur.sig){cur.edits={};cur.sel=null}
   cur.sig=sig;
   const nCh=Math.max(1,Math.min(12,+$('#chorusSel').value||1));cur.chorus=nCh;
-  const op={useLicks:cur.useLicks!==false,style:cur.style,groups:cur.useGroups,feel:currentFeel(),topic:cur.topic,motif:cur.motifOn!==false,headMotifs:cur.headFrags||[],lyric:lyricAmt(cur.lyric==null?LYRIC_MAP.def:cur.lyric),bpm:+$('#bpm').value};
+  const op={useLicks:cur.useLicks!==false,style:cur.style,groups:cur.useGroups,feel:currentFeel(),topic:cur.topic,motif:cur.motifOn!==false,headMotifs:cur.headFrags||[],level:cur.selLv,lyric:lyricAmt(cur.lyric==null?LYRIC_MAP.def:cur.lyric),bpm:+$('#bpm').value};
   const mk=i=>Object.assign({},op,{quote:themeQuoteFor(i,nCh),arc:{i,n:nCh}});   /* v0.27 코러스 곡선 */
   const hp=headPlan(),NT=nCh+(hp?(hp.mode==='inout'?2:1):0);cur.headCh=hp?{first:true,last:hp.mode==='inout'}:null;   /* v0.46 헤드 코러스(코러스 수는 솔로만 셈) */
   if(cur.view==='drill'){cur.soloBase=null;cur.soloBases=[]}   /* 연습 악보는 applyView에서 사용자 조·기보에 맞춰 만든다 */
@@ -2257,7 +2260,7 @@ function renderSheet(){
   const s=SONGDB[cur.selProg];
   $('#paperTitle').textContent=s.name;
   const kOrig=keyLabel(origKey(),0),kNow=keyLabel(songKeyPc(),cur.trUser);
-  $('#paperMeta').textContent=(cur.trUser?kNow+' (원곡 '+kOrig+')':kNow)+(cur.selTrans?' · '+(cur.selTrans===9?'E♭ 악기 기보':'B♭ 악기 기보'):'')+' · '+s.bpm+' BPM 기본 · '+STYLE_DATA.profiles[cur.style].label+' · 난이도 '+cur.selDiff+/* v0.50 악기 분류(목관·금관)는 악보 머리에서 숨김 — 목관·금관 스타일을 따로 만들 때 다시 표시 */(cur.topic&&cur.topic!=='auto'?' · 주제 '+TOPIC_L[cur.topic]:'')+' · 반주 '+FEEL_LABEL[currentFeel()]+(cur.solo&&cur.solo.quote?' · 테마 인용 '+(cur.solo.quote.bar+1)+'~'+(cur.solo.quote.bar+cur.solo.quote.bars)+'마디':'');
+  $('#paperMeta').textContent=(cur.trUser?kNow+' (원곡 '+kOrig+')':kNow)+(cur.selTrans?' · '+(cur.selTrans===9?'E♭ 악기 기보':'B♭ 악기 기보'):'')+' · '+s.bpm+' BPM 기본 · '+STYLE_DATA.profiles[cur.style].label+' · 난이도 '+cur.selLv+/* v0.50 악기 분류(목관·금관)는 악보 머리에서 숨김 — 목관·금관 스타일을 따로 만들 때 다시 표시 */(cur.topic&&cur.topic!=='auto'?' · 주제 '+TOPIC_L[cur.topic]:'')+' · 반주 '+FEEL_LABEL[currentFeel()]+(cur.solo&&cur.solo.quote?' · 테마 인용 '+(cur.solo.quote.bar+1)+'~'+(cur.solo.quote.bar+cur.solo.quote.bars)+'마디':'');
   $('#chartWrap').style.display=cur.view==='both'?'block':'none';
   updDrill();
   if(cur.view==='both'&&typeof ABCJS!=='undefined'){
@@ -2489,7 +2492,7 @@ async function fbSend(){
 }
 function fbLoad(){try{const v=JSON.parse(localStorage.getItem(FB_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
 function fbStore(){try{localStorage.setItem(FB_KEY,JSON.stringify(cur.fb.slice(-FB_MAX)))}catch(e){}}
-function fbSolKey(ch){return [cur.selProg,cur.seed,cur.selDiff,cur.style,cur.selInst,cur.lyric,cur.topic,ch].join('|')}
+function fbSolKey(ch){return [cur.selProg,cur.seed,cur.selLv,cur.style,cur.selInst,cur.lyric,cur.topic,ch].join('|')}
 function fbRatedNow(ch){const k=fbSolKey(ch),o={};(cur.fb||[]).forEach(r=>{if(r.sk===k)o[r.bar]=r.r});return o}
 function fbRecord(ch,i,r){
   const base=ch===0?applyEdits(JSON.parse(JSON.stringify(cur.soloBase)),cur.edits):cur.soloBases[ch],B=base.bars,b=B[i],sg=SONGDB[cur.selProg]||{};
@@ -2498,7 +2501,7 @@ function fbRecord(ch,i,r){
   const pv=nn(B[i-1]),nx=nn(B[i+1]);
   return {id:Date.now().toString(36)+'-'+ch+'-'+i,sk:fbSolKey(ch),ts:new Date().toISOString(),v:APP_VER,r,
     song:{id:cur.selProg,n:sg.name||'',my:isMy,cls:sg.c||'',keyPc:base.keyPc,form:base.form||null},
-    set:{seed:cur.seed,diff:cur.selDiff,style:cur.style,inst:cur.selInst,lyric:cur.lyric,topic:cur.topic||null,feel:base.feel||null,bpm:+$('#bpm').value,choruses:cur.solos?cur.solos.length:1},
+    set:{seed:cur.seed,diff:cur.selDiff,lv:cur.selLv,style:cur.style,inst:cur.selInst,lyric:cur.lyric,topic:cur.topic||null,feel:base.feel||null,bpm:+$('#bpm').value,choruses:cur.solos?cur.solos.length:1},
     ch,bar:i,nb:B.length,bpb:base.bpb,chords:b.chords||[],tags:b.tags||[],head,edited:ch===0&&!!(cur.edits&&Object.keys(cur.edits).some(k=>+String(k).split(':')[0]===i)),
     notes:head?null:b.notes.map(n=>[n.t,n.d,n.midi===undefined?null:n.midi].concat(n.trip?['t']:[])),
     prev:head||!pv.length?null:pv[pv.length-1].midi,next:head||!nx.length?null:nx[0].midi};
@@ -2708,8 +2711,8 @@ $('#btnSave').onclick=()=>{
   const s=cur.solo,sg=SONGDB[cur.selProg];
   /* v0.42 악보 그대로 저장 — 시드뿐 아니라 실제 음표(코러스별 원본 + 편집)도 담아, 엔진이 바뀌어도 같은 악보로 돌아온다 */
   const snap=cur.view!=='drill'&&cur.soloBases&&cur.soloBases.length?{bases:JSON.parse(JSON.stringify(cur.soloBases)),edits:JSON.parse(JSON.stringify(cur.edits||{})),nCh:cur.soloBases.length}:null;
-  cur.saved.unshift({v:APP_VER,snap,id:s.ts,seed:cur.seed,song:cur.selProg,tr:cur.trUser,diff:cur.selDiff,inst:cur.selInst,licks:cur.useLicks!==false,groups:cur.useGroups,style:cur.style,lyric:cur.lyric,lm:2,
-    name:sg.name+' · '+keyLabel(songKeyPc(),cur.trUser)+' · '+STYLE_DATA.profiles[cur.style].label+' · 난이도 '+cur.selDiff});
+  cur.saved.unshift({v:APP_VER,snap,id:s.ts,seed:cur.seed,song:cur.selProg,tr:cur.trUser,diff:cur.selDiff,lv:cur.selLv,inst:cur.selInst,licks:cur.useLicks!==false,groups:cur.useGroups,style:cur.style,lyric:cur.lyric,lm:2,
+    name:sg.name+' · '+keyLabel(songKeyPc(),cur.trUser)+' · '+STYLE_DATA.profiles[cur.style].label+' · 난이도 '+cur.selLv});
   storeSaved();askPersist();renderSaved();
 };
 function renderSaved(){
@@ -2722,15 +2725,15 @@ function renderSaved(){
     const acts=document.createElement('span');acts.className='acts';
     const b=document.createElement('button');b.textContent='불러오기';
     b.onclick=()=>{
-      cur.selProg=item.song;cur.trUser=item.tr||0;cur.selDiff=item.diff;cur.selInst=item.inst||'wind';
+      cur.selProg=item.song;cur.trUser=item.tr||0;setLevel(lvFromItem(item));cur.selInst=item.inst||'wind';
       cur.useLicks=item.licks!==false;cur.useGroups=item.groups!==false;cur.style=item.style||'all';
       cur.seed=item.seed;cur.edits={};cur.sel=null;
-      cur.sig=[cur.selProg,cur.selDiff,cur.selInst,cur.useLicks,cur.style,cur.useGroups].join('|');
+      cur.sig=[cur.selProg,cur.selDiff,cur.selLv,cur.selInst,cur.useLicks,cur.style,cur.useGroups].join('|');
       styleSel.value=cur.style;updStyleDesc();updTr();
       const s=SONGDB[cur.selProg];$('#bpm').value=s.bpm;$('#bpmVal').textContent=s.bpm+' BPM';
       songSel.value=cur.selProg;
       [...$('#segInst').children].forEach((c,i)=>c.classList.toggle('on',(i===0)===(cur.selInst==='wind')));
-      $('#diffSel').value=cur.selDiff;
+      $('#diffSel').value=String(cur.selLv);
       cur.lyric=item.lyric==null?LYRIC_MAP.def:item.lm===2?item.lyric:lyricFromOld(item.lyric);$('#lyric').value=cur.lyric;$('#lyrVal').textContent='노래 '+cur.lyric+' · 비밥 '+(100-cur.lyric);
       if(item.snap&&cur.view==='drill'){cur.view='solo';$('#viewSel').value='solo'}
       if(item.snap){$('#chorusSel').value=item.snap.nCh;cur.chorus=item.snap.nCh}
@@ -3061,7 +3064,7 @@ function popAct(act){
 /* ── 피드백: 입력창 → GitHub 이슈(곡·설정 자동 첨부) 또는 내용 복사 ── */
 function fbInfo(){
   const so=songSel.selectedOptions&&songSel.selectedOptions[0]?songSel.selectedOptions[0].textContent:'-';
-  return ['버전: v'+APP_VER,'곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selDiff,'스타일: '+cur.style,'노래↔비밥: '+cur.lyric,'오디오: '+(typeof SHARED_AC!=='undefined'&&SHARED_AC?SHARED_AC.state:'없음')+(typeof IS_IOS!=='undefined'&&IS_IOS?' · iOS'+(navigator.audioSession?' · 세션 '+navigator.audioSession.type:' · 세션 API 없음'):''),'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
+  return ['버전: v'+APP_VER,'곡: '+so,'시드: '+(cur.seed||'-'),'BPM: '+$('#bpm').value,'코러스: '+(cur.chorus||1),'악보 표시: '+cur.view,'조 이조: '+cur.trUser,'난이도: '+cur.selLv+'단계(엔진 '+cur.selDiff+')','스타일: '+cur.style,'노래↔비밥: '+cur.lyric,'오디오: '+(typeof SHARED_AC!=='undefined'&&SHARED_AC?SHARED_AC.state:'없음')+(typeof IS_IOS!=='undefined'&&IS_IOS?' · iOS'+(navigator.audioSession?' · 세션 '+navigator.audioSession.type:' · 세션 API 없음'):''),'악기/톤: '+cur.selInst+'/'+cur.tone,'반주: '+currentFeel(),'주제: '+(TOPIC_L[cur.topic]||'자동'),'테마 인용: '+(cur.themeOn?cur.themeCh:'끔'),'브라우저: '+navigator.userAgent].join('\n');
 }
 $('#btnFeedback').onclick=()=>{$('#fbModal').style.display='flex';$('#fbText').focus();$('#fbMsg').textContent=''};
 $('#fbClose').onclick=()=>{$('#fbModal').style.display='none'};
@@ -3286,7 +3289,7 @@ gen();syncNow();syncPlay();
    v0.58: 3번 가이드톤 라인 → 활용 스케일(가이드톤은 같은 음 되풀이가 45%라 첫인상에 맞지 않음 — 엔진 과제로 남김),
    한 곡이 끝나면 다음 데모로 이어서 재생(BGM처럼). 기기 저장소는 건드리지 않는다(설정은 저장되지 않음 · 계정 동기화 끔) */
 const EMB_SONG='pd-tea-for-two',EMB_BPM=120,EMB_TONE='tenor',EMB_GAP_MS=900;
-const EMB_DEMOS=[{d:1,tp:'ct',sd:12001},{d:2,tp:'auto',sd:22002},{d:2,tp:'dom',sd:33001},{d:2,tp:'penta',sd:42004},{d:3,tp:'auto',sd:52005}];
+const EMB_DEMOS=[{lv:1,tp:'ct',sd:12001},{lv:3,tp:'auto',sd:22002},{lv:3,tp:'dom',sd:33001},{lv:3,tp:'penta',sd:42004},{lv:5,tp:'auto',sd:52005}];   /* v0.61 단계(1~5) */
 const EMB_TP_L={auto:'자유',ct:'코드톤 라인',gt:'가이드톤 라인',penta:'펜타토닉',scale:'기본 스케일',dom:'활용 스케일'};
 if(location.hash==='#embed-demo'&&SONGDB[EMB_SONG]){
   document.documentElement.classList.add('embed');
@@ -3297,8 +3300,8 @@ if(location.hash==='#embed-demo'&&SONGDB[EMB_SONG]){
   try{prefetchSamples(currentFeel(),cur.tone)}catch(e){}
   let embI=0,embOn=false,embStop=false;
   const embShow=i=>{embI=(i+EMB_DEMOS.length)%EMB_DEMOS.length;const D=EMB_DEMOS[embI];
-    cur.selDiff=D.d;$('#diffSel').value=String(D.d);cur.topic=D.tp;$('#topicSel').value=D.tp;cur.seed=D.sd;gen(false);
-    $('#embLab').textContent='난이도 '+D.d+' · '+EMB_TP_L[D.tp]+' · '+EMB_BPM+' BPM';$('#embNo').textContent=(embI+1)+'/'+EMB_DEMOS.length};
+    setLevel(D.lv);cur.topic=D.tp;$('#topicSel').value=D.tp;cur.seed=D.sd;gen(false);
+    $('#embLab').textContent='난이도 '+D.lv+' · '+EMB_TP_L[D.tp]+' · '+EMB_BPM+' BPM';$('#embNo').textContent=(embI+1)+'/'+EMB_DEMOS.length};
   const _syncPlay=syncPlay;
   syncPlay=function(){_syncPlay();   /* 끝까지 재생돼 멈추면(■·다른 솔로가 아니면) 다음 데모를 이어서 */
     if(cur.playReq){embOn=true;return}

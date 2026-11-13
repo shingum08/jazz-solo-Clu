@@ -5,12 +5,13 @@
 코드 진행을 고르면 **매번 새로운** 연습용 즉흥 솔로 악보를 만들어 주고, 반주와 함께 들려 주는 단일 HTML 웹앱.
 규칙 기반 엔진이 **Weimar Jazz Database 실측 통계**를 확률로 사용해 "사람 같은" 라인을 만든다.
 
-수정 작업 버전 **v0.60.0 "EzImprovJazz"**. 배포 여부와 검증 결과는 별도로 확인해야 한다. 버전 이력 전체는 [CHANGELOG.md](CHANGELOG.md), 되돌릴 수 있는 시점은 [CHECKPOINTS.md](CHECKPOINTS.md)에 있다 — 이 README에는 현재 기능 요약만 둔다.
+수정 작업 버전 **v0.61.0 "EzImprovJazz"**. 배포 여부와 검증 결과는 별도로 확인해야 한다. 버전 이력 전체는 [CHANGELOG.md](CHANGELOG.md), 되돌릴 수 있는 시점은 [CHECKPOINTS.md](CHECKPOINTS.md)에 있다 — 이 README에는 현재 기능 요약만 둔다.
 
 > 마스터 기획안: [docs/blueprint-v1.0.pdf](docs/blueprint-v1.0.pdf) — 프로젝트 전체 로드맵(v1~v4), ML·RAG 확장 설계, 비용·법무 프레임.
 
 ## 주요 기능
 
+- **v0.61 EzImprovJazz**: 난이도 5단계(3단계부터 중급) · 2박 셋잇단 · 셋잇단 연달아 2묶음까지 · iReal 12/8·9/8 박자 버그 수정 · 외부 AI 검토 대조표(docs/v061_ai_feedback_audit.md)
 - **v0.60 EzImprovJazz**: 셋잇단 릭 순서 뒤집기 · 새 릭(Ⅳ 펜타 두 번씩 → Ⅰ) · 2박 쉼 줄이기 · 8분·4분 섞기 프레이즈 · 곧은 8분 계열 셋잇단 빼기
 - **v0.59 EzImprovJazz**: 마디 번호 줄 없앰 · 휴대폰 악보 한 줄 2마디 · 코드 기호 겹침 수정 · 셋잇단↓ 8분 연속↑ · 노래↔비밥 다시 맞춤(기본 노래 10) · 3코러스 이상 쉬어 가는 섹션
 - **v0.58 EzImprovJazz**: 새 심볼(기울인 E·I + 음표 J, 또렷한 오선) · 첫 화면 데모 3번을 활용 스케일로

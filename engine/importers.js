@@ -350,9 +350,12 @@ function irealOne(str,book){
   const title=(f[0]||'불러온 곡').replace(/\s*,\s*The$/,'').trim(),style=f[3]||'',keyS=f[4]||'C';
   const bpmF=+f[mi+2]||0;
   /* 박자 */
+  /* v0.61 박자 — iReal 표기 T44·T34·T54·T22·T68·T12(12/8)·T98… 를 표로. 예전 식(Math.round(a*4/b))은 12/8을 12박으로 읽어 막고,
+     9/8·7/8·5/8을 5/4·4/4·3/4로 조용히 잘못 읽었다(외부 검토 11/13 지적 — 확인함). 겹박자는 큰 박 기준(12/8 → 4박, 6/8·9/8 → 3박).
+     엔진은 3·4·5박만 다룬다 — 2/4·7/8·5/8 등은 분명한 안내로 막는다 */
+  const METER={'44':4,'34':3,'54':5,'22':4,'12':4,'68':3,'98':3};
   const ts=music.match(/T(\d)(\d)/);let bpb=4;
-  if(ts){const a=+ts[1],b=+ts[2];bpb=a===1&&b===2?12:Math.round(a*4/b);if(a===6&&b===8)bpb=3}
-  if(![3,4,5].includes(bpb))throw new Error('박자 T'+(ts?ts[1]+ts[2]:'')+'는 아직 못 읽어요');
+  if(ts){const k=ts[1]+ts[2];if(METER[k]===undefined)throw new Error('박자 '+(k==='12'?'12/8':ts[1]+'/'+ts[2])+'는 아직 못 읽어요 — 지금은 4/4·3/4·5/4·2/2·6/8·9/8·12/8만 됩니다');bpb=METER[k]}
   /* 토큰화: 마디·반복·엔딩·코드 */
   /* v0.44 글자 지시(<D.S. al Coda>·<D.C. al Fine>·<Fine>)는 길잡이 표시로 바꿔 두고 나머지 글자는 지운다 */
   const src=music.replace(/<([^>]*)>/g,(m0,w)=>{const M={};navWords(M,w);return M.ds?' ¶DS ':M.dc?' ¶DC ':M.fine?' ¶FN ':' '})

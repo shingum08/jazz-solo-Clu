@@ -296,7 +296,7 @@ const TOK=['R','H','Q','E','Ur','Uh','T','Tr'];
 const NOTE_TOK={Q:1,Qs:1,E:1,Ur:1,Uh:1,T:1};
 const ALLOWED=[null,{Q:1,H:1,R:1},{Q:1,Qs:1,H:1,R:1,E:1,Ur:1,Uh:1},{Q:1,Qs:1,H:1,R:1,E:1,Ur:1,Uh:1,T:1}];
 /* v0.33 Qs = 정박 8분 + 8분 쉼(짧게 끊는 음). 앞이 끊긴 토큰 뒤에는 이어짐(H·Uh)이 올 수 없다 */
-const CUT_TOK={R:1,T:1,Qs:1};
+const CUT_TOK={R:1,T:1,Qs:1,T2c:1};   /* v0.61 T2c = 2박 셋잇단의 둘째 박 자리 */
 
 function sampleQuart(rng,q,lo,hi){ /* 사분위 [Q1,Q2,Q3] → 대략적 분포 샘플 */
   const r=rng();let v;
@@ -341,6 +341,13 @@ const RHY_MIX={trip:0.6,tripPair:0.2,tripRun:0.45,eighth:1.25,line:1.6};
    gapShortP: 프레이즈 사이를 1박 숨으로 줄일 확률 · gapMax: 프레이즈 사이 쉼 상한(박) — longGapP 확률로만 그보다 길게 · pullHalf: 셋째 박에서 시작하는 프레이즈를 둘째 박(또는 넷째 박 픽업)으로 당길 확률
    inR: 프레이즈 안 쉼표(4분 쉼) 가중 · mixPh: 「8분·4분 섞기」 프레이즈 확률 · straight: 셋잇단이 어색한 곧은 8분 계열(셋잇단 장치·릭 제외) */
 const REST_MIX={gapShortP:0.45,gapMax:2.5,longGapP:0.15,pullHalf:0.7,inR:0.15,mixPh:0.3,straight:['bossa','latin','funk']};
+/* v0.61 난이도 5단계(사용자 요청 11/13 — 3단계부터 중급) — 앱 단계(opts.level 1~5) → 엔진 난이도(diff 1~3) + 세부 조정.
+   E: 8분 가중 배수 · hl: 하이라이트 장치 확률 배수 · licks/ust: false면 끔 · trip: 8분 셋잇단 가중 배수 · t2: 프레이즈마다 2박 셋잇단(4분 셋잇단)을 넣을 확률.
+   opts.level이 없으면 diff 1·2·3 → 단계 1·3·5(v0.60까지의 1·2·3과 같은 느낌) */
+const LEVELS={1:{diff:1,label:'입문'},2:{diff:2,label:'초급',E:0.6,hl:0,licks:false,ust:false,t2:0},3:{diff:2,label:'중급',t2:0.12},
+  4:{diff:3,label:'중상급',trip:0.5,t2:0.16},5:{diff:3,label:'심화',t2:0.18}};
+const LEVEL_OF_DIFF={1:1,2:3,3:5};
+const TRIP_MAX_RUN=2;   /* v0.61 셋잇단 묶음(8분 셋잇단 한 박 · 2박 셋잇단)은 연달아 2개까지(사용자 규칙) */
 const RELAX={p:0.5,density:0.58,songBonus:0.35,salt:0x5f3759df};
 const BLUES_STD=0.04;   /* v0.48 블루스 형식이 아닌 스윙·발라드 곡에서 프레이즈가 블루스 스케일일 확률(예전 0.14·0.06) */
 const HL_LABEL={line:'8분 라인',perc:'리듬 반복(한 음)',pivot:'피벗 패턴',hemiola:'3음 시퀀스(헤미올라)',trip:'셋잇단 런',ust:'어퍼 스트럭처'};
@@ -399,7 +406,8 @@ function sectionIndex(t,phrase,bpb){return Math.floor(t/(phrase*bpb*6))}
 /* ── 메인 생성기 ── */
 function generateSolo(progId,keyPc,diff,seed,inst,opts){
   opts=opts||{};
-  const useLicks=opts.useLicks!==false;
+  const LV=LEVELS[opts.level]&&LEVELS[opts.level].diff===diff?LEVELS[opts.level]:LEVELS[LEVEL_OF_DIFF[diff]]||{};   /* v0.61 단계 세부 조정 */
+  const useLicks=opts.useLicks!==false&&LV.licks!==false;
   const useGroups=opts.groups!==false;
   inst=inst||'free';
   const SD=(typeof STYLE_DATA!=='undefined')?STYLE_DATA:null;
@@ -603,8 +611,8 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     /* v0.35 하이라이트 장치 — 4마디 블록마다 최대 하나. line(8분 라인)·perc(한 음 리듬 반복)·pivot(피벗 패턴)·hemiola(3음 시퀀스)·trip(셋잇단 런) */
     {
       const blk=Math.floor(ph.s/(BPB*4));
-      if(R2&&!recall&&!ph.song&&!ph.blues&&!relaxAt(ph.s)&&need>=6&&diff>=2&&topic==='auto'&&!hlBlocks.has(blk)&&rng()<(diff===2?0.5:0.6)){
-        const pool=[{v:'line',w:RHY_MIX.line*eighthTilt},{v:'perc',w:0.8},{v:'pivot',w:0.9},{v:'hemiola',w:0.9},{v:'ust',w:opts.ust===false?0:UST_W}];
+      if(R2&&!recall&&!ph.song&&!ph.blues&&!relaxAt(ph.s)&&need>=6&&diff>=2&&topic==='auto'&&!hlBlocks.has(blk)&&rng()<(diff===2?0.5:0.6)*(LV.hl===undefined?1:LV.hl)){
+        const pool=[{v:'line',w:RHY_MIX.line*eighthTilt},{v:'perc',w:0.8},{v:'pivot',w:0.9},{v:'hemiola',w:0.9},{v:'ust',w:opts.ust===false||LV.ust===false?0:UST_W}];
         if(diff>=3&&!REST_MIX.straight.includes(feel))pool.push({v:'trip',w:RHY_MIX.tripRun*tripTilt});   /* v0.60 곧은 8분 계열(보사·라틴·펑크)은 셋잇단 런 없음 */
         const kind=pickW(rng,pool),s0=ph.s+1;   /* 첫 박은 실측 분포(엇박 진입이 많다)에 맡긴다 */
         let len=0,cells=0;
@@ -613,7 +621,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         else if(kind==='pivot')len=4;
         else if(kind==='ust')len=BPB;
         else if(kind==='hemiola'){cells=Math.min(4,Math.floor(((ph.e-s0)*2-1)/3));len=Math.ceil((cells*3+1)/2)}
-        else if(kind==='trip')len=rng()<0.5?2:3;
+        else if(kind==='trip')len=Math.min(TRIP_MAX_RUN,rng()<0.5?2:3);   /* v0.61 연달아 2묶음까지 */
         if(len>0&&s0+len<=ph.e&&(kind!=='hemiola'||cells>=2)){
           hl={kind,s:s0,e:s0+len,cells,id:++hlSeq,chromatic:kind==='hemiola'&&diff>=3&&rng()<0.25,dir:rng()<0.65?1:-1};
           hlBlocks.add(blk);
@@ -652,8 +660,9 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         if(!al[k2])continue;
         let w=row[k2];
         const density=densityAt(bt);
-        if(k2==='T')w*=FP.T*density*density*RHY_MIX.trip;else if(k2==='E')w*=FP.E*density*density*RHY_MIX.eighth;else if(k2==='Q'||k2==='Qs'||k2==='H')w*=FP.QH/density;
+        if(k2==='T')w*=FP.T*density*density*RHY_MIX.trip*(LV.trip||1);else if(k2==='E')w*=FP.E*density*density*RHY_MIX.eighth*(LV.E||1);else if(k2==='Q'||k2==='Qs'||k2==='H')w*=FP.QH/density;
         if(isFirst&&!NOTE_TOK[k2])continue;
+        if(k2==='T'&&prev==='T'&&prev2==='T')continue;   /* v0.61 셋잇단 3연속 금지 */
         if(isFirst&&k2==='Uh')continue;
         if(!isFirst&&k2==='R')w*=REST_MIX.inR;
         if(mixQ&&!(hl&&bt>=hl.s&&bt<hl.e)){if(k2==='Q'||k2==='Qs')w*=prev==='E'&&prev2==='E'?3:prev==='E'?1.6:0.8;else if(k2==='E')w*=prev==='Q'||prev==='Qs'?2:1;else if(k2==='T')w*=0.3;else if(k2==='H'||k2==='R')w*=0.4}
@@ -674,11 +683,20 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       k=c.length?pickW(rng,c):'Q';
       }
       /* v0.34 셋잇단 쌍 — 셋잇단 뒤에 한 박 더 셋잇단(같은 음형 반복 → 6연음 느낌) */
-      if(k==='T'&&R2&&diff>=3&&!REST_MIX.straight.includes(feel)&&bt+1<ph.e&&!(bt+1>=lineS&&bt+1<lineE)&&rng()<RHY_MIX.tripPair*tripTilt)tripNext=true;
+      if(k==='T'&&prev!=='T'&&R2&&diff>=3&&!REST_MIX.straight.includes(feel)&&bt+1<ph.e&&!(bt+1>=lineS&&bt+1<lineE)&&rng()<RHY_MIX.tripPair*tripTilt)tripNext=true;
       toks.push(k);prev2=prev;prev=k;
     }
     if(!motif&&ph.e-ph.s>=3)motif={toks:toks.slice(0,Math.min(6,toks.length)),pi};
     if(recall){ph.recall=true;tag(Math.floor(ph.s/BPB),'모티프 회상(리듬)')}
+    /* v0.61 2박 셋잇단(4분 셋잇단 — 두 박을 셋으로) — 1·3박에서 시작, 프레이즈 첫 박·끝 박·장치 구간·쉼 자리는 피한다 */
+    const inHl=bt=>!!(hl&&bt>=hl.s&&bt<hl.e);
+    if((LV.t2||0)>0&&BPB===4&&!ph.song&&!ph.blues&&!recall&&toks.length>=4&&rng()<LV.t2){
+      const cand=[];for(let j=1;j+2<toks.length;j++){const bt=ph.s+j;if(bt%2!==0||inHl(bt)||inHl(bt+1))continue;if(!NOTE_TOK[toks[j]]||toks[j]==='T'||toks[j]==='Ur'||toks[j+1]==='T'||toks[j+1]==='R')continue;cand.push(j)}
+      if(cand.length){const j=cand[Math.floor(rng()*cand.length)];toks[j]='T2';toks[j+1]='T2c';tag(Math.floor((ph.s+j)/BPB),'2박 셋잇단')}
+    }
+    /* v0.61 셋잇단 묶음은 연달아 TRIP_MAX_RUN개까지 — 넘치면 장치 밖 것을 8분(또는 4분 둘)로 */
+    {let run=[];const flush=()=>{if(run.length>TRIP_MAX_RUN){let keep=run.filter(j=>inHl(ph.s+j)).length;for(const j of run){if(inHl(ph.s+j))continue;if(keep<TRIP_MAX_RUN){keep++;continue}if(toks[j]==='T')toks[j]='E';else{toks[j]='Q';toks[j+1]='Q'}}}run=[]};
+     for(let j=0;j<toks.length;j++){const k=toks[j];if(k==='T'||k==='T2')run.push(j);else if(k!=='T2c')flush()}flush()}
     /* 토큰 → 음 이벤트 */
     const phEv=[];
     toks.forEach((k,j)=>{
@@ -691,6 +709,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       else if(k==='Uh'){if(lastEv&&lastEv.t+lastEv.d===t&&!lastEv.trip)lastEv.d+=3;phEv.push({t:t+3,d:3})}
       else if(k==='T'){const rp=tripRep.has(ph.s+j);phEv.push({t,d:2,trip:1,rep:rp?1:0,repK:0});phEv.push({t:t+2,d:2,trip:1,rep:rp?1:0,repK:1});phEv.push({t:t+4,d:2,trip:1,rep:rp?1:0,repK:2})}
       else if(k==='H'){if(lastEv&&lastEv.t+lastEv.d===t&&!lastEv.trip)lastEv.d+=6}
+      else if(k==='T2'){phEv.push({t,d:4,trip:1,t2:1,repK:0});phEv.push({t:t+4,d:4,trip:1,t2:1,repK:1});phEv.push({t:t+8,d:4,trip:1,t2:1,repK:2})}   /* v0.61 2박 셋잇단 */
     });
     if(!phEv.length)return;
     if(hl){let k=0;phEv.forEach(ev=>{if(ev.t>=hl.s*6&&ev.t<hl.e*6){ev.hl=hl;ev.hlK=k++;if(hl.chromatic)ev.hlx=true}})}
@@ -763,7 +782,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         for(let q=pool.length-1;q>=0;q--)if(bad(pool[q]))pool.splice(q,1);if(!pool.length)continue}
       if(res){
         tgt=events.find(e=>e.t===t1);
-        if(tgt){if(tgt.ph!==P||tgt.song||tgt.blu||tgt.hl||tgt.quote)continue}
+        if(tgt){if(tgt.ph!==P||tgt.song||tgt.blu||tgt.hl||tgt.quote||tgt.trip)continue}   /* v0.61 셋잇단 음에는 착지하지 않는다 */
         else{
           const nxE=events.filter(e=>e.t>t1).reduce((a,e)=>a===null||e.t<a.t?e:a,null);
           const room=(nxE?nxE.t:TOT)-t1;if(room<6)continue;
