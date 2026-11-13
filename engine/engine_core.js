@@ -337,6 +337,10 @@ const UST_W=1.6;   /* v0.48 하이라이트 장치 중 어퍼 스트럭처를 �
 const RHY_MIX={trip:0.6,tripPair:0.2,tripRun:0.45,eighth:1.25,line:1.6};
 /* v0.59 쉬어 가는 섹션 — 3코러스 이상일 때 둘째~끝에서 둘째 코러스에 확률 p로 한 섹션(A 우선)을 첫 코러스 A처럼 성기게.
    density: 그 섹션의 리듬 밀도 · songBonus: 노래 프레이즈로 고를 가산점 · salt: 본 난수열과 따로 쓰는 난수 씨앗 */
+/* v0.60 쉼·리듬 섞기(사용자 피드백 11/13: 2박 쉼이 많아 하다 말다 하는 느낌, 8분·4분이 섞이는 구간 필요)
+   gapShortP: 프레이즈 사이를 1박 숨으로 줄일 확률 · gapMax: 프레이즈 사이 쉼 상한(박) — longGapP 확률로만 그보다 길게 · pullHalf: 셋째 박에서 시작하는 프레이즈를 둘째 박(또는 넷째 박 픽업)으로 당길 확률
+   inR: 프레이즈 안 쉼표(4분 쉼) 가중 · mixPh: 「8분·4분 섞기」 프레이즈 확률 · straight: 셋잇단이 어색한 곧은 8분 계열(셋잇단 장치·릭 제외) */
+const REST_MIX={gapShortP:0.45,gapMax:2.5,longGapP:0.15,pullHalf:0.7,inR:0.15,mixPh:0.3,straight:['bossa','latin','funk']};
 const RELAX={p:0.5,density:0.58,songBonus:0.35,salt:0x5f3759df};
 const BLUES_STD=0.04;   /* v0.48 블루스 형식이 아닌 스윙·발라드 곡에서 프레이즈가 블루스 스케일일 확률(예전 0.14·0.06) */
 const HL_LABEL={line:'8분 라인',perc:'리듬 반복(한 음)',pivot:'피벗 패턴',hemiola:'3음 시퀀스(헤미올라)',trip:'셋잇단 런',ust:'어퍼 스트럭처'};
@@ -495,12 +499,15 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     if(inst==='wind')g=Math.max(g,1.2);
     const slow=feel==='ballad'||feel==='bossa'||feel==='latin';
     g=Math.min(g,slow?BPB-1:BPB+1);   /* 프레이즈 사이 쉼 — 느린 계열(발라드·보사·라틴)은 더 촘촘히 */
+    {const r=rng();if(r<REST_MIX.gapShortP)g=Math.min(g,1.4);else if(r<1-REST_MIX.longGapP)g=Math.min(g,REST_MIX.gapMax)}   /* v0.60 짧은 숨(1박)을 자주, 긴 쉼은 가끔만 */
     beat=end+1+Math.round(g);
     /* 곡 첫 박 근처로 새 섹션을 시작하도록 — 섹션 경계 1박 전(픽업)이나 경계에서 */
     const nb2=Math.ceil(beat/secBeats)*secBeats;
     if(nb2-beat<=2&&nb2-beat>0&&rng()<0.6)beat=nb2-(diff>=2&&rng()<0.5?1:0);
     /* v0.43 마디 첫 박에서 시작할 프레이즈를 앞 마디 4박(엇박 진입)으로 당겨 시작 */
     else if(diff>=2&&beat%BPB===0&&beat-1>end+1&&rng()<ANTIC.pull)beat-=1;
+    /* v0.60 마디 앞 2박을 통째로 쉬고 셋째 박에서 시작하는 일을 줄인다 — 둘째 박으로 당기거나(쉼이 1박 넘게 남을 때) 넷째 박 픽업으로 */
+    if(diff>=2&&BPB===4&&beat%BPB===2&&rng()<REST_MIX.pullHalf)beat=beat-1>end+1?beat-1:beat+1;   /* 난이도 1은 짝수 박 시작 유지 */
   }
   /* 마지막 프레이즈는 마지막 마디 1박에서 길게 끝나도록 */
   if(phrases.length){
@@ -598,7 +605,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       const blk=Math.floor(ph.s/(BPB*4));
       if(R2&&!recall&&!ph.song&&!ph.blues&&!relaxAt(ph.s)&&need>=6&&diff>=2&&topic==='auto'&&!hlBlocks.has(blk)&&rng()<(diff===2?0.5:0.6)){
         const pool=[{v:'line',w:RHY_MIX.line*eighthTilt},{v:'perc',w:0.8},{v:'pivot',w:0.9},{v:'hemiola',w:0.9},{v:'ust',w:opts.ust===false?0:UST_W}];
-        if(diff>=3)pool.push({v:'trip',w:RHY_MIX.tripRun*tripTilt});
+        if(diff>=3&&!REST_MIX.straight.includes(feel))pool.push({v:'trip',w:RHY_MIX.tripRun*tripTilt});   /* v0.60 곧은 8분 계열(보사·라틴·펑크)은 셋잇단 런 없음 */
         const kind=pickW(rng,pool),s0=ph.s+1;   /* 첫 박은 실측 분포(엇박 진입이 많다)에 맡긴다 */
         let len=0,cells=0;
         if(kind==='line')len=need>=10&&rng()<0.6?BPB*2:BPB;
@@ -615,6 +622,9 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         }
       }
     }
+    /* v0.60 「8분·4분 섞기」 — 8분 두 박 뒤엔 4분, 4분 뒤엔 8분이 잘 오게(스윙의 기본 말투). 셋잇단·긴 음·쉼은 줄인다 */
+    const mixQ=!tpl&&!recall&&!ph.song&&!ph.blues&&diff>=2&&topic==='auto'&&need>=4&&rng()<REST_MIX.mixPh;
+    if(mixQ)tag(Math.floor(ph.s/BPB),'8분·4분 섞기');
     let prev='R',prev2='R',tripNext=false;
     for(let bt=ph.s;bt<=ph.e&&!ph.song;bt++){
       const bp=(bt%BPB)+1,isFirst=bt===ph.s,isLast=bt===ph.e;
@@ -645,7 +655,8 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         if(k2==='T')w*=FP.T*density*density*RHY_MIX.trip;else if(k2==='E')w*=FP.E*density*density*RHY_MIX.eighth;else if(k2==='Q'||k2==='Qs'||k2==='H')w*=FP.QH/density;
         if(isFirst&&!NOTE_TOK[k2])continue;
         if(isFirst&&k2==='Uh')continue;
-        if(!isFirst&&k2==='R')w*=0.25;
+        if(!isFirst&&k2==='R')w*=REST_MIX.inR;
+        if(mixQ&&!(hl&&bt>=hl.s&&bt<hl.e)){if(k2==='Q'||k2==='Qs')w*=prev==='E'&&prev2==='E'?3:prev==='E'?1.6:0.8;else if(k2==='E')w*=prev==='Q'||prev==='Qs'?2:1;else if(k2==='T')w*=0.3;else if(k2==='H'||k2==='R')w*=0.4}
         if(isLast&&!(k2==='Q'||k2==='Qs'||k2==='E'||k2==='Uh'||(k2==='Ur'&&diff>=2)))continue;
         if((k2==='H'||k2==='Uh')&&CUT_TOK[prev])continue;
         if(diff===2&&k2==='E')w*=0.8;
@@ -663,7 +674,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       k=c.length?pickW(rng,c):'Q';
       }
       /* v0.34 셋잇단 쌍 — 셋잇단 뒤에 한 박 더 셋잇단(같은 음형 반복 → 6연음 느낌) */
-      if(k==='T'&&R2&&diff>=3&&bt+1<ph.e&&!(bt+1>=lineS&&bt+1<lineE)&&rng()<RHY_MIX.tripPair*tripTilt)tripNext=true;
+      if(k==='T'&&R2&&diff>=3&&!REST_MIX.straight.includes(feel)&&bt+1<ph.e&&!(bt+1>=lineS&&bt+1<lineE)&&rng()<RHY_MIX.tripPair*tripTilt)tripNext=true;
       toks.push(k);prev2=prev;prev=k;
     }
     if(!motif&&ph.e-ph.s>=3)motif={toks:toks.slice(0,Math.min(6,toks.length)),pi};
@@ -735,7 +746,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       if(segAt(t1-1)!==s0||segs[s0].t0!==t0)continue;
       const sg=segs[s0],nxI=b<NB-1?segAt(t1):-1,nx=nxI>=0?segs[nxI]:null;
       const res=!!(nx&&nx.t0===t1&&mod12(nx.root-sg.root)===5);   /* Ⅴ→Ⅰ 자리면 해결 릭, 아니면 v0.49 코드 릭 */
-      const pool=CURATED_LICKS.filter(L=>!(L.minDiff&&diff<L.minDiff)&&L.cls.includes(sg.cls)&&
+      const pool=CURATED_LICKS.filter(L=>!(L.minDiff&&diff<L.minDiff)&&L.cls.includes(sg.cls)&&!(REST_MIX.straight.includes(feel)&&L.n.some(x=>x[1]===2))&&(!L.nx||res)&&
         (res?(L.to&&L.to.includes(nx.cls==='domalt'?'dom':nx.cls)&&L.tr===5):
           (!L.to&&L.n.every(x=>sg.scale.includes(mod12(x[2]))||(sg.ct||[]).includes(mod12(x[2]))))));   /* 코드 릭은 그 코드 스케일 안 음만(예: 6음은 도리안 마이너에서만) */
       if(!pool.length)continue;
@@ -746,6 +757,10 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       if(!events.some(e=>e.ph===P&&e.t<t0))continue;   /* 프레이즈가 이 마디 앞에서 이미 시작돼 있어야(첫 음 표시 유지) */
       /* 착지음: 다음 마디 첫 박에 같은 프레이즈 음이 있으면 그 음, 없으면(프레이즈가 여기서 끝나면) 새로 만든다 */
       let tgt=null,newT=null;
+      /* v0.60 착지 마디로 이어지는 음(L.nx) — 착지음 뒤 그 자리에 같은 프레이즈 음만 있거나 비어 있어야 */
+      const nxEnd=L0=>L0.nx?t1+Math.max(...L0.nx.map(x=>x[0]+x[1])):t1;
+      if(res&&pool.some(L0=>L0.nx)){const bad=L0=>L0.nx&&(t1+TPB>TOT||events.some(e=>e.t>t1&&e.t<nxEnd(L0)&&e.ph!==P)||events.some(e=>e.t<nxEnd(L0)&&e.t+e.d>nxEnd(L0)&&e.ph!==P));
+        for(let q=pool.length-1;q>=0;q--)if(bad(pool[q]))pool.splice(q,1);if(!pool.length)continue}
       if(res){
         tgt=events.find(e=>e.t===t1);
         if(tgt){if(tgt.ph!==P||tgt.song||tgt.blu||tgt.hl||tgt.quote)continue}
@@ -760,13 +775,16 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       }
       if(perCh[0]>=LICK_MAX_PER_CHORUS)continue;
       if(rng()>=(res?rate:rateC))continue;
-      const L=pool[Math.floor(rng()*pool.length)];
+      const L=pickW(rng,pool.map(L0=>({v:L0,w:L0.w||1})));   /* v0.60 릭마다 무게(w) — 없으면 1 */
       const wasLast=inBar.some(e=>e.last);
       for(let i=events.length-1;i>=0;i--)if(events[i].t>=t0&&events[i].t<t1)events.splice(i,1);
       const id=lickPlan.length;
       L.n.forEach(([dt,d],k)=>events.push({t:t0+dt,d,ph:P,strong:(t0+dt)%6===0,trip:d===2?1:undefined,first:false,last:!res&&wasLast&&k===L.n.length-1,midi:null,lick:id,lickK:k}));
       if(newT){events.push(newT);tgt=newT}
       if(tgt)tgt.lickT=id;
+      if(L.nx&&tgt){const ne=nxEnd(L);for(let i=events.length-1;i>=0;i--)if(events[i]!==tgt&&events[i].t>t1&&events[i].t<ne)events.splice(i,1);
+        tgt.d=L.nx[0][0];const nxLast=!events.some(e=>e.ph===P&&e.t>=ne);
+        L.nx.forEach(([dt,d],k)=>events.push({t:t1+dt,d,ph:P,strong:(t1+dt)%6===0,first:false,last:nxLast&&k===L.nx.length-1,midi:null,lickN:id,lickNK:k}));tgt.last=false}
       lickPlan.push({L,bar:b,root:sg.root});perCh[0]++;
     }
     if(lickPlan.length){events.sort((a,b)=>a.t-b.t);for(let i=0;i<events.length-1;i++)if(events[i].t+events[i].d>events[i+1].t)events[i].d=Math.max(1,events[i+1].t-events[i].t)}
@@ -1137,17 +1155,20 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     const span=[];for(let k=i;k<events.length&&events[k].lick===e.lick;k++)span.push(k);
     const noT=P.L.t===null||P.L.t===undefined;   /* v0.49 코드 릭 — 착지음 없음 */
     const ti=noT?-1:events.findIndex(x=>x.lickT===e.lick);
-    const ok=span.length===P.L.n.length&&(noT||ti>span[span.length-1]);
+    const nxI=P.L.nx?events.map((x,k)=>x.lickN===e.lick?k:-1).filter(k=>k>=0):[];   /* v0.60 착지 뒤 이어지는 음 */
+    const ok=span.length===P.L.n.length&&(noT||ti>span[span.length-1])&&(!P.L.nx||(nxI.length===P.L.nx.length&&nxI[0]>ti));
     let best=null;
     if(ok)for(let o=-4;o<=4;o++){
-      const base=mod12(P.root)+60+12*o,ms=P.L.n.map(x=>base+x[2]),mt=noT?null:base+P.L.t;
+      const base=mod12(P.root)+60+12*o,ms=P.L.n.map(x=>base+x[2]),mt=noT?null:base+P.L.t,mx=nxI.map((k,q)=>base+P.L.nx[q][2]);
       if(ms.some((m,q)=>!allow(m,events[span[q]].t))||(!noT&&!allow(mt,events[ti].t)))continue;
+      if(mx.some((m,q)=>!allow(m,events[nxI[q]].t)||Math.abs(m-(q?mx[q-1]:mt))>MAXLEAP))continue;
       if(prevM!==null&&Math.abs(ms[0]-prevM)>MAXLEAP)continue;
       if(ms.some((m,q)=>q>0&&Math.abs(m-ms[q-1])>MAXLEAP)||(!noT&&Math.abs(mt-ms[ms.length-1])>MAXLEAP))continue;
       const sc=Math.abs((ms[0]+(noT?ms[ms.length-1]:mt))/2-pitchGoal(e.t))+(prevM===null?0:0.5*Math.abs(ms[0]-prevM));
-      if(!best||sc<best.sc)best={ms,mt,sc};
+      if(!best||sc<best.sc)best={ms,mt,mx,sc};
     }
-    if(!best){span.concat(ti>=0?[ti]:[]).forEach(k=>{delete events[k].lick;delete events[k].lickT});return}
+    if(!best){span.concat(ti>=0?[ti]:[],nxI).forEach(k=>{delete events[k].lick;delete events[k].lickT;delete events[k].lickN});return}
+    nxI.forEach((k,q)=>{forced.set(k,{m:best.mx[q],kind:'lick'});motifLock.add(k);events[k].keep=true});
     span.forEach((k,q)=>{forced.set(k,{m:best.ms[q],kind:'lick'});motifLock.add(k);events[k].keep=true});
     if(!noT){forced.set(ti,{m:best.mt,kind:'lick'});motifLock.add(ti);events[ti].keep=true}
     tag(P.bar,'릭: '+P.L.name);stats.licks=(stats.licks||0)+1;lickUse[P.L.id]=(lickUse[P.L.id]||0)+1;
