@@ -64,7 +64,7 @@ Worker 주소(`https://….workers.dev`)는 비밀이 아니라서 개발자에�
 6. 개발자가 `clu-feedback` 저장소를 읽을 수 있게, Claude 세션에 이 저장소를 추가해 달라고 말해 주세요.
 
 ## 6. 앱에 주소 넣기
-1. Worker 화면 위쪽에 보이는 주소(`https://clu-feedback.<계정이름>.workers.dev`)를 개발자에게 알려 줍니다.
+1. Worker 화면 위쪽에 보이는 주소(`https://clu-feedbacks.shingum08.workers.dev` — 2026-11-13 만든 이름)를 개발자에게 알려 줍니다.
 2. 개발자가 그 주소를 `server/feedback-worker/ENDPOINT`에 넣고 웹 테스트판을 다시 빌드합니다.
 3. 새 zip을 Cloudflare Pages에 올리면 끝입니다.
 

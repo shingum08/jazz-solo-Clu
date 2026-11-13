@@ -5425,7 +5425,7 @@ function selBars(){return [...(cur.barSel||[])].sort((a,b)=>a-b)}
 const FB_KEY='clu.barfb.v1',FB_BATCH=100,FB_MAX=3000;
 /* v0.53 자동 보내기 — 수신 주소(Cloudflare Worker)가 빌드에 들어 있으면 👍·👎를 누르는 즉시 익명으로 보낸다(못 보내면 다음에 다시).
    cid = 이 기기의 무작위 번호(이름·연락처 아님). 「⚙ 설정 → 저장·내보내기」에서 끌 수 있다. 주소가 없으면 파일 내보내기 방식 */
-const FB_ENDPOINT=/*__FB_ENDPOINT__*/'';
+const FB_ENDPOINT=/*__FB_ENDPOINT__*/'https://clu-feedbacks.shingum08.workers.dev';
 const FB_SEND_KEY='clu.fbsend.v1',FB_CID_KEY='clu.cid.v1';
 function fbAuto(){if(!FB_ENDPOINT)return false;try{return localStorage.getItem(FB_SEND_KEY)!=='0'}catch(e){return true}}
 function fbCid(){try{let c=localStorage.getItem(FB_CID_KEY);if(!c){c=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12));localStorage.setItem(FB_CID_KEY,c)}return c}catch(e){return cur._cid||(cur._cid='t'+Date.now().toString(36)+'-tmp')}}
