@@ -74,7 +74,7 @@ Worker 주소(`https://….workers.dev`)는 비밀이 아니라서 개발자에�
 동작 확인: 브라우저에서 `https://<Worker 주소>/v1/health`를 열면 `{"ok":true,"total":…}`가 보입니다.
 
 ## 허용 주소
-기본으로는 `https://clu-lab-0412.pages.dev`(미리보기 하위 주소 포함)와 `https://shingum08.github.io`에서 오는 요청만 받습니다.
+기본으로는 `https://clu-lab-0412.pages.dev`(미리보기 하위 주소 포함), `https://shingum08.github.io`, `https://ezimprovjazz.com`(www 포함)에서 오는 요청만 받습니다.
 주소가 바뀌면 Worker 변수 `ALLOW_ORIGINS`(Text, 쉼표 구분)에 새 주소를 넣으세요.
 
 ## 무엇이 저장되나

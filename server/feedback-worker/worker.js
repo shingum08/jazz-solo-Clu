@@ -9,7 +9,7 @@
      GH_REPO        일반 — 예) shingum08/clu-feedback
      GH_BRANCH      일반 — 기본 main
      BATCH          일반 — 몇 개 모이면 올릴지, 기본 100
-     ALLOW_ORIGINS  일반 — 쉼표로 구분한 허용 주소. 기본 https://clu-lab-0412.pages.dev(그 미리보기 하위 주소 포함), https://shingum08.github.io
+     ALLOW_ORIGINS  일반 — 쉼표로 구분한 허용 주소. 기본 https://clu-lab-0412.pages.dev(그 미리보기 하위 주소 포함), https://shingum08.github.io, https://ezimprovjazz.com(www 포함)
 
    경로
      POST /v1/feedback   {cid, v, records:[…]}  → {ok, saved}
@@ -19,7 +19,7 @@
    개인정보: IP는 저장하지 않는다. 남용 막기용으로 「IP+날짜+SALT」 해시만(날마다 바뀜) 남긴다. cid = 앱이 기기마다 만든 무작위 값 ── */
 
 const LIMITS={bodyBytes:96*1024,perRequest:60,recordBytes:6000,notes:96,tags:24,str:120,perIp10min:400};
-const DEF_ORIGINS=['https://clu-lab-0412.pages.dev','https://shingum08.github.io'];
+const DEF_ORIGINS=['https://clu-lab-0412.pages.dev','https://shingum08.github.io','https://ezimprovjazz.com'];
 
 export default {
   async fetch(req,env,ctx){
