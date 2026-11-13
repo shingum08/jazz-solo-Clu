@@ -34,7 +34,7 @@ out=out.replace(marker, '<script id="musicxml">\n'+xml+'\n</script>', 1)
 # v0.41.1 공개 빌드(GitHub에 올라가는 index.html)는 앱 기능(설치·오프라인·업데이트)을 끈다.
 #   python3 tools/build.py --app     → dist/app/ 에 테스트용 PWA 빌드(설치 가능) + dist/clu-app-v버전.zip
 #   python3 tools/build.py --android → dist/android/CluJazz/ 안드로이드 프로젝트(앱 안에 index.html) + dist/clu-android-v버전.zip
-#   python3 tools/build.py --web     → dist/web/ 웹 테스트 빌드(공통 형식만 · noindex) + dist/clu-web-v버전.zip
+#   python3 tools/build.py --web     → dist/web/ 웹 빌드(홈 / + 앱 /app/ · 공통 형식만 · noindex) + dist/ezimprovjazz-web-v버전.zip
 #   (dist/는 커밋하지 않음 — 직접 전달)
 import sys, shutil, zipfile
 ver=re.search(r'<title>[^<]*?v(\d+\.\d+\.\d+)',tpl).group(1)
@@ -125,11 +125,34 @@ if '--web' in sys.argv:
     rep('</head>','<meta name="robots" content="noindex,nofollow">\n<style>#btnFeedback{display:none!important}</style>\n</head>')
     for bad in ['리얼북','261곡','대조해 옮겼','정오표']:
         if bad in web: raise RuntimeError('웹 빌드에 남은 문구: '+bad)
-    wd=os.path.join(root,'dist','web'); shutil.rmtree(wd,ignore_errors=True); os.makedirs(wd)
-    open(os.path.join(wd,'index.html'),'w',encoding='utf-8').write(web)
+    # v0.56 홈페이지 + 앱 나눔 — / 는 홈(app/landing/index.html: 소개·로그인·「프로그램 실행」), /app/ 은 앱
+    rep('<a class="brandlink" id="brandLink">','<a class="brandlink" id="brandLink" href="../" title="EzImprovJazz 홈">')
+    rep('</head>','<link rel="icon" type="image/svg+xml" href="../favicon.svg">\n</head>')
+    wd=os.path.join(root,'dist','web'); shutil.rmtree(wd,ignore_errors=True); os.makedirs(os.path.join(wd,'app')); os.makedirs(os.path.join(wd,'icons'))
+    open(os.path.join(wd,'app','index.html'),'w',encoding='utf-8').write(web)
+    ld=os.path.join(root,'app','landing')
+    land=open(os.path.join(ld,'index.html'),encoding='utf-8').read()
+    mark=re.sub(r'\s*<!--.*?-->','',open(os.path.join(root,'app','brand','mark.svg'),encoding='utf-8').read())
+    mark=re.sub(r'\n\s*','',mark).strip().replace('<svg ','<svg aria-hidden="true" ')
+    demo=json.load(open(os.path.join(ld,'demo.json'),encoding='utf-8'))['solos']
+    def lrep(old,new,n=1):
+        global land
+        if land.count(old)!=n: raise RuntimeError('홈페이지 마커를 찾지 못했습니다 — '+old)
+        land=land.replace(old,new)
+    lrep('<!--__MARK__-->',mark,3)
+    sv=lambda d:'<div class="sv sv-w">'+d['svg']+'</div><div class="sv sv-n">'+d['svgN']+'</div>'
+    lrep('<div id="sheetSvg"><!--__DEMO_FIRST__-->','<div id="sheetSvg" data-diff="'+str(demo[0]['diff'])+'">'+sv(demo[0]))
+    lrep('<!--__DEMO_REST__-->',''.join('<template class="demo" data-diff="'+str(d['diff'])+'">'+sv(d)+'</template>' for d in demo[1:]))
+    lrep('/*__SB_CONFIG__*/null','/*__SB_CONFIG__*/'+(json.dumps(sb_cfg) if sb_cfg else 'null'))
+    lrep('</head>','<meta name="robots" content="noindex,nofollow">\n</head>')   # 공개 출시(개인정보처리방침·약관 게시) 전까지
+    open(os.path.join(wd,'index.html'),'w',encoding='utf-8').write(land)
+    shutil.copyfile(os.path.join(root,'app','pwa','icon.svg'),os.path.join(wd,'favicon.svg'))
+    for f in ['apple-touch-icon.png','icon-192.png']: shutil.copyfile(os.path.join(root,'app','pwa','icons',f),os.path.join(wd,'icons',f))
+    shutil.copyfile(os.path.join(ld,'og.jpg'),os.path.join(wd,'og.jpg'))
     open(os.path.join(wd,'_headers'),'w',encoding='utf-8').write('/*\n  X-Robots-Tag: noindex, nofollow\n')
     open(os.path.join(wd,'robots.txt'),'w',encoding='utf-8').write('User-agent: *\nDisallow: /\n')
-    zp=os.path.join(root,'dist','clu-web-v'+ver+'.zip')
+    zp=os.path.join(root,'dist','ezimprovjazz-web-v'+ver+'.zip')
     with zipfile.ZipFile(zp,'w',zipfile.ZIP_DEFLATED) as z:
-        for f in sorted(os.listdir(wd)): z.write(os.path.join(wd,f),f)
-    print('web build →',wd,'·',zp,os.path.getsize(zp),'bytes')
+        for d,_,fs in os.walk(wd):
+            for f in sorted(fs): full=os.path.join(d,f); z.write(full,os.path.relpath(full,wd))
+    print('web build →',wd,'(홈 index.html + 앱 app/index.html) ·',zp,os.path.getsize(zp),'bytes')

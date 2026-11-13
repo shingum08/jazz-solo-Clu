@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- EzImprovJazz 홈페이지(v0.56) — python3 tools/build.py --web 이 dist/web/index.html 로 만든다. 앱은 /app/
+     · 마커: __MARK__(심볼 SVG) · __DEMO_FIRST__/__DEMO_REST__(예시 솔로, tools/make_landing_demo.js) · __SB_CONFIG__(공개 키만)
+     · 로그인은 앱과 같은 저장 키(clu.auth.v1)를 쓴다 — 여기서 로그인하면 앱이 그대로 이어받아 동기화한다 -->
+<title>EzImprovJazz — 코드 진행 위에 매번 새로운 재즈 솔로</title>
+<meta name="description" content="재즈 즉흥연주를 연습하는 관악기 연주자를 위한 솔로 악보 생성기. 코드 진행을 고르면 화성에 맞는 연습용 솔로를 만들고 반주와 함께 들려 줍니다.">
+<meta name="theme-color" content="#10161f">
+<meta property="og:type" content="website">
+<meta property="og:title" content="EzImprovJazz — 코드 진행 위에 매번 새로운 재즈 솔로">
+<meta property="og:description" content="코드 진행을 고르면 연습할 솔로 악보를 만들고, 반주와 함께 들려 줘요. 베타 기간 무료.">
+<meta property="og:image" content="https://ezimprovjazz.com/og.jpg">
+<meta property="og:url" content="https://ezimprovjazz.com/">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="prefetch" href="app/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500&family=Gowun+Batang:wght@700&display=swap" rel="stylesheet">
+<style>
+/* ── 색 · 글꼴 ── 밤 연습실(남색) 위에 불 켜진 보면대 한 장(크림 종이). 포인트는 놋쇠색 하나 */
+:root{
+  color-scheme:dark;
+  --night:#10161f;--stand:#161f2c;--line:rgba(243,238,226,.13);
+  --paper:#f3eee2;--paper-edge:#e2d9c4;--ink:#1b2230;
+  --brass:#d1a545;--brass-hi:#e3bc63;--on-brass:#1a1406;
+  --text:#e7e2d5;--fog:#97a3b3;
+  --serif:'Hahmlet','Noto Serif KR','Gowun Batang',serif;
+  --sans:'IBM Plex Sans KR','Noto Sans KR',system-ui,sans-serif;
+  --gut:max(16px,env(safe-area-inset-left));
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--night);color:var(--text);font:400 16px/1.7 var(--sans);word-break:keep-all;overflow-x:hidden}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 var(--gut)}
+h1,h2,h3{font-family:var(--serif);font-weight:700;color:#f6f2e8;letter-spacing:-.015em;margin:0}
+
+/* ── 버튼 ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;border:1px solid transparent;font:500 15px/1 var(--sans);cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-brass{background:var(--brass);color:var(--on-brass)}
+.btn-brass:hover{background:var(--brass-hi)}
+.btn-line{background:transparent;color:var(--text);border-color:var(--line)}
+.btn-line:hover{border-color:rgba(243,238,226,.35)}
+.btn-big{min-height:52px;padding:0 28px;font-size:16.5px}
+.linkbtn{background:none;border:0;padding:0;color:var(--fog);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.linkbtn:hover{color:var(--text)}
+
+/* ── 위쪽 막대 ── */
+.top{position:sticky;top:0;z-index:20;background:rgba(16,22,31,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid transparent;transition:border-color .2s}
+.top.scrolled{border-bottom-color:var(--line)}
+.topin{display:flex;align-items:center;gap:12px;min-height:64px;padding-top:env(safe-area-inset-top)}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:700 21px/1 var(--serif);color:#f6f2e8;letter-spacing:-.01em;margin-right:auto}
+.brand svg{height:26px;width:auto}
+.who{font-size:13.5px;color:var(--fog);max-width:22ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topin .btn{min-height:40px;padding:0 16px;font-size:14.5px}
+
+/* ── 첫 화면 ── */
+.hero{position:relative;padding:56px 0 88px}
+.hero::before{content:"";position:absolute;inset:-64px 0 0;pointer-events:none;
+  background:radial-gradient(60% 55% at 72% 30%,rgba(209,165,69,.13),transparent 70%)}   /* 보면대 등불 */
+.herogrid{position:relative;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);column-gap:56px;row-gap:8px;align-items:start}
+.hero h1{grid-column:1/-1;font-size:clamp(32px,4.6vw,60px);line-height:1.2}
+.hero h1 span{display:block}
+.lead{margin:28px 0 32px;max-width:34em;color:var(--text);font-size:17px}
+.cta{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px}
+.cta small{color:var(--fog);font-size:14px}
+
+/* 보면대 위 악보 한 장 */
+.stand{margin:30px 0 0}
+.paper{position:relative;background:var(--paper);color:var(--ink);border-radius:6px;padding:22px 22px 14px;
+  box-shadow:0 1px 0 var(--paper-edge),0 30px 60px -24px rgba(0,0,0,.65),0 0 0 1px rgba(0,0,0,.04)}
+.ptop{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 2px 6px;font-family:var(--serif)}
+.ptop b{font-size:19px;font-weight:700}
+.ptop span{font-size:13.5px;color:#5c6473}
+.sheet{position:relative}
+.sheet svg{display:block;width:100%;height:auto}
+.sheet svg text{font-family:'Gowun Batang','Noto Serif KR',serif}
+/* 손으로 적어 나가듯 한 줄씩 드러남 — 줄마다 종이색 가림막이 오른쪽으로 걷힌다 */
+.cover{position:absolute;left:0;right:0;background:var(--paper);transform-origin:right center;transform:scaleX(0)}
+.js .cover{transform:scaleX(1)}
+.sheet.write .cover{animation:uncover .9s cubic-bezier(.5,0,.3,1) both}
+/* 넓은 화면은 악보 3줄(.sv-w), 좁은 화면은 4줄(.sv-n) — 가림막도 줄 수에 맞춘다 */
+.sv-n{display:none}
+.cover:nth-child(2){top:0;height:34%}
+.cover:nth-child(3){top:34%;height:33%}
+.cover:nth-child(4){top:67%;height:34%}
+.cover:nth-child(5){display:none}
+.sheet.write .cover:nth-child(3){animation-delay:.75s}
+.sheet.write .cover:nth-child(4){animation-delay:1.5s}
+.sheet.write .cover:nth-child(5){animation-delay:2.25s}
+@keyframes uncover{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.standbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;color:var(--fog);font-size:14px}
+.standbar .btn{min-height:40px;font-size:14.5px}
+.count{font-variant-numeric:tabular-nums}
+
+/* ── 구역 공통 ── */
+.sec{padding:84px 0;border-top:1px solid var(--line)}
+.sec h2{font-size:clamp(26px,3vw,36px);line-height:1.3;max-width:20em}
+.sec .intro{margin:14px 0 0;max-width:38em;color:var(--fog)}
+
+/* 연습 순서 — 네 마디짜리 악보처럼: 마디 번호 · 세로줄 · 끝은 겹세로줄 */
+.bars{list-style:none;margin:44px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.bars li{position:relative;padding:30px 24px 30px 22px;border-left:1px solid rgba(243,238,226,.32)}
+.bars li:last-child{box-shadow:inset -1px 0 0 rgba(243,238,226,.32)}
+.bars li:last-child::after{content:"";position:absolute;top:-1px;bottom:-1px;right:-7px;width:5px;background:rgba(243,238,226,.55)}
+.mno{position:absolute;top:-12px;left:8px;padding:0 6px;background:var(--night);font:italic 500 15px/24px var(--serif);color:var(--brass)}
+.bars h3{font-size:19px;margin:0 0 8px}
+.bars p{margin:0;font-size:15px;color:#c9c4b8}
+
+/* 기능 — 두 단 목록 */
+.feats{margin:44px 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:56px}
+.feat{padding:22px 0;border-top:1px solid var(--line)}
+.feat dt{font:700 18px/1.4 var(--serif);color:#f6f2e8;margin-bottom:6px}
+.feat dd{margin:0;color:#c9c4b8;font-size:15.5px;max-width:34em}
+
+/* 원곡은 담지 않아요 */
+.honest{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;align-items:start}
+.honest .body p{margin:0 0 16px;max-width:36em}
+.honest .body p:last-child{margin:0;color:var(--fog);font-size:14.5px}
+
+/* 요금 */
+.price{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;margin-top:36px;padding:28px 30px;border:1px solid rgba(209,165,69,.45);border-radius:14px;background:rgba(209,165,69,.06)}
+.price b{display:block;font:700 24px/1.3 var(--serif);color:#f6f2e8}
+.price p{margin:6px 0 0;color:var(--fog);max-width:36em}
+
+/* 자주 묻는 질문 */
+.faq{margin-top:36px;max-width:820px}
+.faq details{border-top:1px solid var(--line)}
+.faq details:last-child{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;padding:20px 40px 20px 0;position:relative;font:500 17px/1.5 var(--sans);color:#f1ece0}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";position:absolute;right:8px;top:50%;width:10px;height:10px;border-right:2px solid var(--fog);border-bottom:2px solid var(--fog);transform:translateY(-70%) rotate(45deg);transition:transform .2s}
+.faq details[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+.faq details p{margin:0 0 22px;color:#c9c4b8;max-width:42em}
+
+/* 아래 */
+.foot{padding:44px 0 calc(44px + env(safe-area-inset-bottom));border-top:1px solid var(--line);color:var(--fog);font-size:14px}
+.footin{display:flex;flex-wrap:wrap;gap:16px 40px;justify-content:space-between}
+.foot .brand{font-size:17px;margin:0 0 8px}
+.foot .brand svg{height:20px}
+.foot ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 22px}
+.foot p{margin:4px 0 0}
+
+/* ── 로그인 창 ── */
+dialog.login{width:min(420px,calc(100vw - 32px));padding:0;border:1px solid var(--line);border-radius:16px;background:var(--stand);color:var(--text)}
+dialog.login::backdrop{background:rgba(5,8,12,.66)}
+.lgin{padding:28px 26px 24px}
+.lgin h2{font-size:24px}
+.lgin .why{margin:8px 0 20px;color:var(--fog);font-size:14.5px}
+.fld{display:block;margin-bottom:14px;font-size:14px;color:#cfc9bc}
+.fld input{display:block;width:100%;margin-top:6px;min-height:46px;padding:0 14px;border-radius:10px;border:1px solid rgba(243,238,226,.2);background:var(--night);color:var(--text);font:400 16px var(--sans)}
+.fld input:focus{border-color:var(--brass);outline:none}
+.lgbtns{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.lgbtns .btn{width:100%}
+.lgsub{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:14px;font-size:14px;color:var(--fog)}
+.lgmsg{min-height:1.5em;margin:12px 0 0;font-size:14px;color:var(--brass-hi)}
+.xbtn{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;border:0;background:transparent;color:var(--fog);font-size:20px;cursor:pointer}
+.xbtn:hover{color:var(--text)}
+.lgin hr{border:0;border-top:1px solid var(--line);margin:22px 0 16px}
+.signedin p{margin:0 0 6px}
+
+/* ── 로딩 화면(앱의 #boot 와 같은 모양 — 이어지게) ── */
+.boot{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:var(--night);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.boot.on{opacity:1;visibility:visible}
+.bootin{display:flex;flex-direction:column;align-items:center;gap:14px;color:#f6f2e8}
+.bootin svg{width:76px;height:auto}
+.bootin svg ellipse,.bootin svg rect,.bootin svg g~path{transform-box:view-box;transform-origin:183px 134px;animation:bootswing 1.1s ease-in-out infinite alternate}
+@keyframes bootswing{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+.bootin b{font:700 22px/1 'Gowun Batang',serif;letter-spacing:-.01em}
+.bootbar{width:168px;height:3px;border-radius:2px;background:rgba(209,165,69,.18);overflow:hidden}
+.bootbar i{display:block;width:40%;height:100%;border-radius:2px;background:var(--brass);animation:bootbar 1.2s ease-in-out infinite}
+@keyframes bootbar{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+.bootin p{margin:0;font-size:13px;color:var(--fog)}
+
+/* ── 좁은 화면 ── */
+@media(max-width:900px){
+  .herogrid,.honest{grid-template-columns:1fr;gap:36px}
+  .herogrid{row-gap:0}.stand{margin-top:36px}.lead{margin-top:20px}
+  .hero{padding:32px 0 64px}
+  .hero::before{background:radial-gradient(90% 40% at 50% 62%,rgba(209,165,69,.12),transparent 70%)}
+  .bars{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bars li:nth-child(3){border-top:1px solid var(--line)}
+  .bars li:nth-child(4){border-top:1px solid var(--line)}
+  .bars li:nth-child(2){box-shadow:inset -1px 0 0 rgba(243,238,226,.32)}
+  .feats{grid-template-columns:1fr}
+  .sec{padding:64px 0}
+}
+@media(max-width:560px){
+  .topin .who{display:none}
+  .topin{gap:8px}.topin .btn{padding:0 13px;font-size:14px}
+  .brand{font-size:19px}
+  .paper{padding:16px 12px 10px}
+  .sv-w{display:none}.sv-n{display:block}
+  .cover:nth-child(2){top:0;height:25%}.cover:nth-child(3){top:25%;height:25%}.cover:nth-child(4){top:50%;height:25%}.cover:nth-child(5){display:block;top:75%;height:25%}
+  .bars{grid-template-columns:1fr;border-left:1px solid rgba(243,238,226,.32)}
+  .bars li{border-left:0;border-top:1px solid var(--line);padding:30px 18px 24px}
+  .bars li:first-child{border-top:0}
+  .bars li:nth-child(2),.bars li:last-child{box-shadow:none}
+  .bars li:last-child::after{display:none}
+  .bars{border-bottom:5px solid rgba(243,238,226,.55);box-shadow:0 3px 0 -2px var(--night)}
+  .price{padding:22px 20px}
+  .cta .btn-big{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  .js .cover,.sheet.write .cover{animation:none;transform:scaleX(0)}
+  .bootin svg *,.bootbar i{animation:none}.bootbar i{width:100%}
+  .boot,.top{transition:none}
+}
+</style>
+</head>
+<body>
+<header class="top" id="top">
+  <div class="wrap topin">
+    <a class="brand" href="./" aria-label="EzImprovJazz 홈"><!--__MARK__-->EzImprovJazz</a>
+    <span class="who" id="who" hidden></span>
+    <button class="btn btn-line" type="button" id="btnLogin">로그인</button>
+    <button class="btn btn-brass" type="button" data-launch>프로그램 실행</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap herogrid">
+      <h1><span>코드 진행만 고르세요.</span><span>솔로는 매번 새로 써 드려요.</span></h1>
+      <div>
+        <p class="lead">재즈 즉흥연주를 연습하는 관악기 연주자를 위한 솔로 악보 생성기예요. 화성에 맞는 연습용 솔로를 만들고 베이스·피아노 반주와 함께 들려 줘요. 듣고, 따라 불고, 마음에 드는 마디만 남겨 다시 만드세요.</p>
+        <div class="cta">
+          <button class="btn btn-brass btn-big" type="button" data-launch>프로그램 실행</button>
+          <small>베타 기간에는 무료예요. 로그인 없이도 써 볼 수 있어요.</small>
+        </div>
+      </div>
+      <figure class="stand">
+        <div class="paper">
+          <div class="ptop"><b>재즈 블루스 F</b><span id="demoDiff">난이도 2</span></div>
+          <div class="sheet" id="sheet"><div id="sheetSvg"><!--__DEMO_FIRST__--></div><i class="cover"></i><i class="cover"></i><i class="cover"></i><i class="cover"></i></div>
+        </div>
+        <figcaption class="standbar">
+          <span>같은 코드 진행으로 만든 솔로 <span class="count" id="demoCount">1 / 5</span></span>
+          <button class="btn btn-line" type="button" id="btnDemo">다른 솔로 보기</button>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="hFlow">
+    <div class="wrap">
+      <h2 id="hFlow">연습은 이렇게 흘러가요</h2>
+      <ol class="bars">
+        <li><span class="mno">1</span><h3>곡 고르기</h3><p>ii–V–I·블루스 같은 연습 진행, 리듬 체인지 같은 공통 형식으로 바로 시작해요. 갖고 있는 리드시트는 MusicXML 파일이나 iReal Pro 링크로 불러와요.</p></li>
+        <li><span class="mno">2</span><h3>솔로 만들기</h3><p>난이도와 악기, 연습 주제(코드톤·가이드톤·펜타토닉·스케일)를 고르면 악보가 나와요.</p></li>
+        <li><span class="mno">3</span><h3>듣고 따라 불기</h3><p>스윙·보사노바·발라드 반주와 함께 재생해요. 탭으로 템포를 잡고, 어려운 마디만 골라 반복해요.</p></li>
+        <li><span class="mno">4</span><h3>남기고 다시</h3><p>좋은 마디는 남기고 나머지만 새로 만들어요. 마음에 드는 솔로는 저장하고 PNG·MusicXML로 내보내요.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="hFeat">
+    <div class="wrap">
+      <h2 id="hFeat">악보 한 장에 담긴 것</h2>
+      <dl class="feats">
+        <div class="feat"><dt>화성을 따라가는 선율</dt><dd>코드가 바뀌는 자리에서 코드음에 닿고, 3음과 7음(가이드톤)을 이어 화성이 들리게 써요. 악보 아래에서 마디마다 어떤 음을 왜 골랐는지 볼 수 있어요.</dd></div>
+        <div class="feat"><dt>실제 재즈 솔로의 통계</dt><dd>Weimar Jazz Database에 담긴 재즈 솔로들의 음정·리듬 통계를 확률로 써요. 연습곡처럼 딱딱하지 않고 연주처럼 흐르는 선율이 나와요.</dd></div>
+        <div class="feat"><dt>노래하듯, 또는 비밥처럼</dt><dd>노래와 비밥 사이의 비율, 아티스트 스타일, 모티프 발전으로 솔로의 성격을 바꿔요. 같은 곡도 연습할 때마다 다른 솔로가 나와요.</dd></div>
+        <div class="feat"><dt>반주와 악기 소리</dt><dd>여섯 가지 반주 스타일과 테너·알토·트럼펫·플루트 같은 실제 악기 샘플로 들려 줘요. 템포와 코러스 수(최대 12)도 정할 수 있어요.</dd></div>
+        <div class="feat"><dt>내 악기 조로 바로</dt><dd>콘서트 C, B♭(테너 색소폰·트럼펫), E♭(알토 색소폰) 악보로 보고, 반음 단위로 조를 옮겨요.</dd></div>
+        <div class="feat"><dt>보면대 위 휴대폰에서도</dt><dd>브라우저에서 바로 열리고 휴대폰·태블릿 화면에 맞춰져요. 로그인하면 저장한 솔로와 내 곡이 다른 기기에서도 이어져요.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="hHonest">
+    <div class="wrap honest">
+      <h2 id="hHonest">원곡은 담지 않아요</h2>
+      <div class="body">
+        <p>곡은 코드 진행만 다뤄요. 원곡 멜로디나 특정 녹음을 옮겨 적은 악보는 넣지 않고, 솔로는 매번 새로 만들어요.</p>
+        <p>연주 통계는 Weimar Jazz Database에서 확률 분포와, 네 명 이상의 연주자가 함께 쓴 짧은 음형만 가져왔어요. 한 사람의 솔로를 그대로 옮기지 않아요.</p>
+        <p>마디에 남긴 👍·👎 평가는 이메일·계정과 연결하지 않은 익명 자료로만 모여 솔로를 다듬는 데 쓰여요.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="hPrice">
+    <div class="wrap">
+      <h2 id="hPrice">요금</h2>
+      <div class="price">
+        <div><b>베타 기간에는 모든 기능이 무료예요</b><p>유료 요금제를 만들게 되면 이곳과 앱에서 먼저 알려 드릴게요.</p></div>
+        <button class="btn btn-brass btn-big" type="button" data-launch>프로그램 실행</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="hFaq">
+    <div class="wrap">
+      <h2 id="hFaq">자주 묻는 질문</h2>
+      <div class="faq">
+        <details><summary>로그인해야 쓸 수 있나요?</summary><p>아니요. 로그인 없이도 모든 기능을 쓸 수 있어요. 로그인하면 내 곡·즐겨찾기·저장한 솔로·보관한 마디가 계정에 저장돼 다른 기기에서도 이어서 쓸 수 있어요. 회원가입은 곧 열려요. 지금은 테스트 계정만 쓸 수 있어요.</p></details>
+        <details><summary>어떤 곡으로 연습할 수 있나요?</summary><p>ii–V–I·블루스 같은 연습 진행, 리듬 체인지·재즈 블루스·마이너 블루스 같은 공통 형식, 저작권이 끝난 스탠더드 몇 곡이 들어 있어요. 갖고 있는 리드시트는 MusicXML 파일이나 iReal Pro 공유 링크로 불러와 이 기기에 담아 쓸 수 있어요.</p></details>
+        <details><summary>어떤 악기로 연습하면 좋나요?</summary><p>색소폰·트럼펫 같은 관악기를 중심으로 만들었어요. 악보는 콘서트 C, B♭, E♭ 중에서 고를 수 있어서 다른 선율 악기로도 쓸 수 있어요.</p></details>
+        <details><summary>휴대폰에서도 되나요?</summary><p>네, 브라우저에서 바로 돼요. 처음 재생할 때는 악기 샘플을 받느라 2~5초쯤 걸릴 수 있어요.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap footin">
+    <div>
+      <a class="brand" href="./"><!--__MARK__-->EzImprovJazz</a>
+      <p>재즈 즉흥연주 연습용 솔로 악보 생성기 · 베타</p>
+    </div>
+    <div>
+      <ul><li>개인정보처리방침 (준비 중)</li><li>이용약관 (준비 중)</li></ul>
+      <p>연주 통계 출처: <a href="https://jazzomat.hfm-weimar.de/" rel="noopener" target="_blank">Weimar Jazz Database</a>, Jazzomat Research Project (ODbL 1.0)</p>
+      <p>© 2026 EzImprovJazz</p>
+    </div>
+  </div>
+</footer>
+
+<dialog class="login" id="loginDlg" aria-labelledby="lgTitle">
+  <div class="lgin">
+    <button class="xbtn" type="button" id="lgClose" aria-label="닫기">✕</button>
+    <div id="lgOut">
+      <h2 id="lgTitle">로그인</h2>
+      <p class="why">로그인하면 저장한 솔로와 내 곡이 계정에 저장돼 다른 기기에서도 이어져요.</p>
+      <form id="lgForm" novalidate>
+        <label class="fld">이메일<input id="lgEmail" type="email" autocomplete="email" inputmode="email" required></label>
+        <label class="fld">비밀번호<input id="lgPw" type="password" autocomplete="current-password" minlength="8" required></label>
+        <div class="lgbtns">
+          <button class="btn btn-brass" type="submit" id="lgSubmit">로그인하고 실행</button>
+          <button class="btn btn-line" type="button" id="lgSignup" hidden>가입하기</button>
+        </div>
+      </form>
+      <div class="lgsub"><button class="linkbtn" type="button" id="lgReset">비밀번호 찾기</button><span id="lgSoon">회원가입은 곧 열려요</span></div>
+      <p class="lgmsg" id="lgMsg" aria-live="polite"></p>
+      <hr>
+      <button class="btn btn-line" type="button" id="lgGuest" style="width:100%">로그인 없이 시작</button>
+    </div>
+    <div id="lgIn" class="signedin" hidden>
+      <h2>로그인됨</h2>
+      <p class="why"><b id="lgWho"></b> 계정으로 로그인했어요.</p>
+      <div class="lgbtns">
+        <button class="btn btn-brass" type="button" data-launch>프로그램 실행</button>
+        <button class="btn btn-line" type="button" id="lgLogout">로그아웃</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<div class="boot" id="boot" role="status" aria-live="polite" hidden><div class="bootin"><!--__MARK__--><b>EzImprovJazz</b><div class="bootbar"><i></i></div><p>악보 엔진을 준비하는 중…</p></div></div>
+
+<!--__DEMO_REST__-->
+<script>
+/* ── 홈페이지 동작(v0.56) ── 예시 솔로 넘기기 · 로그인(앱과 같은 저장 키) · 「프로그램 실행」 → 로딩 화면 → /app/ */
+(function(){
+'use strict';
+const $=q=>document.querySelector(q);
+const SB=/*__SB_CONFIG__*/null;
+const ACCT_KEY='clu.auth.v1',BETA_KEY='clu.beta.v1',APP_URL='app/',LAUNCH_DELAY_MS=260;
+
+/* 메일 링크(가입 확인·비밀번호 재설정)는 홈(/)으로 돌아온다 — 토큰을 앱에 넘겨 앱이 처리하게 */
+if(/access_token=|error_description=/.test(location.hash)){location.replace(APP_URL+location.hash);return}
+
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function beta(){try{if(/[?&]beta=1(&|$)/.test(location.search))localStorage.setItem(BETA_KEY,'1');return localStorage.getItem(BETA_KEY)==='1'}catch(e){return false}}
+const sess=()=>lsGet(ACCT_KEY,null);
+const sbOn=()=>!!(SB&&SB.url&&SB.key);
+
+/* 위쪽 막대 — 스크롤하면 아래 선 */
+const top=$('#top');addEventListener('scroll',()=>top.classList.toggle('scrolled',scrollY>8),{passive:true});
+
+/* ── 예시 솔로 ── */
+const tpl=[...document.querySelectorAll('template.demo')];
+const solos=[{diff:+($('#sheetSvg').dataset.diff||2),html:null}].concat(tpl.map(t=>({diff:+t.dataset.diff,html:t.innerHTML})));
+let di=0;const sheet=$('#sheet');
+function write(){sheet.classList.remove('write');void sheet.offsetWidth;sheet.classList.add('write')}
+function showDemo(i){
+  di=(i+solos.length)%solos.length;const s=solos[di];
+  if(s.html===null)s.html=$('#sheetSvg').innerHTML;
+  $('#sheetSvg').innerHTML=s.html;$('#demoDiff').textContent='난이도 '+s.diff;
+  $('#demoCount').textContent=(di+1)+' / '+solos.length;write();
+}
+$('#btnDemo').onclick=()=>showDemo(di+1);
+if(solos.length<2)$('#btnDemo').hidden=true;
+$('#demoCount').textContent='1 / '+solos.length;
+/* 첫 악보는 화면에 들어올 때 한 줄씩 적힌다 */
+try{const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){write();io.disconnect()}},{threshold:.3});io.observe(sheet)}catch(e){}
+
+/* ── 로그인 ── */
+const dlg=$('#loginDlg');
+function msg(t){$('#lgMsg').textContent=t||''}
+function errText(e){const m=String(e&&e.message||e);
+  return /Invalid login credentials/i.test(m)?'이메일이나 비밀번호가 맞지 않아요.':/Email not confirmed/i.test(m)?'메일 인증이 아직 안 됐어요. 받은 메일의 링크를 눌러 주세요.':/already registered/i.test(m)?'이미 가입된 이메일이에요. 로그인해 주세요.':/Password should be/i.test(m)?'비밀번호는 8자 이상으로 해 주세요.':/rate limit/i.test(m)?'요청이 많아요. 잠시 뒤 다시 해 주세요.':/Failed to fetch|NetworkError|Load failed/i.test(m)?'인터넷 연결을 확인해 주세요.':m}
+async function sb(path,body,token){
+  const h={'apikey':SB.key,'content-type':'application/json'};if(token)h.authorization='Bearer '+token;
+  const r=await fetch(SB.url+path,{method:'POST',headers:h,body:JSON.stringify(body||{})});
+  const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
+  if(!r.ok)throw new Error((j&&(j.msg||j.error_description||j.message||j.error))||('HTTP '+r.status));
+  return j;
+}
+function save(j){const u=j.user||{};lsSet(ACCT_KEY,{access_token:j.access_token,refresh_token:j.refresh_token,expires_at:Date.now()+((+j.expires_in||3600)-60)*1000,email:u.email||'',uid:u.id||''})}
+function back(){return location.origin&&location.origin!=='null'?location.origin+location.pathname.replace(/[^/]*$/,'')+APP_URL:''}
+function ui(){
+  const s=sess(),b=beta();
+  $('#who').hidden=!s;$('#who').textContent=s?(s.email||'로그인됨'):'';
+  $('#btnLogin').textContent=s?'계정':'로그인';
+  $('#lgOut').hidden=!!s;$('#lgIn').hidden=!s;if(s)$('#lgWho').textContent=s.email||'이';
+  $('#lgSignup').hidden=!b;$('#lgSoon').hidden=b;
+  if(!sbOn()){$('#btnLogin').hidden=true}
+}
+function openLogin(){msg('');ui();try{dlg.showModal()}catch(e){dlg.setAttribute('open','')}setTimeout(()=>{const f=sess()?null:$('#lgEmail');if(f)f.focus()},40)}
+function closeLogin(){try{dlg.close()}catch(e){dlg.removeAttribute('open')}}
+$('#btnLogin').onclick=openLogin;$('#lgClose').onclick=closeLogin;
+dlg.addEventListener('click',e=>{if(e.target===dlg)closeLogin()});
+$('#lgForm').addEventListener('submit',async e=>{
+  e.preventDefault();const em=$('#lgEmail').value.trim(),pw=$('#lgPw').value;
+  if(!em||!pw){msg('이메일과 비밀번호를 넣어 주세요.');return}
+  const btn=$('#lgSubmit');btn.disabled=true;msg('로그인하는 중…');
+  try{save(await sb('/auth/v1/token?grant_type=password',{email:em,password:pw}));$('#lgPw').value='';msg('');ui();launch()}
+  catch(err){msg('로그인하지 못했어요. '+errText(err))}
+  finally{btn.disabled=false}
+});
+$('#lgSignup').onclick=async()=>{
+  const em=$('#lgEmail').value.trim(),pw=$('#lgPw').value;
+  if(!em||pw.length<8){msg('이메일과 8자 이상의 비밀번호를 넣어 주세요.');return}
+  msg('가입하는 중…');
+  try{const bk=back(),j=await sb('/auth/v1/signup'+(bk?'?redirect_to='+encodeURIComponent(bk):''),{email:em,password:pw});
+    if(j&&j.access_token){save(j);ui();launch()}else msg('확인 메일을 보냈어요. 메일의 링크를 누르면 로그인된 채로 프로그램이 열려요.')}
+  catch(err){msg('가입하지 못했어요. '+errText(err))}
+};
+$('#lgReset').onclick=async()=>{
+  const em=$('#lgEmail').value.trim();if(!em){msg('비밀번호를 찾을 이메일을 넣어 주세요.');$('#lgEmail').focus();return}
+  try{const bk=back();await sb('/auth/v1/recover'+(bk?'?redirect_to='+encodeURIComponent(bk):''),{email:em});msg('비밀번호 재설정 메일을 보냈어요. 링크를 누르면 프로그램에서 새 비밀번호를 정할 수 있어요.')}
+  catch(err){msg('메일을 보내지 못했어요. '+errText(err))}
+};
+$('#lgLogout').onclick=async()=>{const s=sess();try{if(s)await sb('/auth/v1/logout',{},s.access_token)}catch(e){}try{localStorage.removeItem(ACCT_KEY)}catch(e){}ui();msg('로그아웃했어요. 이 기기의 자료는 그대로 남아 있어요.')};
+$('#lgGuest').onclick=()=>launch();
+
+/* ── 프로그램 실행 — 로그인 안 했으면 먼저 로그인 창(「로그인 없이 시작」도 있음) ── */
+const boot=$('#boot');
+function launch(){
+  closeLogin();boot.hidden=false;requestAnimationFrame(()=>boot.classList.add('on'));
+  setTimeout(()=>{location.href=APP_URL},LAUNCH_DELAY_MS);
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-launch]');if(!b)return;
+  if(sess()||!sbOn()||b.closest('#lgIn'))launch();else openLogin();
+});
+/* 뒤로 가기로 돌아오면 로딩 화면 걷기 */
+addEventListener('pageshow',()=>{boot.classList.remove('on');boot.hidden=true});
+ui();
+})();
+</script>
+</body>
+</html>

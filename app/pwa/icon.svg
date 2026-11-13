@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- 임시 아이콘(v0.41) — 앱 이름·심볼이 정해지면 교체. 오선 3줄 + 8분음표, 앱 색(--bg·--brass·--paper) -->
+  <!-- EzImprovJazz 앱 아이콘(v0.56) — 심볼(app/brand/mark.svg)을 남색 바탕에. 바꾸면 node tools/make_icons.js -->
   <rect width="512" height="512" fill="#10161f"/>
-  <g stroke="#f6f2e8" stroke-opacity=".22" stroke-width="10">
-    <line x1="64" y1="200" x2="448" y2="200"/><line x1="64" y1="256" x2="448" y2="256"/><line x1="64" y1="312" x2="448" y2="312"/>
+  <g stroke="#f3eee2" stroke-width="30" stroke-linecap="round">
+    <path d="M120 150H288M120 256H224M120 362H288M120 150V362" fill="none"/>
   </g>
-  <ellipse cx="226" cy="340" rx="62" ry="46" transform="rotate(-22 226 340)" fill="#d1a545"/>
-  <rect x="272" y="128" width="18" height="214" rx="6" fill="#d1a545"/>
-  <path d="M281 128c22 44 96 54 92 132-2 30-14 46-26 58 8-60-24-92-66-96z" fill="#d1a545"/>
+  <ellipse cx="288" cy="262" rx="44" ry="33" transform="rotate(-24 288 262)" fill="#d1a545"/>
+  <rect x="313" y="112" width="20" height="150" rx="10" fill="#d1a545"/>
+  <path d="M323 114c18 40 72 50 70 112-1 22-10 36-20 46 5-46-16-72-50-76z" fill="#d1a545"/>
 </svg>

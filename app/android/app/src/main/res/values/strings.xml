@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- 앱 이름(임시) — 이름이 정해지면 바꾼다 -->
-    <string name="app_name">즉흥 악보</string>
+    <string name="app_name">EzImprovJazz</string>
 </resources>

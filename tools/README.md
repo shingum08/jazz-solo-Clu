@@ -52,3 +52,12 @@ PY
 ```
 
 (스타일 프로필을 바꾸지 않는 한 재생성 불필요 — `engine/style_data.js`가 그 결과물이다.)
+
+## 홈페이지(v0.56)
+
+```bash
+python3 tools/build.py --web                          # dist/web/ — 홈(index.html) + 앱(app/index.html)
+node tools/make_landing_demo.js                       # 엔진이 바뀌었을 때만: 홈 첫 화면 예시 솔로(app/landing/demo.json)·링크 미리보기(og.jpg) 다시 그림 → 다시 --web
+node --no-warnings tools/test_landing_v056.mjs        # 홈 → 로그인 → 로딩 → 앱 이어받기 (가짜 Supabase)
+node --no-warnings tools/test_acct_v055.mjs dist/web/app/index.html
+```

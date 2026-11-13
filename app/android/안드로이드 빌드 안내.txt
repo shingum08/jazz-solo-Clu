@@ -1,4 +1,4 @@
-즉흥 악보 생성기 · Clu — 안드로이드 앱 프로젝트 v__VERSION__ (versionCode __VERSION_CODE__)
+EzImprovJazz — 안드로이드 앱 프로젝트 v__VERSION__ (versionCode __VERSION_CODE__)
 (우리끼리 테스트·구글 플레이 등록용 · GitHub에 올리지 않는 묶음)
 
 ━━ 이 앱은 ━━
@@ -26,7 +26,7 @@
 · 메뉴 Build → Generate Signed App Bundle or APK → Android App Bundle → 업로드 키 새로 만들기(Create new…)
   - 키 파일(.jks)과 비밀번호는 잃어버리면 업데이트를 못 올립니다 — 안전한 곳에 따로 보관(채팅에 올리지 마세요)
   - release 선택 → 만들어진 app-release.aab 를 플레이 콘솔에 올립니다.
-· 앱 이름: app/src/main/res/values/strings.xml 의 app_name (지금 임시 「즉흥 악보」)
+· 앱 이름: app/src/main/res/values/strings.xml 의 app_name (v0.56부터 「EzImprovJazz」)
 · 아이콘: 임시(오선 + 8분음표). 심볼이 정해지면 바꿉니다.
 
 ━━ 4. 플레이 콘솔 순서(요약) ━━

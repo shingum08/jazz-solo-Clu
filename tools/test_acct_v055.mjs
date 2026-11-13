@@ -1,5 +1,5 @@
 /* v0.55 계정 동기화 브라우저 시험 — Supabase(GoTrue·PostgREST)를 흉내 낸 가짜 서버로 가입·로그인·기기 간 합치기·변경 반영·로그아웃 확인
-   사용: python3 tools/build.py --web && node --no-warnings tools/test_acct_v055.mjs dist/web/index.html */
+   사용: python3 tools/build.py --web && node --no-warnings tools/test_acct_v055.mjs dist/web/app/index.html   (v0.56부터 앱은 dist/web/app/) */
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 let pw;try{pw=require('playwright')}catch(e){pw=require('/opt/node22/lib/node_modules/playwright')}

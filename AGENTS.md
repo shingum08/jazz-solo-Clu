@@ -9,6 +9,8 @@
 
 ```
 app/template.html        UI·CSS·전체 뼈대 (마커 있음 — 직접 수정 금지, engine 수정 후 빌드)
+app/landing/index.html   홈페이지(웹 빌드의 /, 앱은 /app/) — demo.json 은 tools/make_landing_demo.js 산출물
+app/brand/mark.svg       EzImprovJazz 심볼(앱 머리·로딩 화면·홈페이지·아이콘)
 engine/engine_core.js    순수 로직: analyzeHarmony(화성 분석) → generateSolo(생성) → toAbc(ABC 변환)
 engine/style_data.js     생성 데이터: WJD 통계 프로필 9종 + 공통 셀 134종 (스크립트 산출물 — 손으로 고치지 말 것)
 engine/playback.js       Web Audio: 스윙비·아티큘레이션·반주 (bassLine/voicingFor/playAll)
