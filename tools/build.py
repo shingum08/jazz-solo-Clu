@@ -40,6 +40,15 @@ import sys, shutil, zipfile
 ver=re.search(r'<title>[^<]*?v(\d+\.\d+\.\d+)',tpl).group(1)
 if '<!--__PWA_HEAD__-->' not in out or '/*__PWA_BUILD__*/false' not in out:
     raise RuntimeError('PWA 마커가 없습니다(app/template.html)')
+# v0.53 마디 평가 수신 주소(Cloudflare Worker) — 환경변수 CLU_FB_URL 또는 server/feedback-worker/ENDPOINT 한 줄. 비밀 아님(주소만).
+#   없으면 앱은 예전처럼 「📤 내보내기」 파일 방식으로 동작한다.
+fb_url=os.environ.get('CLU_FB_URL','').strip()
+fb_file=os.path.join(root,'server','feedback-worker','ENDPOINT')
+if not fb_url and os.path.exists(fb_file): fb_url=open(fb_file,encoding='utf-8').read().strip()
+if fb_url and not re.fullmatch(r'https://[A-Za-z0-9.-]+(/[A-Za-z0-9._/-]*)?',fb_url): raise RuntimeError('평가 수신 주소 형식이 이상합니다: '+fb_url)
+if out.count("/*__FB_ENDPOINT__*/''")!=1: raise RuntimeError('FB_ENDPOINT 마커가 없습니다(app/template.html)')
+out=out.replace("/*__FB_ENDPOINT__*/''",'/*__FB_ENDPOINT__*/'+repr(fb_url.rstrip('/')))
+print('마디 평가 수신 주소:',fb_url or '(없음 — 파일 내보내기 방식)')
 pub=out.replace('<!--__PWA_HEAD__-->\n','').replace('<!--__PWA_HEAD__-->','')
 open(os.path.join(root,'index.html'),'w',encoding='utf-8').write(pub)
 print('built index.html',len(pub),'bytes (공개 빌드 · 앱 설치 꺼짐)')

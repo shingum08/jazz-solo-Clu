@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!--__PWA_HEAD__-->
-<title>즉흥 악보 생성기 v0.52.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.53.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -503,6 +503,9 @@ svg .selbar.pk{fill:rgba(243,134,38,.30);stroke:#e0701a;stroke-dasharray:none}
 .pkbtn.keep:not(:disabled){background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .fbcount{font-size:13.5px;color:#5c5a4f;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .fbcount .full{color:#a0521a;font-weight:600}
+.fbcount .fbnote2{flex-basis:100%;font-size:12px;opacity:.75}
+.fbsendopt{display:flex;align-items:center;gap:8px;font-size:14px;flex-basis:100%;margin-top:6px}
+.fbsendopt input{width:20px;height:20px}
 .fbcount button{min-height:36px;padding:0 12px;font-size:13.5px;font-family:inherit;background:transparent;color:var(--ink);border:1px solid rgba(37,42,34,.45);border-radius:8px;cursor:pointer}
 svg .selbar.lockd{fill:rgba(70,110,150,.13);stroke:#4f7aa3;stroke-width:1.5;stroke-dasharray:none}
 svg .selbar.liked{fill:rgba(63,143,85,.14);stroke:#3f8f55;stroke-width:1.5;stroke-dasharray:none}
@@ -871,7 +874,7 @@ svg .abcjs-tempo{cursor:pointer}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.52.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">Concept Prototype · v0.53.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -979,7 +982,7 @@ svg .abcjs-tempo{cursor:pointer}
      </section>
      <section class="setsec">
       <h4>저장 · 내보내기</h4>
-    <div class="tb btns"><button class="btn ghost" id="btnSave" disabled>♡ 목록 저장</button><button class="btn ghost" id="btnExport" disabled>⬇ PNG 저장</button><button class="btn ghost" id="btnXml" disabled>⬇ MusicXML</button><button class="btn ghost" id="btnShare" disabled>📤 공유·메일</button><button class="btn ghost" id="btnFbExport" type="button" title="마디 좋아요·싫어요 평가를 파일로 내보냅니다">📤 마디 평가 내보내기</button><button class="btn ghost" id="btnFeedback" title="버그·개선 제안을 GitHub 이슈로 보냅니다">💬 피드백</button></div>
+    <div class="tb btns"><button class="btn ghost" id="btnSave" disabled>♡ 목록 저장</button><button class="btn ghost" id="btnExport" disabled>⬇ PNG 저장</button><button class="btn ghost" id="btnXml" disabled>⬇ MusicXML</button><button class="btn ghost" id="btnShare" disabled>📤 공유·메일</button><button class="btn ghost" id="btnFbExport" type="button" title="마디 좋아요·싫어요 평가를 파일로 내보냅니다">📤 마디 평가 내보내기</button><label class="fbsendopt"><input type="checkbox" id="fbSendOn" checked> 마디 평가(👍·👎)를 익명으로 개발팀에 보내기</label><button class="btn ghost" id="btnFeedback" title="버그·개선 제안을 GitHub 이슈로 보냅니다">💬 피드백</button></div>
       <div class="saved">
     <h3>저장한 솔로</h3>
     <p class="note">이 기기에 저장되어 새로고침해도 남습니다. ♡ 저장은 <b>악보 그대로</b>(편집한 음 · 여러 코러스 포함) 담기므로 앱이 업데이트돼도 같은 악보로 돌아옵니다. 마디만 따로 두려면 「🔒 마디 고정 모드」에서 마디를 골라 「♡ 선택 마디 보관」. 아이폰은 사파리와 홈 화면 앱의 저장 공간이 따로라서, 옮기거나 다른 기기로 가져갈 때는 백업 파일을 쓰세요.</p>
@@ -2372,6 +2375,29 @@ function selBars(){return [...(cur.barSel||[])].sort((a,b)=>a-b)}
    한 기록 = 곡·생성 설정(시드 등)·코러스·마디·코드·음(실음 midi, 틱)·앞뒤 음·기법 태그 → tools/feedback_report.js 로 모아 엔진에 반영.
    헤드(불러온 원곡 멜로디) 마디는 음을 남기지 않는다(원곡 멜로디가 파일로 나가지 않게). 비밀번호·토큰 없이 파일로만 오간다 ── */
 const FB_KEY='clu.barfb.v1',FB_BATCH=100,FB_MAX=3000;
+/* v0.53 자동 보내기 — 수신 주소(Cloudflare Worker)가 빌드에 들어 있으면 👍·👎를 누르는 즉시 익명으로 보낸다(못 보내면 다음에 다시).
+   cid = 이 기기의 무작위 번호(이름·연락처 아님). 「⚙ 설정 → 저장·내보내기」에서 끌 수 있다. 주소가 없으면 파일 내보내기 방식 */
+const FB_ENDPOINT=/*__FB_ENDPOINT__*/'';
+const FB_SEND_KEY='clu.fbsend.v1',FB_CID_KEY='clu.cid.v1';
+function fbAuto(){if(!FB_ENDPOINT)return false;try{return localStorage.getItem(FB_SEND_KEY)!=='0'}catch(e){return true}}
+function fbCid(){try{let c=localStorage.getItem(FB_CID_KEY);if(!c){c=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12));localStorage.setItem(FB_CID_KEY,c)}return c}catch(e){return cur._cid||(cur._cid='t'+Date.now().toString(36)+'-tmp')}}
+function fbUnsent(){return (cur.fb||[]).filter(x=>!x.s)}
+async function fbSend(){
+  if(!fbAuto()||cur._fbBusy)return;
+  const q=fbUnsent();if(!q.length)return;
+  cur._fbBusy=true;
+  try{
+    for(let i=0;i<q.length;i+=50){
+      const part=q.slice(i,i+50);
+      const res=await fetch(FB_ENDPOINT+'/v1/feedback',{method:'POST',headers:{'content-type':'text/plain'},keepalive:true,
+        body:JSON.stringify({cid:fbCid(),v:APP_VER,records:part.map(({x,s,...r})=>r)})});
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      part.forEach(r=>r.s=1);fbStore();
+    }
+    cur._fbErr='';
+  }catch(e){cur._fbErr='지금은 보내지 못했어요 — 연결되면 다시 보냅니다'}
+  finally{cur._fbBusy=false;fbSyncCount()}
+}
 function fbLoad(){try{const v=JSON.parse(localStorage.getItem(FB_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
 function fbStore(){try{localStorage.setItem(FB_KEY,JSON.stringify(cur.fb.slice(-FB_MAX)))}catch(e){}}
 function fbSolKey(ch){return [cur.selProg,cur.seed,cur.selDiff,cur.style,cur.selInst,cur.lyric,cur.topic,ch].join('|')}
@@ -2393,6 +2419,7 @@ function fbRate(r){
   const ch=curChorus(),k=fbSolKey(ch);
   bs.forEach(i=>{cur.fb=cur.fb.filter(x=>!(x.sk===k&&x.bar===i));cur.fb.push(fbRecord(ch,i,r))});   /* 같은 솔로 같은 마디는 마지막 평가로 */
   fbStore();cur.barSel=new Set();renderChips();
+  if(fbAuto()){fbToast((r>0?'👍 ':'👎 ')+barRangeLabel(bs)+'마디 — 고마워요! 보내는 중…');fbSend();return}
   const n=fbPending();if(n&&n%FB_BATCH===0)fbToast(n+'개 모였어요! 📤 평가 내보내기로 파일을 받아 보내 주세요');else fbToast((r>0?'👍 ':'👎 ')+barRangeLabel(bs)+'마디 평가 저장');
 }
 function fbPending(){return (cur.fb||[]).filter(x=>!x.x).length}
@@ -2400,6 +2427,14 @@ function fbToast(t){const el=$('#fbCount');if(!el)return;cur._fbMsg=t;fbSyncCoun
 function fbSyncCount(){
   const el=$('#fbCount');if(!el)return;const all=(cur.fb||[]).length,n=fbPending(),up=(cur.fb||[]).filter(x=>!x.x&&x.r>0).length;
   el.innerHTML='';
+  if(fbAuto()){   /* v0.53 자동 보내기 */
+    const sent=all-fbUnsent().length,un=fbUnsent().length,sp=document.createElement('span');
+    sp.textContent=cur._fbMsg||(cur._fbErr&&un?cur._fbErr+' ('+un+'개 대기)':sent?'보낸 평가 '+sent+'개 · 고마워요! 솔로 생성 개선에 씁니다':'좋은 마디·아쉬운 마디에 👍·👎를 눌러 주세요 — 익명으로 개발팀에 보내져 솔로 생성 개선에 쓰입니다');
+    el.appendChild(sp);
+    const nt=document.createElement('span');nt.className='fbnote2';nt.textContent='보내는 것: 곡·설정·마디의 코드와 음 · 이 기기 무작위 번호(이름·연락처 없음) · 설정에서 끌 수 있어요';el.appendChild(nt);
+    const eb=$('#btnFbExport');if(eb)eb.textContent='📤 마디 평가 내보내기(파일)';
+    return;
+  }
   const sp=document.createElement('span');sp.textContent=cur._fbMsg||(n?'보내지 않은 평가 '+n+'개(👍 '+up+' · 👎 '+(n-up)+')'+(n>=FB_BATCH?' — 내보내 보내 주세요':' · '+FB_BATCH+'개 모이면 알려 드려요'):all?'평가는 모두 내보냈어요':'고른 마디에 👍·👎를 누르면 이 기기에 쌓입니다');
   if(n>=FB_BATCH&&!cur._fbMsg)sp.className='full';el.appendChild(sp);
   if(n){const b=document.createElement('button');b.type='button';b.textContent='📤 내보내기';b.onclick=fbExport;el.appendChild(b)}
@@ -2442,6 +2477,10 @@ function renderSnips(){
 }
 cur.snips=loadSnips();cur.locks={};cur.barSel=new Set();cur.lockMode=false;renderSnips();
 cur.fb=fbLoad();
+/* v0.53 평가 자동 보내기 켜기·끄기(설정) · 안 보낸 평가는 열릴 때·다시 연결될 때 보냄 */
+{const cb=$('#fbSendOn');if(cb){cb.closest('label').style.display=FB_ENDPOINT?'':'none';cb.checked=fbAuto();
+  cb.addEventListener('change',()=>{try{localStorage.setItem(FB_SEND_KEY,cb.checked?'1':'0')}catch(e){}fbSyncCount();if(cb.checked)fbSend()})}}
+window.addEventListener('online',()=>fbSend());setTimeout(()=>fbSend(),1500);
 $('#btnLike').onclick=()=>fbRate(1);$('#btnDislike').onclick=()=>fbRate(-1);
 $('#btnFbExport').onclick=fbExport;
 /* 마디 고정 모드 토글 — 켜면 마디 선택과 고정 도구가 나타난다 */
