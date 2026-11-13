@@ -31,7 +31,7 @@ index.html               빌드 결과물 — 커밋하지만 손으로 편집�
 
 ```bash
 python3 tools/build.py        # template.html + engine/*.js → index.html (수정 후 항상 실행)
-node tools/test.js            # 945조합 전수 검증 — 마디 완결/음역/도약/3연음/겹침 위반이 0이어야 함
+node tools/test.js            # 전곡 × 난이도 3 × 악기 3 × 시드 2 전수 검증(현재 264곡 = 솔로 4,752개) — 마디 완결/음역/도약/3연음/겹침 위반이 0이어야 함
 node tools/compare.js         # v0.11 대비 지표 (docs/solo-generator-v0.11.html 에서 engine_old.js 추출 필요 — tools/README.md)
 python3 tools/analyze.py      # wjazzd.db(42MB, 커밋 안 함) → 통계 재추출 (필요 시)
 ```

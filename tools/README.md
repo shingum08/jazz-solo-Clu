@@ -8,7 +8,7 @@
 | `phrase_stats.py` | `wjazzd.db` → `data/phrase_stats.json` | 프레이즈 길이·쉼 길이 백분위 |
 | `export.py` | `data/wjd_stats.json` + `data/phrase_stats.json` → `data/wjd_export.json` | 스타일 9종 블렌딩 프로필 + 셀 (엔진 주입용) |
 | `build.py` | `app/template.html` + `engine/*.js` → `index.html` | 단일 파일 앱 빌드 |
-| `test.js` | `engine/*.js` | 945개 조합 전수 검증 (마디 완결·음역·도약·3연음·겹침 위반 카운트 + 화성 지표) |
+| `test.js` | `engine/*.js` | 전곡 × 난이도 3 × 악기 3 × 시드 2 전수 검증(현재 264곡 = 솔로 4,752개; 「945조합」은 옛 수치) (마디 완결·음역·도약·3연음·겹침 위반 카운트 + 화성 지표) |
 | `compare.js` | `engine/*.js` | v0.11 엔진(`docs/solo-generator-v0.11.html`에서 추출한 버전)과 지표 비교 |
 
 ## 요구 사항
