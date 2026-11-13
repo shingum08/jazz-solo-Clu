@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<script>/* v0.54 화면 테마 — 그리기 전에 적용 */try{var _t=localStorage.getItem('clu.theme.v1');if(_t&&/^[a-z]+$/.test(_t))document.documentElement.setAttribute('data-theme',_t)}catch(e){}</script>
+<!-- v0.54.1 화면 테마는 잠시 닫음(사용자 요청) — 다시 열 때 THEME_ON=true + 여기서 저장된 테마를 그리기 전에 적용 -->
 <!--__PWA_HEAD__-->
-<title>즉흥 악보 생성기 v0.54.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.54.1 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -894,7 +894,7 @@ svg .abcjs-tempo{cursor:pointer}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.54.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">Concept Prototype · v0.54.1 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -1000,7 +1000,7 @@ svg .abcjs-tempo{cursor:pointer}
       </div>
       <p class="note">마디 고정·구간 반복을 켜면 설정이 닫히고 악보 아래에 마디 번호 줄이 나옵니다. 거기서 마디를 고르세요.</p>
      </section>
-     <section class="setsec">
+     <section class="setsec" id="themeSec" hidden>
       <h4>화면 테마</h4>
       <div class="themegrid" id="themeGrid" role="group" aria-label="화면 테마"></div>
       <p class="note">이 기기에만 저장됩니다.</p>
@@ -3046,6 +3046,7 @@ const THEMES=[
   {id:'sky',n:'스카이 블루',sw:['#eaf4fb','#1f6fae','#ffffff']},
   {id:'emerald',n:'에메랄드',sw:['#0d2620','#2fbf8f','#f3f8f4']}];
 const THEME_KEY='clu.theme.v1';
+const THEME_ON=false;   /* v0.54.1 잠시 닫음 — 기본(미드나잇 클럽)만. 테마 CSS·목록은 남겨 둠 */
 function themeNow(){const t=document.documentElement.getAttribute('data-theme');return THEMES.some(x=>x.id===t)?t:'midnight'}
 function setTheme(id){
   if(!THEMES.some(x=>x.id===id))id='midnight';
@@ -3059,7 +3060,7 @@ function renderThemes(){
     const sw=document.createElement('span');sw.className='sw';sw.setAttribute('aria-hidden','true');t.sw.forEach(c=>{const i=document.createElement('i');i.style.background=c;sw.appendChild(i)});
     const nm=document.createElement('span');nm.textContent=t.n;b.appendChild(sw);b.appendChild(nm);b.onclick=()=>setTheme(t.id);g.appendChild(b)});
 }
-renderThemes();
+if(THEME_ON){$('#themeSec').hidden=false;renderThemes()}else document.documentElement.removeAttribute('data-theme');
 /* v0.50 기법·화성 분석 접기 상태 — 이 기기에만 기억 */
 document.querySelectorAll('details.fold2').forEach(d=>{const k='clu.fold.'+d.id;try{d.open=localStorage.getItem(k)==='1'}catch(e){}d.addEventListener('toggle',()=>{try{localStorage.setItem(k,d.open?'1':'0')}catch(e){}})});
 $('#btnStop').onclick=()=>{stopAll();cur.selBar=null;if(cur.solo)renderChips();syncPlay()};   /* v0.50 ■ = 처음으로(고른 마디도 지움) · 마디부터는 ∥ 일시정지 뒤 마디 누르기 */
