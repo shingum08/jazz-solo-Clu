@@ -37,7 +37,7 @@ export default {
         return json({ok:true,total:t.n||0,unsynced:t.u||0},200,cors);
       }
       if(url.pathname==='/v1/export'&&req.method==='GET'){
-        if(!isAdmin(req,url,env))return json({ok:false,error:'key'},401,cors);
+        {const why=adminCheck(req,url,env);if(why)return json({ok:false,error:why},401,cors)}
         const since=url.searchParams.get('since')||'';
         const rs=await env.DB.prepare('SELECT body FROM fb WHERE rcv>=? ORDER BY rcv').bind(since).all();
         const recs=(rs.results||[]).map(r=>JSON.parse(r.body));
@@ -45,7 +45,7 @@ export default {
         return new Response(JSON.stringify(pack(recs)),{headers:{...cors,'content-type':'application/json; charset=utf-8','content-disposition':"attachment; filename*=UTF-8''"+encodeURIComponent(name)}});
       }
       if(url.pathname==='/v1/sync'&&req.method==='POST'){
-        if(!isAdmin(req,url,env))return json({ok:false,error:'key'},401,cors);
+        {const why=adminCheck(req,url,env);if(why)return json({ok:false,error:why},401,cors)}
         return json(await syncGitHub(env,true),200,cors);
       }
       return json({ok:false,error:'not found'},404,cors);
@@ -138,11 +138,16 @@ function corsHeaders(origin,env){
   if(ok)h['Access-Control-Allow-Origin']=origin;
   return h;
 }
-function isAdmin(req,url,env){
-  if(!env.ADMIN_KEY)return false;
-  const k=url.searchParams.get('key')||(req.headers.get('authorization')||'').replace(/^Bearer\s+/i,'');
-  return k.length>0&&k===env.ADMIN_KEY;
+/* 관리자 키 확인 — 앞뒤 공백·줄바꿈과 안내서 예시의 < > 괄호는 떼고 비교. 틀린 이유를 키 내용 없이 알려 준다 */
+function adminCheck(req,url,env){
+  const tidy=x=>String(x||'').trim().replace(/^<+|>+$/g,'').trim();
+  const want=tidy(env.ADMIN_KEY);
+  if(!want)return 'admin-key-not-set';
+  const got=tidy(url.searchParams.get('key')||(req.headers.get('authorization')||'').replace(/^Bearer\s+/i,''));
+  if(!got)return 'key-missing';
+  return got===want?'':'key-wrong (길이 '+got.length+'자를 받음)';
 }
+function isAdmin(req,url,env){return adminCheck(req,url,env)===''}
 function cleanId(x){return typeof x==='string'&&/^[A-Za-z0-9-]{8,64}$/.test(x)?x:null}
 function json(o,status,headers){return new Response(JSON.stringify(o),{status,headers:{...headers,'content-type':'application/json; charset=utf-8'}})}
 async function sha256hex(s){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32)}

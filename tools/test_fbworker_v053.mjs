@@ -51,6 +51,8 @@ assert.strictEqual(file.kind,'bar-feedback');assert.strictEqual(file.count,5);
 assert.strictEqual(env.DB._db.prepare('SELECT COUNT(*) n FROM fb WHERE synced=0').get().n,0);
 /* 7) 관리자 내보내기 · 키 없으면 401 · health */
 assert.strictEqual((await worker.fetch(new Request('https://w.example/v1/export'),env,ctx)).status,401);
+assert.strictEqual((await (await worker.fetch(new Request('https://w.example/v1/export?key=nope'),env,ctx)).json()).error.slice(0,9),'key-wrong');
+assert.strictEqual((await worker.fetch(new Request('https://w.example/v1/export?key=%3Cadmin-test%3E%20'),env,ctx)).status,200,'< > 공백 허용');
 const ex=await (await worker.fetch(new Request('https://w.example/v1/export?key=admin-test'),env,ctx)).json();
 assert.strictEqual(ex.count,5);
 const h=await (await worker.fetch(new Request('https://w.example/v1/health'),env,ctx)).json();

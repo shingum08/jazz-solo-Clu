@@ -41,7 +41,10 @@ Worker 주소(`https://….workers.dev`)는 비밀이 아니라서 개발자에�
 2. Type은 **Secret**, 이름은 `ADMIN_KEY`로 합니다.
 3. 값은 긴 무작위 문자열로 직접 만들어 넣습니다(예: 비밀번호 관리자에서 생성).
 
-받아 보기: 브라우저에서 `https://<Worker 주소>/v1/export?key=<관리자 키>`를 엽니다. 파일이 받아집니다.
+받아 보기: 브라우저 주소창에 `https://clu-feedbacks.shingum08.workers.dev/v1/export?key=` 를 쓰고 바로 뒤에 관리자 키 값을 붙여(괄호·공백 없이) 엽니다. 파일이 받아집니다.
+안 되면 나오는 글자로 원인을 알 수 있습니다: `admin-key-not-set` = Cloudflare에 `ADMIN_KEY`(대문자)가 없음 · `key-missing` = 주소에 키가 없음 · `key-wrong` = 값이 다름(받은 글자 수 표시).
+
+키 없이 내용을 보려면: Cloudflare **Storage & Databases → D1 → clu-feedback → Console**에서 `SELECT r, song, ch, bar, ts FROM fb ORDER BY rcv DESC;` 를 실행합니다(r: 1 = 👍, -1 = 👎).
 이 주소는 키가 들어 있으니 북마크나 메모에만 두고 남에게 보내지 마세요.
 
 ## 5. (선택·추천) 100개마다 비공개 깃허브로 자동 올리기
