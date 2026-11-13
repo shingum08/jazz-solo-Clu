@@ -333,6 +333,11 @@ const ANTIC={pull:0.3,lastBeat:1.6,firstUr:2.5,holdOver:2.0,merge:0.35};   /* me
    from: B에서 시작하는 수준(둘째 코러스=1) · reach: 남은 구간 중 1에 닿는 비율 */
 const BUILD_FIRST={from:0.6,reach:0.5};
 const UST_W=1.6;   /* v0.48 하이라이트 장치 중 어퍼 스트럭처를 고를 무게(8분 라인 1.3 · 피벗 0.9 …) */
+/* v0.59 리듬 구성(사용자 피드백 11/13: 셋잇단 줄이고 8분 연속을 늘림) — 셋잇단·8분 토큰 가중, 셋잇단 쌍(6연음 느낌)·셋잇단 런·8분 라인 장치 무게 */
+const RHY_MIX={trip:0.6,tripPair:0.2,tripRun:0.45,eighth:1.25,line:1.6};
+/* v0.59 쉬어 가는 섹션 — 3코러스 이상일 때 둘째~끝에서 둘째 코러스에 확률 p로 한 섹션(A 우선)을 첫 코러스 A처럼 성기게.
+   density: 그 섹션의 리듬 밀도 · songBonus: 노래 프레이즈로 고를 가산점 · salt: 본 난수열과 따로 쓰는 난수 씨앗 */
+const RELAX={p:0.5,density:0.58,songBonus:0.35,salt:0x5f3759df};
 const BLUES_STD=0.04;   /* v0.48 블루스 형식이 아닌 스윙·발라드 곡에서 프레이즈가 블루스 스케일일 확률(예전 0.14·0.06) */
 const HL_LABEL={line:'8분 라인',perc:'리듬 반복(한 음)',pivot:'피벗 패턴',hemiola:'3음 시퀀스(헤미올라)',trip:'셋잇단 런',ust:'어퍼 스트럭처'};
 /* v0.48 어퍼 스트럭처 트라이어드 — 코드 위에 텐션(9·11·13·변화음)으로 쌓은 장·단3화음을 펼쳐 친다(기타 연주자 제안: 소리가 풍성해진다).
@@ -465,8 +470,13 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   const phLenQ=PF?PF.stats.phLen:[4.2,7.1,13.1],gapQ=PF?PF.stats.gap:[1.2,2,3.1];
   const capBeats=inst==='wind'?8:(inst==='brass'?12:16);
   const lenScale=[0,0.75,0.9,1][diff];
-  const capAt=bt=>ARC.n>1&&arcI(bt*6)<0.5?Math.max(3,Math.floor(capBeats*0.72)):capBeats;   /* v0.43 첫 코러스 앞부분만 짧게 */
-  const densityAt=bt=>ARC.n<=1?1:(ARC.i>=ARC.n-1&&bt>=totalBeats-BPB*2?0.5:0.55+0.65*arcI(bt*6)/(ARC.n-1));
+  const relaxSec=(()=>{if(ARC.n<3||ARC.i<1||ARC.i>=ARC.n-1)return -1;   /* v0.59 쉬어 가는 섹션(RELAX) — 따로 만든 난수로 골라 본 난수열은 그대로 */
+    const r=mulberry32(((seed===undefined?0:seed)^RELAX.salt)>>>0);if(r()>=RELAX.p)return -1;
+    const cand=[];for(let q=0;q<nPh;q++)if((sec[q]||'A')==='A')cand.push(q);const pool=cand.length?cand:[...Array(nPh).keys()];return pool[Math.floor(r()*pool.length)]})();
+  const relaxAt=bt=>relaxSec>=0&&Math.floor(bt/(P*BPB))===relaxSec;
+  if(relaxSec>=0)tag(relaxSec*P,'쉬어 가는 섹션');
+  const capAt=bt=>ARC.n>1&&(arcI(bt*6)<0.5||relaxAt(bt))?Math.max(3,Math.floor(capBeats*0.72)):capBeats;   /* v0.43 첫 코러스 앞부분만 짧게 · v0.59 쉬어 가는 섹션도 */
+  const densityAt=bt=>ARC.n<=1?1:relaxAt(bt)?RELAX.density:(ARC.i>=ARC.n-1&&bt>=totalBeats-BPB*2?0.5:0.55+0.65*arcI(bt*6)/(ARC.n-1));
   const phrases=[];
   let beat=rng()<0.6?0:(diff===1?2:1);
   const totalBeats=NB*BPB;
@@ -517,7 +527,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       const secB=P*BPB;
       const sc=phrases.map((ph,i)=>{let v=rng()*0.6;if(ph.s%secB<=1)v+=0.35;if(ph.final)v+=0.4;if(i===0)v+=0.3;
         const r=roles[sectionIndex(ph.s*6,P,BPB)]||'statement';if(r==='resolution')v+=0.15;if(r==='contrast')v-=0.15;
-        if(ARC.n>1)v+=0.2*(1-ARC.i/(ARC.n-1));return v});
+        if(ARC.n>1)v+=0.2*(1-ARC.i/(ARC.n-1));if(relaxAt(ph.s))v+=RELAX.songBonus;return v});
       for(let k=0;k<K;k++){let bi=-1;for(let i=0;i<N;i++)if(!phrases[i].song&&(bi<0||sc[i]>sc[bi]))bi=i;if(bi<0)break;
         phrases[bi].song=true;if(p<0.6){if(bi>0)sc[bi-1]-=0.35;if(bi+1<N)sc[bi+1]-=0.35}}
     }
@@ -586,9 +596,9 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     /* v0.35 하이라이트 장치 — 4마디 블록마다 최대 하나. line(8분 라인)·perc(한 음 리듬 반복)·pivot(피벗 패턴)·hemiola(3음 시퀀스)·trip(셋잇단 런) */
     {
       const blk=Math.floor(ph.s/(BPB*4));
-      if(R2&&!recall&&!ph.song&&!ph.blues&&need>=6&&diff>=2&&topic==='auto'&&!hlBlocks.has(blk)&&rng()<(diff===2?0.5:0.6)){
-        const pool=[{v:'line',w:1.3*eighthTilt},{v:'perc',w:0.8},{v:'pivot',w:0.9},{v:'hemiola',w:0.9},{v:'ust',w:opts.ust===false?0:UST_W}];
-        if(diff>=3)pool.push({v:'trip',w:0.8*tripTilt});
+      if(R2&&!recall&&!ph.song&&!ph.blues&&!relaxAt(ph.s)&&need>=6&&diff>=2&&topic==='auto'&&!hlBlocks.has(blk)&&rng()<(diff===2?0.5:0.6)){
+        const pool=[{v:'line',w:RHY_MIX.line*eighthTilt},{v:'perc',w:0.8},{v:'pivot',w:0.9},{v:'hemiola',w:0.9},{v:'ust',w:opts.ust===false?0:UST_W}];
+        if(diff>=3)pool.push({v:'trip',w:RHY_MIX.tripRun*tripTilt});
         const kind=pickW(rng,pool),s0=ph.s+1;   /* 첫 박은 실측 분포(엇박 진입이 많다)에 맡긴다 */
         let len=0,cells=0;
         if(kind==='line')len=need>=10&&rng()<0.6?BPB*2:BPB;
@@ -632,7 +642,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         if(!al[k2])continue;
         let w=row[k2];
         const density=densityAt(bt);
-        if(k2==='T')w*=FP.T*density*density;else if(k2==='E')w*=FP.E*density*density;else if(k2==='Q'||k2==='Qs'||k2==='H')w*=FP.QH/density;
+        if(k2==='T')w*=FP.T*density*density*RHY_MIX.trip;else if(k2==='E')w*=FP.E*density*density*RHY_MIX.eighth;else if(k2==='Q'||k2==='Qs'||k2==='H')w*=FP.QH/density;
         if(isFirst&&!NOTE_TOK[k2])continue;
         if(isFirst&&k2==='Uh')continue;
         if(!isFirst&&k2==='R')w*=0.25;
@@ -653,7 +663,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       k=c.length?pickW(rng,c):'Q';
       }
       /* v0.34 셋잇단 쌍 — 셋잇단 뒤에 한 박 더 셋잇단(같은 음형 반복 → 6연음 느낌) */
-      if(k==='T'&&R2&&diff>=3&&bt+1<ph.e&&!(bt+1>=lineS&&bt+1<lineE)&&rng()<0.35*tripTilt)tripNext=true;
+      if(k==='T'&&R2&&diff>=3&&bt+1<ph.e&&!(bt+1>=lineS&&bt+1<lineE)&&rng()<RHY_MIX.tripPair*tripTilt)tripNext=true;
       toks.push(k);prev2=prev;prev=k;
     }
     if(!motif&&ph.e-ph.s>=3)motif={toks:toks.slice(0,Math.min(6,toks.length)),pi};
@@ -1261,7 +1271,10 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       let cur=null;const c=[];
       for(let m=LO;m<=HI;m++)if(isCT(seg0,m)&&isStable(seg0,m)&&Math.abs(m-goal)<=5&&(prevM===null||Math.abs(m-prevM)<=MAXLEAP))c.push({v:m,w:Math.exp(-Math.abs(m-goal)/2)});
       if(!c.length)return fail();cur=pickW(rng,c);
-      for(const k of span){const sg=segs[segAt(events[k].t)];if(tgt[k]!==undefined&&Math.abs(tgt[k]-cur)<=4)cur=tgt[k];else if(!(isCT(sg,cur)||inScale(sg,cur))){const ct=chordToneMidis(sg.root,sg.type,LO,HI).filter(x=>Math.abs(x-cur)<=3);if(ct.length)cur=nearest(ct,cur)}ms.push(cur)}
+      for(const k of span){const sg=segs[segAt(events[k].t)];if(isCT(sg,cur)){}   /* v0.59 새 코드의 코드톤이면 그 음을 그대로 — 착지 규칙도 만족 */
+        else if(tgt[k]!==undefined&&Math.abs(tgt[k]-cur)<=4)cur=tgt[k];else if(!inScale(sg,cur)){const ct=chordToneMidis(sg.root,sg.type,LO,HI).filter(x=>Math.abs(x-cur)<=3);if(ct.length)cur=nearest(ct,cur)}ms.push(cur)}
+      /* v0.59 한 음이 4번 넘게 이어지지 못하면 「리듬 반복(한 음)」이라 부를 수 없으니 장치를 접는다 */
+      {let run=1,best=1;for(let q=1;q<ms.length;q++){run=ms[q]===ms[q-1]?run+1:1;best=Math.max(best,run)}if(ms.length>=4&&best<4)return fail()}
     }else if(H.kind==='pivot'){
       const c=[];
       for(let m=LO+2;m<=HI-5;m++)if(isCT(seg0,m)&&Math.abs(m-goal)<=5&&(prevM===null||Math.abs(m-prevM)<=MAXLEAP))c.push({v:m,w:Math.exp(-Math.abs(m-goal)/2)*(mod12(m-seg0.root)===0?0.7:1)});
@@ -1774,11 +1787,11 @@ function abcDur(ticks,trip){
   const v=ticks/3;
   return Number.isInteger(v)?String(v):ticks+'/3';
 }
-function toAbc(solo,tempo,transpose,octShift){
-  transpose=transpose||0;octShift=octShift||0;
+function toAbc(solo,tempo,transpose,octShift,perLine){
+  transpose=transpose||0;octShift=octShift||0;const PL=perLine>0?perLine:4;   /* v0.59 줄당 마디 수(좁은 화면은 2) */
   const rows=[];
-  for(let b=0;b<solo.bars.length;b+=4){
-    const chunk=solo.bars.slice(b,b+4).map(bar=>{
+  for(let b=0;b<solo.bars.length;b+=PL){
+    const chunk=solo.bars.slice(b,b+PL).map(bar=>{
       const split=bar.notes.some(n=>n.ci!==undefined);   /* v0.29 연습 악보: 코드 기호를 그 코드가 시작하는 음 위에 */
       let s=split?'':' ';
       const cst=chordBeats(bar.chords.length,solo.bpb||4).map(x=>x*6);let cDone=0;   /* v0.38 코드 기호를 그 코드가 시작하는 자리의 음 위에 */
@@ -1790,7 +1803,8 @@ function toAbc(solo,tempo,transpose,octShift){
         const scale=CHORD_TYPES[ch.type].scale;
         if(n.t%6===0&&k>0&&!n.trip&&!(bar.notes[k-1]&&bar.notes[k-1].trip))s+=' ';
         if(split&&n.ci!==undefined)s+='"'+chordSymbol(ch.root+transpose,ch.type)+'"';
-        if(!split)while(cDone<cst.length&&cst[cDone]<n.t+n.d){const c2=bar.chords[cDone];s+='"'+chordSymbol(c2.root+transpose,c2.type)+'"';cDone++}
+        /* v0.59 둘째 코드부터는 그 자리 이후에 시작하는 음 위에 — 앞 음이 길게 걸쳐 있으면 위아래로 겹쳐 쌓이던 문제 */
+        if(!split)while(cDone<cst.length&&(cDone===0?cst[0]<n.t+n.d:cst[cDone]<=n.t)){const c2=bar.chords[cDone];s+='"'+chordSymbol(c2.root+transpose,c2.type)+'"';cDone++}
         if(n.trip&&tripPos%3===0)s+='(3';
         if(n.midi===null)s+='z'+abcDur(n.d,!!n.trip);
         else{
@@ -1804,6 +1818,7 @@ function toAbc(solo,tempo,transpose,octShift){
         }
         tripPos=n.trip?tripPos+1:0;
       });
+      if(!split)while(cDone<cst.length){const c2=bar.chords[cDone];s+=' "'+chordSymbol(c2.root+transpose,c2.type)+'"y';cDone++}   /* 마디 끝까지 이어지는 음 — 빈칸(y) 위에 */
       return s;
     });
     rows.push(chunk.join('|')+'|');
