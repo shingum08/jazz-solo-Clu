@@ -49,6 +49,19 @@ if fb_url and not re.fullmatch(r'https://[A-Za-z0-9.-]+(/[A-Za-z0-9._/-]*)?',fb_
 if out.count("/*__FB_ENDPOINT__*/''")!=1: raise RuntimeError('FB_ENDPOINT 마커가 없습니다(app/template.html)')
 out=out.replace("/*__FB_ENDPOINT__*/''",'/*__FB_ENDPOINT__*/'+repr(fb_url.rstrip('/')))
 print('마디 평가 수신 주소:',fb_url or '(없음 — 파일 내보내기 방식)')
+# v0.55 Supabase 공개 설정(주소 + publishable 키) — server/supabase/config.json. 비밀 키(sb_secret_·service_role)는 절대 넣지 않는다
+import json as _json
+sb_file=os.path.join(root,'server','supabase','config.json')
+sb_cfg=None
+if os.path.exists(sb_file):
+    sb_cfg=_json.load(open(sb_file,encoding='utf-8'))
+    if not re.fullmatch(r'https://[a-z0-9]{20}\.supabase\.co',sb_cfg.get('url','')): raise RuntimeError('Supabase 주소 형식이 이상합니다')
+    k=sb_cfg.get('key','')
+    if not k.startswith('sb_publishable_') or 'secret' in k or 'service_role' in k: raise RuntimeError('Supabase 키는 publishable 키만 넣습니다(비밀 키 금지)')
+    sb_cfg={'url':sb_cfg['url'],'key':k}
+if out.count("/*__SB_CONFIG__*/null")!=1: raise RuntimeError('SB_CONFIG 마커가 없습니다(app/template.html)')
+out=out.replace("/*__SB_CONFIG__*/null",'/*__SB_CONFIG__*/'+(_json.dumps(sb_cfg) if sb_cfg else 'null'))
+print('Supabase:',sb_cfg['url'] if sb_cfg else '(없음 — 계정 기능 꺼짐)')
 pub=out.replace('<!--__PWA_HEAD__-->\n','').replace('<!--__PWA_HEAD__-->','')
 open(os.path.join(root,'index.html'),'w',encoding='utf-8').write(pub)
 print('built index.html',len(pub),'bytes (공개 빌드 · 앱 설치 꺼짐)')

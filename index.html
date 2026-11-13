@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<!-- v0.54.1 화면 테마는 잠시 닫음(사용자 요청) — 다시 열 때 THEME_ON=true + 여기서 저장된 테마를 그리기 전에 적용 -->
-<title>즉흥 악보 생성기 v0.54.1 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<!-- v0.55.0 화면 테마는 잠시 닫음(사용자 요청) — 다시 열 때 THEME_ON=true + 여기서 저장된 테마를 그리기 전에 적용 -->
+<title>즉흥 악보 생성기 v0.55.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -1136,6 +1136,11 @@ body.setopen{overflow:hidden}
 .forumbtn{display:inline-flex;align-items:center;gap:6px;background:var(--panel-2);border:1px solid var(--brass-deep);color:var(--brass);border-radius:8px;padding:9px 14px;font-size:15px;text-decoration:none;min-height:42px}
 .forumbtn:hover{border-color:var(--brass)}
 .impnote{font-size:13px;color:var(--mut);flex:1 1 220px}
+.acctbox{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.acctf{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--mut)}
+.acctf input{background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:10px 12px;font-family:inherit;font-size:16px;min-height:44px}
+.acctbtns{display:flex;flex-wrap:wrap;gap:8px}.acctbtns .btn{min-height:44px;padding:10px 14px}
+.acctwho{font-size:15px}.acctwho b{color:var(--hi)}
 .impcat input{background:var(--panel-2);border:1px solid var(--line);color:var(--txt);border-radius:7px;padding:6px 8px;font-family:inherit;font-size:14px;width:12em}
 .mylisthead{position:sticky;top:-4px;z-index:6;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);padding:10px 0 8px;border-bottom:1px solid var(--line);margin-top:6px}
 .mylisthead[hidden]{display:none}
@@ -1213,7 +1218,7 @@ svg .abcjs-tempo{cursor:pointer}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.54.1 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">Concept Prototype · v0.55.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -1318,6 +1323,23 @@ svg .abcjs-tempo{cursor:pointer}
         <span class="zlab">악보 크기</span><button class="zbtn" data-z="-" type="button" aria-label="악보 작게">−</button><span class="zval">100%</span><button class="zbtn" data-z="+" type="button" aria-label="악보 크게">+</button>
       </div>
       <p class="note">마디 고정·구간 반복을 켜면 설정이 닫히고 악보 아래에 마디 번호 줄이 나옵니다. 거기서 마디를 고르세요.</p>
+     </section>
+     <!-- v0.55 계정(테스트) — 개인정보처리방침 게시 전이라 ?beta=1 로 연 기기에서만 보임 -->
+     <section class="setsec" id="acctSec" hidden>
+      <h4>계정 (테스트)</h4>
+      <p class="note">로그인하면 내 곡 · 즐겨찾기 · 저장한 솔로 · 보관한 마디가 계정에 저장돼 다른 기기에서도 이어서 쓸 수 있어요. 지금은 테스트 계정 전용이에요. 마디 평가는 계정과 따로 익명으로 모입니다.</p>
+      <div id="acctOut" class="acctbox">
+       <label class="acctf">이메일 <input id="acctEmail" type="email" autocomplete="email" inputmode="email"></label>
+       <label class="acctf">비밀번호 <input id="acctPw" type="password" autocomplete="current-password" minlength="8"></label>
+       <div class="acctbtns"><button type="button" class="btn primary" id="acctLoginBtn">로그인</button><button type="button" class="btn ghost" id="acctSignupBtn">가입하기</button><button type="button" class="btn ghost" id="acctResetBtn">비밀번호 찾기</button></div>
+      </div>
+      <div id="acctIn" class="acctbox" hidden>
+       <div class="acctwho">로그인됨 · <b id="acctWho"></b></div>
+       <div class="acctbtns"><button type="button" class="btn primary" id="acctSyncBtn">지금 동기화</button><button type="button" class="btn ghost" id="acctLogoutBtn">로그아웃</button></div>
+       <label class="acctf">새 비밀번호 <input id="acctNewPw" type="password" autocomplete="new-password" minlength="8"></label>
+       <div class="acctbtns"><button type="button" class="btn ghost" id="acctPwBtn">비밀번호 바꾸기</button></div>
+      </div>
+      <p class="note" id="acctMsg" aria-live="polite"></p>
      </section>
      <section class="setsec" id="themeSec" hidden>
       <h4>화면 테마</h4>
@@ -4868,7 +4890,7 @@ const songSel=$('#songSel');
 /* ── v0.42 내 곡(불러온 곡) — 이 기기 localStorage에만. 곡 목록보다 먼저 SONGDB에 올린다 ── */
 const MYSONG_KEY='clu.mysongs.v1';
 function loadMySongs(){try{const v=JSON.parse(localStorage.getItem(MYSONG_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
-function storeMySongs(){try{localStorage.setItem(MYSONG_KEY,JSON.stringify(cur.mySongs))}catch(e){}}
+function storeMySongs(){try{localStorage.setItem(MYSONG_KEY,JSON.stringify(cur.mySongs))}catch(e){}acctQueue('mysongs')}
 function registerMySong(m){
   SONGDB[m.id]={name:m.n,c:m.c,key:m.k,bpm:m.bpm,bpb:m.m||4,form:{phrase:m.f[1],sections:m.f[0]},bars:m.ch.split('|').map(b=>b.trim().split(/\s+/).map(parseCh)),mine:true};
   if(typeof SONG_STATUS!=='undefined')SONG_STATUS[m.id]={s:'mine',n:(m.src||'불러온 곡')+(m.warn&&m.warn.length?' · '+m.warn.join(' · '):''),a:[]};
@@ -4877,7 +4899,7 @@ cur.mySongs=loadMySongs().filter(m=>{try{registerMySong(m);return true}catch(e){
 /* ── v0.48 즐겨찾기 · 폴더 · 곡 삭제 — 곡이 천 곡을 넘어도 고르기 쉽게 ── */
 const FAV_KEY='clu.fav.v1';
 cur.fav=new Set((()=>{try{const v=JSON.parse(localStorage.getItem(FAV_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}})());
-function storeFav(){try{localStorage.setItem(FAV_KEY,JSON.stringify([...cur.fav]))}catch(e){}}
+function storeFav(){try{localStorage.setItem(FAV_KEY,JSON.stringify([...cur.fav]))}catch(e){}acctQueue('fav')}
 const escH=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function mineOf(id){return (cur.mySongs||[]).find(m=>m.id===id)||null}
 function folderCounts(){const c={};(cur.mySongs||[]).forEach(m=>{const f=m.folder||'';c[f]=(c[f]||0)+1});return c}
@@ -5526,7 +5548,7 @@ function fbExport(){
 }
 const SNIP_KEY='clu.snips.v1';
 function loadSnips(){try{const v=JSON.parse(localStorage.getItem(SNIP_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
-function storeSnips(){try{localStorage.setItem(SNIP_KEY,JSON.stringify(cur.snips))}catch(e){}}
+function storeSnips(){try{localStorage.setItem(SNIP_KEY,JSON.stringify(cur.snips))}catch(e){}acctQueue('snips')}
 function barRangeLabel(bs){const out=[];let s=null,p=null;bs.forEach(b=>{if(s===null){s=p=b}else if(b===p+1){p=b}else{out.push(s===p?(s+1)+'':(s+1)+'–'+(p+1));s=p=b}});if(s!==null)out.push(s===p?(s+1)+'':(s+1)+'–'+(p+1));return out.join(', ')}
 function renderSnips(){
   const el=$('#snipList');if(!el)return;
@@ -5732,7 +5754,7 @@ function renderSaved(){
 /* ── v0.41 저장 영속화 · 백업 · 앱 설치 ── */
 const SAVE_KEY='clu.saved.v1';
 function loadSaved(){try{const v=JSON.parse(localStorage.getItem(SAVE_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
-function storeSaved(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(cur.saved))}catch(e){}}
+function storeSaved(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(cur.saved))}catch(e){}acctQueue('saved')}
 /* 브라우저가 공간이 부족할 때 지우지 않도록 요청(지원·허용 여부는 브라우저가 정한다) */
 function askPersist(){try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}}
 cur.saved=loadSaved().filter(it=>it&&SONGDB[it.song]);renderSaved();
@@ -6094,7 +6116,7 @@ const THEMES=[
   {id:'sky',n:'스카이 블루',sw:['#eaf4fb','#1f6fae','#ffffff']},
   {id:'emerald',n:'에메랄드',sw:['#0d2620','#2fbf8f','#f3f8f4']}];
 const THEME_KEY='clu.theme.v1';
-const THEME_ON=false;   /* v0.54.1 잠시 닫음 — 기본(미드나잇 클럽)만. 테마 CSS·목록은 남겨 둠 */
+const THEME_ON=false;   /* v0.55.0 잠시 닫음 — 기본(미드나잇 클럽)만. 테마 CSS·목록은 남겨 둠 */
 function themeNow(){const t=document.documentElement.getAttribute('data-theme');return THEMES.some(x=>x.id===t)?t:'midnight'}
 function setTheme(id){
   if(!THEMES.some(x=>x.id===id))id='midnight';
@@ -6109,6 +6131,128 @@ function renderThemes(){
     const nm=document.createElement('span');nm.textContent=t.n;b.appendChild(sw);b.appendChild(nm);b.onclick=()=>setTheme(t.id);g.appendChild(b)});
 }
 if(THEME_ON){$('#themeSec').hidden=false;renderThemes()}else document.documentElement.removeAttribute('data-theme');
+/* ── v0.55 계정(테스트) — Supabase 이메일 로그인 + 내 곡·즐겨찾기·저장한 솔로·보관한 마디를 계정에 동기화 ──
+   · 개인정보처리방침 게시 전이라 테스트 계정 전용: 주소에 ?beta=1 을 붙여 한 번 열면 그 기기에서 「계정」 칸이 보인다.
+   · 공개 키(publishable)만 쓴다. 보안은 DB의 RLS(본인 줄만 읽기·쓰기 — server/supabase/schema_v1.sql)로 지킨다.
+   · 이 기기에서 그 계정과 처음 만나면 기기 자료와 계정 자료를 합치고(같은 id는 하나로), 그 뒤로는 바뀐 쪽을 따른다.
+   · 마디 평가(👍·👎)는 계정에 잇지 않는다 — 익명 수집과 분리(젠팀 11/13: 연결은 별도 동의 뒤) */
+const SB=/*__SB_CONFIG__*/{"url": "https://cbepzelupdhcgtvbpzvd.supabase.co", "key": "sb_publishable_JA4auJ9znqwjciscEprluA_x_708z39"};
+const ACCT_KEY='clu.auth.v1',ACCT_SYNC_KEY='clu.acctsync.v1',BETA_KEY='clu.beta.v1';
+const ACCT_STORES={mysongs:MYSONG_KEY,fav:FAV_KEY,saved:SAVE_KEY,snips:SNIP_KEY};
+var acctTimers={},acctBusy=false;
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function acctOn(){return !!(SB&&SB.url&&SB.key)}
+function acctBeta(){try{if(/[?&]beta=1(&|$)/.test(location.search))localStorage.setItem(BETA_KEY,'1');return localStorage.getItem(BETA_KEY)==='1'}catch(e){return false}}
+function acctSess(){return lsGet(ACCT_KEY,null)}
+function acctErr(e){const m=String(e&&e.message||e);
+  return /Invalid login credentials/i.test(m)?'이메일이나 비밀번호가 맞지 않아요':/Email not confirmed/i.test(m)?'메일 인증이 아직 안 됐어요 — 받은 메일의 링크를 눌러 주세요':/already registered/i.test(m)?'이미 가입된 이메일이에요 — 로그인해 주세요':/Password should be/i.test(m)?'비밀번호는 8자 이상으로 해 주세요':/rate limit/i.test(m)?'잠시 뒤 다시 해 주세요(요청이 많아요)':/Failed to fetch|NetworkError/i.test(m)?'인터넷 연결을 확인해 주세요':m}
+async function sbFetch(path,opt,auth){
+  opt=opt||{};const h=Object.assign({'apikey':SB.key,'content-type':'application/json'},opt.headers||{});
+  if(auth!==false){const s=await acctFresh();if(!s)throw new Error('로그인이 필요해요');h.authorization='Bearer '+s.access_token}
+  const r=await fetch(SB.url+path,Object.assign({},opt,{headers:h}));
+  const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
+  if(!r.ok)throw new Error((j&&(j.msg||j.error_description||j.message||j.error))||('HTTP '+r.status));
+  return j;
+}
+function acctSave(j,keep){const u=j.user||{},s={access_token:j.access_token,refresh_token:j.refresh_token,expires_at:Date.now()+((+j.expires_in||3600)-60)*1000,email:u.email||(keep&&keep.email)||'',uid:u.id||(keep&&keep.uid)||''};lsSet(ACCT_KEY,s);return s}
+async function acctFresh(){
+  const s=acctSess();if(!s)return null;
+  if(Date.now()<s.expires_at)return s;
+  try{const j=await sbFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:s.refresh_token})},false);return acctSave(j,s)}
+  catch(e){try{localStorage.removeItem(ACCT_KEY)}catch(_){}cur._acctMsg='로그인이 끝났어요. 다시 로그인해 주세요.';acctUI();return null}
+}
+function acctBack(){return location.origin&&location.origin!=='null'?location.origin+location.pathname:''}
+async function acctLogin(){
+  const em=$('#acctEmail').value.trim(),pw=$('#acctPw').value;if(!em||!pw){acctUI('이메일과 비밀번호를 넣어 주세요.');return}
+  acctUI('로그인하는 중…');
+  try{const j=await sbFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:em,password:pw})},false);acctSave(j);$('#acctPw').value='';await acctPull()}
+  catch(e){acctUI('로그인 실패: '+acctErr(e))}
+}
+async function acctSignup(){
+  const em=$('#acctEmail').value.trim(),pw=$('#acctPw').value;if(!em||!pw){acctUI('이메일과 비밀번호(8자 이상)를 넣어 주세요.');return}
+  if(pw.length<8){acctUI('비밀번호는 8자 이상으로 해 주세요.');return}
+  acctUI('가입하는 중…');
+  try{const back=acctBack(),j=await sbFetch('/auth/v1/signup'+(back?'?redirect_to='+encodeURIComponent(back):''),{method:'POST',body:JSON.stringify({email:em,password:pw})},false);
+    if(j&&j.access_token){acctSave(j);$('#acctPw').value='';await acctPull()}
+    else acctUI('확인 메일을 보냈어요. 메일의 링크를 누르면 이 화면으로 돌아와 로그인돼요.')}
+  catch(e){acctUI('가입 실패: '+acctErr(e))}
+}
+async function acctReset(){
+  const em=$('#acctEmail').value.trim();if(!em){acctUI('비밀번호를 찾을 이메일을 넣어 주세요.');return}
+  try{const back=acctBack();await sbFetch('/auth/v1/recover'+(back?'?redirect_to='+encodeURIComponent(back):''),{method:'POST',body:JSON.stringify({email:em})},false);acctUI('비밀번호 재설정 메일을 보냈어요. 링크를 누르면 로그인되고, 여기서 새 비밀번호를 정할 수 있어요.')}
+  catch(e){acctUI('보내지 못했어요: '+acctErr(e))}
+}
+async function acctLogout(){try{await sbFetch('/auth/v1/logout',{method:'POST'})}catch(e){}try{localStorage.removeItem(ACCT_KEY)}catch(e){}acctUI('로그아웃했어요. 이 기기의 자료는 그대로 남아 있어요.')}
+async function acctNewPw(){
+  const pw=$('#acctNewPw').value;if(pw.length<8){acctUI('새 비밀번호는 8자 이상으로 해 주세요.');return}
+  try{await sbFetch('/auth/v1/user',{method:'PUT',body:JSON.stringify({password:pw})});$('#acctNewPw').value='';cur._acctRecovery=false;acctUI('비밀번호를 바꿨어요.')}
+  catch(e){acctUI('바꾸지 못했어요: '+acctErr(e))}
+}
+function acctFromHash(){
+  const h=location.hash||'';if(!/access_token=|error_description=/.test(h))return;
+  const p=new URLSearchParams(h.slice(1));try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+  if(p.get('error_description')){cur._acctMsg='로그인 링크 오류: '+p.get('error_description').replace(/\+/g,' ');return}
+  acctSave({access_token:p.get('access_token'),refresh_token:p.get('refresh_token'),expires_in:p.get('expires_in')});
+  if(p.get('type')==='recovery'){cur._acctRecovery=true;cur._acctMsg='새 비밀번호를 정해 주세요(설정 → 계정).'}
+  sbFetch('/auth/v1/user').then(u=>{const s=acctSess();if(s&&u){s.email=u.email||'';s.uid=u.id||'';lsSet(ACCT_KEY,s)}return acctPull()}).catch(e=>acctUI('로그인 확인 실패: '+acctErr(e)));
+}
+function acctSyncMap(){const m=lsGet(ACCT_SYNC_KEY,{}),s=acctSess();return s&&m.uid===s.uid&&m.keys?m.keys:{}}
+function acctMark(k,at){const s=acctSess();if(!s)return;let m=lsGet(ACCT_SYNC_KEY,{});if(m.uid!==s.uid)m={uid:s.uid,keys:{}};m.keys=m.keys||{};m.keys[k]=at;lsSet(ACCT_SYNC_KEY,m)}
+function acctMerge(k,a,b){
+  if(k==='fav')return [...new Set([...(a||[]),...(b||[])])];
+  const seen=new Set(),out=[];[...(a||[]),...(b||[])].forEach(x=>{const id=x&&x.id;if(id===undefined||id===null){out.push(x);return}const key=String(id);if(seen.has(key))return;seen.add(key);out.push(x)});return out;
+}
+async function acctPushNow(k){
+  const s=acctSess();if(!s||!s.uid)return;
+  const j=await sbFetch('/rest/v1/user_store?on_conflict=user_id,key',{method:'POST',headers:{prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify([{user_id:s.uid,key:k,value:lsGet(ACCT_STORES[k],[])}])});
+  acctMark(k,(j&&j[0]&&j[0].updated_at)||new Date().toISOString());
+}
+function acctQueue(k){
+  try{if(!acctOn()||!acctSess()||acctBusy)return;clearTimeout(acctTimers[k]);
+    acctTimers[k]=setTimeout(()=>{acctPushNow(k).then(()=>{cur._acctMsg='계정에 저장됨 '+acctClock()}).catch(e=>{cur._acctMsg='계정 저장 실패: '+acctErr(e)}).finally(()=>acctUI())},1500)}catch(e){}
+}
+function acctClock(){return new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}
+async function acctPull(){
+  if(!acctOn()||!acctSess()||acctBusy)return;acctBusy=true;acctUI('계정과 맞추는 중…');
+  try{
+    const rows=await sbFetch('/rest/v1/user_store?select=key,value,updated_at'),R={};(rows||[]).forEach(r=>{R[r.key]=r});
+    const st=acctSyncMap();let changed=false;
+    for(const k of Object.keys(ACCT_STORES)){
+      const r=R[k],loc=lsGet(ACCT_STORES[k],[]);
+      if(!st[k]){   /* 이 기기에서 이 계정과 처음 — 합친다 */
+        const m=r?acctMerge(k,loc,r.value):loc;
+        if(JSON.stringify(m)!==JSON.stringify(loc)){lsSet(ACCT_STORES[k],m);changed=true}
+        if(!r||JSON.stringify(m)!==JSON.stringify(r.value))await acctPushNow(k);else acctMark(k,r.updated_at);
+      }else if(r&&r.updated_at>st[k]){lsSet(ACCT_STORES[k],r.value);acctMark(k,r.updated_at);changed=true}   /* 다른 기기에서 바뀜 */
+      else if(!r)await acctPushNow(k);
+    }
+    if(changed)acctReload();
+    cur._acctMsg='계정과 맞춤 '+acctClock();
+  }catch(e){cur._acctMsg='동기화 실패: '+acctErr(e)}
+  finally{acctBusy=false;acctUI()}
+}
+function acctReload(){
+  try{cur.mySongs=loadMySongs().filter(m=>{try{registerMySong(m);return true}catch(e){return false}})}catch(e){}
+  try{cur.fav=new Set(lsGet(FAV_KEY,[]))}catch(e){}
+  try{cur.saved=loadSaved().filter(it=>it&&SONGDB[it.song])}catch(e){}
+  try{cur.snips=loadSnips()}catch(e){}
+  [renderMySongs,renderSaved,renderSnips,buildViewOptions,syncFav].forEach(f=>{try{f()}catch(e){}});
+}
+function acctUI(msg){
+  if(msg!==undefined)cur._acctMsg=msg;
+  const sec=$('#acctSec');if(!sec)return;const s=acctSess();
+  sec.hidden=!(acctOn()&&(acctBeta()||s));
+  $('#acctOut').hidden=!!s;$('#acctIn').hidden=!s;
+  if(s)$('#acctWho').textContent=s.email||'(이메일 확인 중)';
+  $('#acctMsg').textContent=cur._acctMsg||'';
+}
+if(acctOn()){
+  $('#acctLoginBtn').onclick=acctLogin;$('#acctSignupBtn').onclick=acctSignup;$('#acctResetBtn').onclick=acctReset;
+  $('#acctLogoutBtn').onclick=acctLogout;$('#acctSyncBtn').onclick=()=>acctPull();$('#acctPwBtn').onclick=acctNewPw;
+  acctFromHash();acctUI();if(acctSess())acctPull();
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&acctSess())acctPull()});
+}
 /* v0.50 기법·화성 분석 접기 상태 — 이 기기에만 기억 */
 document.querySelectorAll('details.fold2').forEach(d=>{const k='clu.fold.'+d.id;try{d.open=localStorage.getItem(k)==='1'}catch(e){}d.addEventListener('toggle',()=>{try{localStorage.setItem(k,d.open?'1':'0')}catch(e){}})});
 $('#btnStop').onclick=()=>{stopAll();cur.selBar=null;if(cur.solo)renderChips();syncPlay()};   /* v0.50 ■ = 처음으로(고른 마디도 지움) · 마디부터는 ∥ 일시정지 뒤 마디 누르기 */
