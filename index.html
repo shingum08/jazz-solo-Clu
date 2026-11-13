@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- v0.55.0 화면 테마는 잠시 닫음(사용자 요청) — 다시 열 때 THEME_ON=true + 여기서 저장된 테마를 그리기 전에 적용 -->
-<title>EzImprovJazz v0.64.0 — 즉흥 재즈 솔로 연습 악보</title>
+<title>EzImprovJazz v0.65.0 — 즉흥 재즈 솔로 연습 악보</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -1248,7 +1248,7 @@ svg .abcjs-tempo{cursor:pointer}
 <script>setTimeout(function(){var b=document.getElementById('boot');if(b)b.classList.add('done')},8000)/* v0.56 로딩 화면 안전장치 — 무슨 일이 있어도 8초 뒤에는 걷는다 */</script>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.64.0<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.65.0<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1 class="brand"><a class="brandlink" id="brandLink"><svg class="bmark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="brassH" x1="0" y1="112" x2="0" y2="362" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f8d98a"/><stop offset="0.5" stop-color="#e9b44c"/><stop offset="1" stop-color="#c98a2e"/></linearGradient><radialGradient id="glowH" cx="0.5" cy="0.42" r="0.75"><stop offset="0" stop-color="#1d2a4d"/><stop offset="1" stop-color="#0d1428"/></radialGradient></defs><rect width="512" height="512" rx="112" fill="url(#glowH)"/><g stroke="#4a5d8c" stroke-width="4" stroke-linecap="round" opacity=".85"><line x1="40" y1="134" x2="472" y2="134"/><line x1="40" y1="196" x2="472" y2="196"/><line x1="40" y1="258" x2="472" y2="258"/><line x1="40" y1="320" x2="472" y2="320"/><line x1="40" y1="382" x2="472" y2="382"/></g><g fill="url(#brassH)"><g transform="translate(36 0) skewX(-8)"><rect x="96" y="160" width="26" height="192" rx="13"/><path d="M109.0,160H204L194,186H109.0A13.0,13.0 0 0 1 109.0,160Z"/><path d="M109.0,243H182L172,269H109.0A13.0,13.0 0 0 1 109.0,243Z"/><path d="M109.0,326H204L194,352H109.0A13.0,13.0 0 0 1 109.0,326Z"/></g><g transform="translate(36 0) skewX(-8)"><rect x="240" y="160" width="26" height="192" rx="13"/><path d="M222,173a13,13 0 0 1 13,-13H288L278,186H235a13,13 0 0 1 -13,-13Z"/><path d="M222,339a13,13 0 0 1 13,-13H288L278,352H235a13,13 0 0 1 -13,-13Z"/></g><rect x="384" y="160" width="26" height="136" rx="13"/><path d="M384,282 a49,49 0 0 1 -98,0 l26,0 a23,23 0 0 0 46,0 z"/><circle cx="397" cy="134" r="20"/></g><path d="M100,436 Q256,474 404,436" stroke="#e9b44c" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.9"/><g class="nt"><ellipse cx="434" cy="430" rx="13" ry="10" fill="#e9b44c" transform="rotate(-18 434 430)"/><path d="M446,428 V396 Q460,400 465,409" stroke="#e9b44c" stroke-width="6" fill="none" stroke-linecap="round"/></g></svg><span>EzImprovJazz</span></a></h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -1836,6 +1836,11 @@ const SCALE_COLOR={base:0.08,arc:0.32,contrast:0.15,altShare:0.6,majShare:0.5};
    cap: 프레이즈 최대 길이(박) — 목관 8박(2마디)이 문장을 잘게 끊던 주원인 · sparseCap: 성긴 곳(첫 코러스 앞부분·쉬어 가는 섹션) 최대 길이 · lenLo/lenHi: 밀도(코러스 곡선)에 따라 프레이즈 길이 배수(성긴 곳 → 촘촘한 곳)
    denseGapP: 촘촘한 곳에서 프레이즈 사이를 1박 숨으로 줄일 확률 · crossP: 촘촘한 곳에서 섹션 경계 앞에서 굳이 끊지 않고 넘어갈 확률 · inR: 촘촘한 곳 프레이즈 안 4분 쉼 가중 */
 const PHRASE_FLOW={cap:{wind:14,brass:14,free:16},sparseCap:8,lenLo:0.85,lenHi:1.35,denseGapP:0.6,crossP:0.5,inR:0.08};
+/* v0.65 모티프 발전(사용자 피드백 11/14: 「모티프만 계속 새로 나오고 빌드업·디테일한 구조가 안 생김」)
+   한 섹션의 첫 프레이즈 동기를 그 섹션의 「주제」로 삼아 쓸 때마다 단계를 올린다: 0 진술·대답(반복·시퀀스) → 1 시퀀스·쪼개기 → 2 쪼개기 위주 → maxUse번 쓰면 놓아 주고 긴 라인으로.
+   sparseRate: 성긴 곳(첫 코러스 앞부분 등) 확률 배수 · shapeOnly: 리듬이 안 맞아 윤곽만 닮은 모티프를 버릴 확률
+   stageW: 단계별 변형 무게(frag = 동기 끝 2~3음을 음 높이를 옮겨 두 번 — 쪼개기) · denseRate: 촘촘한 곳(뒤 코러스)에서 모티프를 다시 꺼낼 확률 배수 */
+const MOTIF_DEV={maxUse:3,denseRate:0.55,sparseRate:1.4,shapeOnly:0.2,gapTicks:6,stageW:[{rep:0.6,up:1.2,down:1.2,inv:0.4},{rep:0.2,up:1.5,down:1.5,inv:0.6,frag:1},{up:0.6,down:0.6,inv:0.3,frag:1.5}]};
 const RELAX={p:0.5,density:0.58,songBonus:0.35,salt:0x5f3759df};
 const BLUES_STD=0.04;   /* v0.48 블루스 형식이 아닌 스윙·발라드 곡에서 프레이즈가 블루스 스케일일 확률(예전 0.14·0.06) */
 const HL_LABEL={line:'8분 라인',perc:'리듬 반복(한 음)',pivot:'피벗 패턴',hemiola:'3음 시퀀스(헤미올라)',trip:'셋잇단 런',ust:'어퍼 스트럭처'};
@@ -2616,6 +2621,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
      시퀀스(스케일 위 이동)·반진행(뒤집기)·반복(코드 맞춤)으로 변형해 놓는다. 사람 연주자의 "말 걸고 받아치기"를 흉내.
      음높이는 새 코드의 스케일/코드톤으로 끌어당기고(±1반음), 모든 규칙(음역·도약·메인 음)을 통과하지 못하면 포기한다. */
   const phNotes=[],motifLock=new Set(),motifLog=[];
+  const motifUse={};   /* v0.65 주제(프레이즈 번호) → 쓴 횟수 */
   const motifRate=(opts.motif===false||diff===1)?0:(opts.motifRate!==undefined?opts.motifRate:(diff===2?0.6:0.8));
   const headFrags=(opts.headMotifs||[]).filter(f=>f&&Array.isArray(f.off)&&Array.isArray(f.d)&&f.off.length>=3&&f.off.length===f.d.length&&f.d.every(x=>x>0));
   const headRate=opts.headRate!==undefined?opts.headRate:0.5;   /* 헤드 조각이 있을 때 모티프 출처로 쓰는 비율 */
@@ -2898,43 +2904,52 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     stats.hl=(stats.hl||0)+1;
   }
   function tryMotif(i){
-    if(!motifRate||rng()>motifRate)return false;
     const e0=events[i];
+    if(!motifRate||rng()>Math.min(1,motifRate*(densityAt(e0.t/6)>=0.95?MOTIF_DEV.denseRate:MOTIF_DEV.sparseRate)))return false;   /* v0.65 성긴 곳(주제 제시·발전)은 더, 촘촘한 곳(뒤 코러스)은 덜 */
     if(phDev[e0.ph])return false;
     /* 출처 결정 */
-    let off=null,dd=null,from='self',srcStart=null;
+    let off=null,dd=null,from='self',srcStart=null,srcPh=-1,stage=0,kind0=null;
     if(headFrags.length&&rng()<headRate){const f=headFrags[Math.floor(rng()*headFrags.length)];off=f.off.slice();dd=f.d.slice();from='head'}
     else{
       const cand=[];for(let ph=0;ph<e0.ph;ph++)if(phNotes[ph]&&phNotes[ph].length>=4)cand.push(ph);
       if(!cand.length)return false;
-      const ph0=cand[rng()<0.6?0:cand.length-1],a=phNotes[ph0];
+      /* v0.65 주제 = 지금 섹션의 첫 프레이즈(없으면 예전처럼 코러스 첫 프레이즈 또는 바로 앞) — 같은 주제를 쓸수록 발전 단계가 오른다 */
+      const sec0=sectionIndex(e0.t,P,BPB),inSec=cand.filter(ph=>sectionIndex(phrases[ph].s*6,P,BPB)===sec0);
+      const ph0=inSec.length?inSec[0]:cand[rng()<0.6?0:cand.length-1],a=phNotes[ph0];
+      srcPh=ph0;stage=motifUse[ph0]||0;if(stage>=MOTIF_DEV.maxUse)return false;   /* 다 썼으면 놓아 주고 자유로운 라인으로 */
       const K0=(rng()<0.5)?4:3;let K=0;
-      for(let k=1;k<K0;k++){if(a[k].trip||a[k-1].trip||a[k-1].t+a[k-1].d!==a[k].t)break;K=k+1}
+      for(let k=1;k<K0&&k<a.length;k++){if(a[k].trip||a[k-1].trip||a[k].t-(a[k-1].t+a[k-1].d)>MOTIF_DEV.gapTicks)break;K=k+1}   /* v0.65 사이에 짧은 쉼(1박 이하)이 있어도 한 동기 */
       if(K<3)return false;
-      off=a.slice(0,K).map(n=>n.midi-a[0].midi);dd=a.slice(0,K).map(n=>n.d);srcStart=a[0].midi;
       if(a[K-1].trip)return false;
+      const W=MOTIF_DEV.stageW[Math.min(stage,MOTIF_DEV.stageW.length-1)];
+      kind0=pickW(rng,Object.keys(W).map(k=>({v:k,w:W[k]})));
+      if(kind0==='frag'){   /* 쪼개기: 동기 끝 F음을 두 번 — 둘째는 2~3반음 옮겨(시퀀스) */
+        const F=rng()<0.7?2:3,fa=a.slice(K-F,K),fs=(rng()<0.5?1:-1)*(rng()<0.6?2:3);
+        const fo=fa.map(n=>n.midi-fa[0].midi);off=fo.concat(fo.map(x=>x+fs));dd=fa.map(n=>n.d).concat(fa.map(n=>n.d));srcStart=fa[0].midi;
+      }else{off=a.slice(0,K).map(n=>n.midi-a[0].midi);dd=a.slice(0,K).map(n=>n.d);srcStart=a[0].midi}
     }
     const K=off.length;
     /* 대상 이벤트가 같은 프레이즈의 연속 음이고, 잠긴 곳·인용·잇단·프레이즈 끝음이 없어야 한다 */
+    let contig=true;
     for(let k=0;k<K;k++){const x=events[i+k];if(!x||x.ph!==e0.ph||x.trip||x.quote||x.last||forced.has(i+k)||motifLock.has(i+k))return false;
-      if(k>0&&events[i+k-1].t+events[i+k-1].d!==x.t)return false}
+      if(k>0&&events[i+k-1].t+events[i+k-1].d!==x.t){if(from==='head'||x.t-(events[i+k-1].t+events[i+k-1].d)>MOTIF_DEV.gapTicks)return false;contig=false}}   /* v0.65 자기 모티프는 짧은 쉼을 사이에 둬도 됨 */
     /* 리듬: 총 길이가 같으면 모티프 리듬을 그대로 입힌다. 아니면 헤드는 포기, 자기 모티프는 윤곽만 */
     const own=events[i+K-1].t+events[i+K-1].d-e0.t,srcSum=dd.reduce((a,b)=>a+b,0);
     let rhy=false;
-    if(own===srcSum){
+    if(own===srcSum&&contig&&dd.length===K){
       let t=e0.t;
       const ok=dd.every(d=>{const r=(t%6===0)||(d===3||d===6||d===9);t+=d;return r&&d>=3});
       if(ok)rhy=true;
     }
     /* v0.47 헤드 조각은 리듬 길이가 안 맞아도 음 윤곽(음정 모양)은 빌려 쓴다 — 예전에는 포기해서 헤드 차용이 거의 안 들렸다 */
-    if(!rhy&&from!=='head'&&rng()<0.4)return false;      /* 윤곽만 닮은 자기 모티프는 덜 쓴다 */
+    if(!rhy&&from!=='head'&&rng()<MOTIF_DEV.shapeOnly)return false;      /* 윤곽만 닮은 자기 모티프는 덜 쓴다(v0.65 0.4 → 0.2 — 발전이 너무 드물었다) */
     const t0=e0.t;
     const times=[],durs=[];
-    {let t=t0;for(let k=0;k<K;k++){times.push(t);const d=rhy?dd[k]:events[i+k].d;durs.push(d);t+=d}}
+    {let t=t0;for(let k=0;k<K;k++){if(!rhy)t=events[i+k].t;times.push(t);const d=rhy?dd[k]:events[i+k].d;durs.push(d);t+=d}}   /* v0.65 리듬을 안 입히면 실제 자리 그대로 */
     /* 변형 */
     const kinds=[{v:'rep',w:0.9},{v:'up',w:1.2},{v:'down',w:1.2},{v:'inv',w:0.6}];
-    const kind=pickW(rng,kinds);
-    const sgn=kind==='inv'?-1:1;
+    const kind=kind0||pickW(rng,kinds);   /* v0.65 자기 모티프는 발전 단계에서 고른 변형 */
+    const sgn=kind==='inv'?-1:1;   /* frag: 시퀀스가 off에 들어 있어 옮김 없음 */
     const sh=kind==='up'?pickW(rng,[{v:2,w:3},{v:3,w:1.5},{v:4,w:1}]):kind==='down'?-pickW(rng,[{v:2,w:3},{v:3,w:1.5},{v:4,w:1}]):0;
     const segAtT=t=>segs[segAt(t)];
     /* 시작음: 모티프의 출발음 기준(자기 모티프) 또는 현재 윤곽 목표(헤드)에서 가까운 코드톤 */
@@ -2972,7 +2987,8 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       forced.set(i+k,{m:ms[k],kind:'motif'});motifLock.add(i+k);
     }
     const nm=from==='head'?'헤드 차용':'모티프 발전';
-    const kn={rep:'반복',up:'시퀀스↑',down:'시퀀스↓',inv:'반진행'}[kind];
+    const kn={rep:'반복',up:'시퀀스↑',down:'시퀀스↓',inv:'반진행',frag:'쪼개기'}[kind];
+    if(srcPh>=0)motifUse[srcPh]=stage+1;   /* v0.65 발전 단계 올림 */
     tag(Math.floor(t0/TPB),nm+': '+kn);
     stats.motif++;if(from==='head')stats.headQuote++;
     motifLog.push({bar:Math.floor(t0/TPB),t:t0,from,kind,len:K,rhythm:rhy,off:off.slice(),dur:durs.slice(),start:ms[0],ms:ms.slice()});
