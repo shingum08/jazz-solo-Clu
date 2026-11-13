@@ -71,7 +71,7 @@ console.log('리듬 v2 검사 통과');
     const snd=ns.filter(x=>x.m!==null);
     /* 크로매틱: 스케일 밖 음은 바로 이어지는 음으로 반음 해결 */
     for(let i=0;i<ns.length;i++){const x=ns[i];if(x.m===null)continue;const sg=segAt(x.T),r=mod(x.m-sg.root);if(sg.ct.includes(r)||sg.scale.includes(r))continue;outN++;
-      const nx=ns[i+1];const ok=nx&&nx.m!==null&&nx.T===x.T+x.d&&Math.abs(nx.m-x.m)===1;if(!ok&&!s.bars[x.bar].tags.includes('3음 시퀀스(헤미올라)')&&!s.bars[x.bar].tags.includes('블루스 스케일')&&!s.bars[x.bar].tags.some(g=>/^릭: 얼터드/.test(g)))outBad++}   /* v0.39 블루노트(♭3·♭5)는 일부러 스케일 밖 · v0.40 얼터드 릭(♭9·♯9·♭13)도 의도한 바깥음 */
+      const nx=ns[i+1];const ok=nx&&nx.m!==null&&nx.T===x.T+x.d&&Math.abs(nx.m-x.m)===1;if(!ok&&!s.bars[x.bar].tags.includes('3음 시퀀스(헤미올라)')&&!s.bars[x.bar].tags.includes('블루스 스케일')&&!s.bars[x.bar].tags.some(g=>/^스케일 색/.test(g))&&!s.bars[x.bar].tags.some(g=>/^릭: 얼터드/.test(g)))outBad++}   /* v0.39 블루노트(♭3·♭5)는 일부러 스케일 밖 · v0.40 얼터드 릭(♭9·♯9·♭13)도 의도한 바깥음 */
     s.bars.forEach((b,bi)=>{
       const inBar=snd.filter(x=>x.bar===bi||x.bar===bi+1);
       if(b.tags.includes('리듬 반복(한 음)')){cnt.perc[1]++;let run=1,best=1;for(let i=1;i<inBar.length;i++){run=inBar[i].m===inBar[i-1].m?run+1:1;best=Math.max(best,run)}if(best>=4)cnt.perc[0]++}

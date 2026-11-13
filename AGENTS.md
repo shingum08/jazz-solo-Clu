@@ -13,6 +13,7 @@ app/landing/index.html   홈페이지(웹 빌드의 /, 앱은 /app/) — 첫 화
 app/brand/mark.svg       EzImprovJazz 심볼(앱 머리·로딩 화면·홈페이지·아이콘)
 engine/engine_core.js    순수 로직: analyzeHarmony(화성 분석) → generateSolo(생성) → toAbc(ABC 변환)
 engine/style_data.js     생성 데이터: WJD 통계 프로필 9종 + 공통 셀 134종 (스크립트 산출물 — 손으로 고치지 말 것)
+engine/harmony_v2.js     Harmony V2 — 기존 분석 위에 지역 조·기능·해결 유형·확신(병렬 비교용, 아직 생성·빌드에 안 씀)
 engine/playback.js       Web Audio: 스윙비·아티큘레이션·반주 (bassLine/voicingFor/playAll)
 tools/                   데이터 파이프라인(analyze/phrase_stats/export) + 테스트(test/compare) + 빌드(build)
 docs/                    기획안 PDF, v0.11 아카이브

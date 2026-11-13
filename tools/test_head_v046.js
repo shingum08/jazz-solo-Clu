@@ -24,7 +24,9 @@ const so=E.generateSolo(id,s.key,2,7,'wind',{style:'all'});const before=J(so.bar
 E.spliceHeadBars(so,L,[59,82]);
 assert.strictEqual(J(so.bars[0].notes.map(n=>n.midi)),J(L[0].map(n=>n.midi)),'음역 안이면 옥타브 그대로');
 assert.ok(so.bars[0].head&&!so.bars[1].head&&so.head,'헤드 표시');
-assert.strictEqual(J(so.bars[1].notes),before,'빈 마디는 생성 그대로');
+/* v0.62 다음 마디가 헤드면 마지막 음의 붙임줄(다음 마디로 이어짐)은 끊는 게 맞다 — 그 하나만 빼고 같아야 */
+const noTieEnd=x=>{const a=JSON.parse(x);if(so.bars[2]&&so.bars[2].head&&a.length)delete a[a.length-1].tie;return J(a)};
+assert.strictEqual(noTieEnd(J(so.bars[1].notes)),noTieEnd(before),'빈 마디는 생성 그대로');
 const lowL=E.headLockBars(notes.map(n=>Object.assign({},n,{midi:n.midi-24})),4,4),so2=E.generateSolo(id,s.key,2,7,'wind',{style:'all'});
 E.spliceHeadBars(so2,lowL,[59,82]);assert.strictEqual(so2.bars[0].notes[0].midi,67,'음역 밖이면 옥타브 이동');
 so.bars.forEach((b,i)=>assert.strictEqual(b.notes.reduce((a,n)=>a+n.d,0),24,'끼운 뒤 마디 '+i));

@@ -249,8 +249,9 @@ function analyzeHarmony(bars,keyPc,bpb){
   const merged=[];
   for(const s of segs){
     const L=merged[merged.length-1];
-    if(L&&L.root===s.root&&L.type===s.type){L.dur+=s.dur}else merged.push({...s});
+    if(L&&L.root===s.root&&L.type===s.type){}else merged.push({...s});   /* 같은 코드가 이어지면 한 구간 */
   }
+  merged.forEach((s,i)=>{s.dur=(i+1<merged.length?merged[i+1].t0:bars.length*TPB)-s.t0});   /* v0.62 구간 길이(틱) — 예전 L.dur+=s.dur는 정의 안 된 값을 더해 NaN이었다(쓰는 곳은 없었음, GPT 검토 지적 확인) */
   merged.forEach((s,i)=>{
     const nx=merged[(i+1)%merged.length],pv=merged[(i-1+merged.length)%merged.length];
     const cls0=TYPE_CLS[s.type];
@@ -348,6 +349,22 @@ const LEVELS={1:{diff:1,label:'입문'},2:{diff:2,label:'초급',E:0.6,hl:0,lick
   4:{diff:3,label:'중상급',trip:0.5,t2:0.16},5:{diff:3,label:'심화',t2:0.18}};
 const LEVEL_OF_DIFF={1:1,2:3,3:5};
 const TRIP_MAX_RUN=2;   /* v0.61 셋잇단 묶음(8분 셋잇단 한 박 · 2박 셋잇단)은 연달아 2개까지(사용자 규칙) */
+/* v0.62 장르 리듬 묶음(FEEL_CELLS) — 한 마디(4박) 토큰 묶음. 곧은 8분 계열·발라드·셔플에서 프레이즈 리듬을 이 말투로 짠다.
+   Q 4분 · E 8분 둘 · Qs 짧게 끊은 8분 · Ur 쉼+엇박 · Uh 앞음 지속+엇박(당김) · H 지속 · R 쉼 · T 8분 셋잇단
+   latin: 트레실로(3+3+2)·찰스턴·앞당김 / bossa: 긴 음+당김 / funk: 짧게 끊는 음+엇박 / shuffle: 블루스 리프형 / ballad: 긴 음+짧은 꾸밈.
+   p: 프레이즈가 이 묶음을 쓸 확률 · riff: 그중 한 묶음을 되풀이해 「리프 반복(콜 앤 리스펀스)」으로 만들 확률 */
+const FEEL_CELLS={
+  latin:{p:0.45,riff:0.4,cells:[['Q','Uh','H','Q'],['Q','Uh','H','R'],['E','Ur','Qs','E'],['Qs','Ur','E','Q'],['Ur','Uh','H','Q'],['E','E','Ur','Uh']]},
+  bossa:{p:0.45,riff:0.25,cells:[['Q','Uh','H','Uh'],['Q','H','Ur','E'],['Ur','E','Uh','H'],['E','Q','Uh','H'],['Q','Uh','H','Q']]},
+  funk:{p:0.5,riff:0.45,cells:[['Qs','Ur','Qs','E'],['E','Qs','Ur','Qs'],['Qs','Qs','Ur','Ur'],['Ur','Qs','E','Qs'],['E','E','Qs','Ur']]},
+  shuffle:{p:0.35,riff:0.45,cells:[['Q','Q','Qs','R'],['Ur','Uh','H','R'],['E','Q','Uh','H'],['Qs','Ur','Q','R'],['T','Q','Qs','R']]},
+  ballad:{p:0.35,riff:0,cells:[['Q','H','Ur','E'],['Q','H','H','E'],['Ur','E','Q','H'],['E','E','Q','H'],['T','Q','H','H'],['H','H','Ur','E']]},
+  swing:{p:0,riff:0.08,cells:[['Q','Uh','H','R'],['Ur','Uh','H','R'],['E','Q','Uh','H']]}   /* 스윙은 실측 리듬 그대로 — 블루스 곡에서만 가끔 리프 */
+};
+/* v0.62 스케일 색(외부 검토 「스케일 변형 고정」) — 단계 3 이상·자동 주제에서 해결하는 도미넌트(Ⅴ→장조)·한 마디 이상 장조 토닉의 스케일을
+   코러스 곡선(뒤로 갈수록)·섹션 역할(B=대조)에 따라 가끔 바꾼다. p = base + arc×곡선 위치 + contrast(대조 섹션)
+   도미넌트: 얼터드(alt) 또는 리디안 ♭7(lyd7) — 난이도 2(단계 3)는 리디안 ♭7만 · 장조: 리디안 */
+const SCALE_COLOR={base:0.08,arc:0.32,contrast:0.15,altShare:0.6,majShare:0.5};
 const RELAX={p:0.5,density:0.58,songBonus:0.35,salt:0x5f3759df};
 const BLUES_STD=0.04;   /* v0.48 블루스 형식이 아닌 스윙·발라드 곡에서 프레이즈가 블루스 스케일일 확률(예전 0.14·0.06) */
 const HL_LABEL={line:'8분 라인',perc:'리듬 반복(한 음)',pivot:'피벗 패턴',hemiola:'3음 시퀀스(헤미올라)',trip:'셋잇단 런',ust:'어퍼 스트럭처'};
@@ -605,13 +622,26 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       tpl=fitRhythmTemplate(RHY_TPL[Math.floor(rng()*RHY_TPL.length)],need,diff,FP,rng,densityAt(ph.s));
       tag(Math.floor(ph.s/BPB),'리듬 템플릿');
     }
+    /* v0.62 장르 리듬 묶음·리프 — 곧은 8분·발라드·셔플(스윙은 블루스 곡에서 리프만). 실측 리듬 대신 그 장르 말투로 */
+    if(!tpl&&diff>=2&&!recall&&!ph.song&&!ph.blues&&topic==='auto'&&need>=BPB&&FEEL_CELLS[feel]){
+      const FC=FEEL_CELLS[feel],al=ALLOWED[diff],cells=FC.cells.filter(c=>c.every(k=>al[k]||k==='H'||k==='R')),wantRiff=need>=BPB*2&&(feel!=='swing'||songType==='blues')&&rng()<FC.riff;
+      if(cells.length&&(wantRiff||rng()<FC.p)){
+        const one=cells[Math.floor(rng()*cells.length)];
+        tpl=[];let c=one;for(let j=0;j<need;j++){const bp0=wantRiff?j%BPB:(ph.s+j)%BPB;if(!wantRiff&&bp0===0&&j)c=cells[Math.floor(rng()*cells.length)];tpl.push(c[bp0])}   /* 리프는 프레이즈 시작부터 한 묶음(4박)을 되풀이, 아니면 마디 박 위치에 맞춰 마디마다 새 묶음 */
+        /* 묶음 사이 이음 규칙: 첫 박은 음, 끊긴 뒤 지속 금지, 마지막 박은 4분·8분 */
+        if(!NOTE_TOK[tpl[0]]||tpl[0]==='Uh')tpl[0]=tpl[0]==='Uh'||tpl[0]==='R'?'Ur':'Q';
+        for(let j=1;j<tpl.length;j++)if((tpl[j]==='H'||tpl[j]==='Uh')&&CUT_TOK[tpl[j-1]])tpl[j]=tpl[j]==='H'?'Q':'Ur';
+        if(!['Q','Qs','E','Uh','Ur'].includes(tpl[tpl.length-1]))tpl[tpl.length-1]='Q';
+        if(wantRiff){ph.riff=true;tag(Math.floor(ph.s/BPB),'리프 반복(콜 앤 리스펀스)')}else tag(Math.floor(ph.s/BPB),'장르 리듬: '+FEEL_LABEL[feel]);
+      }
+    }
     /* v0.34 8분 라인 — 가끔 1~2마디를 8분음표로 쭉 이어 가는 구간(비밥 라인). 마지막 박은 착지용으로 비워 둔다 */
     let lineS=-1,lineE=-1,hl=null;
     const eighthTilt=PF&&STYLE_DATA.profiles.all?Math.min(1.8,Math.max(0.4,Math.pow(PF.stats.eighth/STYLE_DATA.profiles.all.stats.eighth,6))):1;   /* 8분 비율이 높은 연주자일수록 라인이 잦다 */
     /* v0.35 하이라이트 장치 — 4마디 블록마다 최대 하나. line(8분 라인)·perc(한 음 리듬 반복)·pivot(피벗 패턴)·hemiola(3음 시퀀스)·trip(셋잇단 런) */
     {
       const blk=Math.floor(ph.s/(BPB*4));
-      if(R2&&!recall&&!ph.song&&!ph.blues&&!relaxAt(ph.s)&&need>=6&&diff>=2&&topic==='auto'&&!hlBlocks.has(blk)&&rng()<(diff===2?0.5:0.6)*(LV.hl===undefined?1:LV.hl)){
+      if(R2&&!tpl&&!recall&&!ph.song&&!ph.blues&&!relaxAt(ph.s)&&need>=6&&diff>=2&&topic==='auto'&&!hlBlocks.has(blk)&&rng()<(diff===2?0.5:0.6)*(LV.hl===undefined?1:LV.hl)){
         const pool=[{v:'line',w:RHY_MIX.line*eighthTilt},{v:'perc',w:0.8},{v:'pivot',w:0.9},{v:'hemiola',w:0.9},{v:'ust',w:opts.ust===false||LV.ust===false?0:UST_W}];
         if(diff>=3&&!REST_MIX.straight.includes(feel))pool.push({v:'trip',w:RHY_MIX.tripRun*tripTilt});   /* v0.60 곧은 8분 계열(보사·라틴·펑크)은 셋잇단 런 없음 */
         const kind=pickW(rng,pool),s0=ph.s+1;   /* 첫 박은 실측 분포(엇박 진입이 많다)에 맡긴다 */
@@ -715,6 +745,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     if(hl){let k=0;phEv.forEach(ev=>{if(ev.t>=hl.s*6&&ev.t<hl.e*6){ev.hl=hl;ev.hlK=k++;if(hl.chromatic)ev.hlx=true}})}
     if(ph.song)phEv.forEach((ev,k)=>{ev.song=true;ev.songK=k;ev.sc=ph.cellOf[Math.max(0,Math.min(ph.cellOf.length-1,Math.floor(ev.t/6)-ph.s))]});
     if(ph.blues)phEv.forEach((ev,k)=>{ev.blu=true;ev.bluK=k});
+    if(ph.riff)phEv.forEach(ev=>{ev.riff=true;ev.riffR=Math.floor((ev.t/6-ph.s)/BPB)});   /* v0.62 리프: 몇 번째 되풀이인지(프레이즈 시작부터 4박 단위) */
     /* 프레이즈 끝음 — 길게(1~2박 더) */
     const le=phEv[phEv.length-1];
     if(!le.trip){
@@ -841,6 +872,23 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   /* v0.23 활용 스케일 — 프레이즈마다 변형(기본/리디안♭7·리디안/얼터드·블루노트/하모닉마이너5·멜로딕)을 시드로 고른다 */
   const phVar=phrases.map(()=>topic==='dom'?Math.floor(rng()*4):0);
   const clsOf=seg=>TYPE_CLS[seg.type]||'dom';
+  /* v0.62 스케일 색(SCALE_COLOR) — 해결하는 도미넌트·긴 장조 토닉의 스케일을 코러스 곡선·섹션 역할에 따라 가끔 바꾼다(따로 만든 난수 — 본 난수열은 그대로) */
+  if(topic==='auto'&&diff>=2){
+    const r=mulberry32(((seed===undefined?0:seed)^0x2c1b3c6d)>>>0);
+    segs.forEach((sg,k)=>{
+      const nx=segs[k+1];if(!nx)return;
+      const pos=ARC.n>1?arcI(sg.t0)/(ARC.n-1):0,role=roles[sectionIndex(sg.t0,P,BPB)]||'statement';
+      const p=SCALE_COLOR.base+SCALE_COLOR.arc*pos+(role==='contrast'?SCALE_COLOR.contrast:0);
+      const u=r(),v=r();if(u>=p)return;
+      if(sg.cls==='dom'&&!sg.blue&&mod12(nx.root-sg.root)===5&&TYPE_CLS[nx.type]==='maj'&&sg.type==='7'){
+        if(diff>=3&&v<SCALE_COLOR.altShare){sg.scale=[0,1,3,4,6,8,10];sg.tens=[1,3,8];sg.sname='얼터드';sg.cls='domalt'}
+        else{sg.scale=[0,2,4,6,7,9,10];sg.tens=[2,6,9];sg.sname='리디안 ♭7'}
+        sg.color=true;sg.label=chordSymbol(sg.root,sg.type)+(sg.fn?' · '+sg.fn:'')+' · '+sg.sname+'(색)';tag(sg.bar,'스케일 색: '+sg.sname);
+      }else if(sg.cls==='maj'&&sg.type==='maj7'&&sg.dur>=TPB&&v<SCALE_COLOR.majShare&&sg.scale.includes(5)){
+        sg.scale=[0,2,4,6,7,9,11];sg.tens=[2,6,9];sg.sname='리디안';sg.color=true;sg.label=chordSymbol(sg.root,sg.type)+(sg.fn?' · '+sg.fn:'')+' · 리디안(색)';tag(sg.bar,'스케일 색: 리디안');
+      }
+    });
+  }
   const matScaleOf=(ph,seg)=>{const L=SCALE_VARIANTS[clsOf(seg)]||SCALE_VARIANTS.dom;return L[Math.min(phVar[ph],L.length-1)]};
   const matName=(ph,seg)=>{const L=VARIANT_NAME[clsOf(seg)]||[];return L[Math.min(phVar[ph],L.length-1)]||'변형 스케일'};
   const matOK=(seg,m,ph)=>{const dev=phDev[ph];if(!dev||dev==='chrom'||dev==='quote')return true;
@@ -980,6 +1028,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     if(!useLicks||diff<2||!SD)return false;
     const e=events[i];
     if(phDev[e.ph])return false;
+    if(e.riff&&e.riffR>0)return false;   /* v0.62 리프 되풀이 */
     if(e.trip||e.t%6!==0)return false;
     if(rng()>Math.min(0.75,0.45+cellRate))return false;
     const run=[0,1,2,3].map(k=>events[i+k]);
@@ -1029,7 +1078,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       if(events[k].ph!==e.ph)break;
       if(segAt(events[k].t)!==segAt(events[k-1].t)&&events[k].t===segs[segAt(events[k].t)].t0){j=k;break}
     }
-    if(j<0||forced.has(j)||motifLock.has(j))return;
+    if(j<0||forced.has(j)||motifLock.has(j)||(events[j].riff&&events[j].riffR>0))return;   /* v0.62 리프 되풀이 자리는 건드리지 않는다 */
     const seg2=segs[segAt(events[j].t)];
     const T=chooseTarget(seg2,events[j].t,prevM,events[j].ph,segs[segAt(e.t)]);
     if(T===null)return;
@@ -1266,7 +1315,8 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     if(span.some(k=>!fits(segs[segAt(events[k].t)])))return off();
     const BL=[0,3,5,6,7,10],INF=1e9;
     const t0=events[span[0]].t,t1=events[span[n-1]].t+events[span[n-1]].d,c0=Math.round(pitchGoal(t0));
-    const goal=t=>c0+3-6*Math.max(0,Math.min(1,(t-t0)/Math.max(1,t1-t0)));   /* 블루스 라인은 내려오는 쪽 */
+    const bShape=rng()<0.5?'desc':(rng()<0.5?'asc':'arch');   /* v0.62 늘 하행이던 블루스 라인 — 상행(울부짖듯)·아치도(외부 검토 지적) */
+    const goal=t=>{const x=Math.max(0,Math.min(1,(t-t0)/Math.max(1,t1-t0)));return bShape==='desc'?c0+3-6*x:bShape==='asc'?c0-3+6*x:c0-2+5*Math.sin(Math.PI*x)};   /* 블루스 라인은 내려오는 쪽 */
     const nc=(q,m,pr)=>{
       const e=events[span[q]];if(!allow(m,e.t))return INF;
       const r=mod12(m-K),sg=segs[segAt(e.t)],long=e.d>=6||q===n-1,strong=e.t%6===0;let c;
@@ -1499,6 +1549,18 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         const c=[];
         for(let x=prevM+8;x<=Math.min(HI,prevM+12);x++)if(isCT(seg,x)&&allow(x,e.t)&&matOK(seg,x,e.ph))c.push({v:x,w:isGuide(seg,x)?2:1});
         if(c.length){forced.set(i,{m:pickW(rng,c),kind:'disp'});e.disp=true}
+      }
+    }
+    /* v0.62 리프 반복 — 앞 마디 같은 자리의 음을 되풀이(블루스·라틴 리프처럼 코드가 바뀌어도 맞으면 그대로, 안 맞으면 반음·온음 안의 코드톤으로).
+       마지막 되풀이의 끝 두 음은 「응답」으로 새로 고른다 */
+    if(e.riff&&e.riffR>0&&!forced.has(i)&&!e.trip&&!e.quote){
+      let src=null;for(let j=i-1;j>=0&&events[j].t>=e.t-TPB;j--)if(events[j].t===e.t-TPB&&events[j].ph===e.ph&&events[j].riff){src=events[j];break}
+      const tail=events.slice(i+1).filter(x=>x.ph===e.ph).length<2&&e.riffR>=2;
+      if(src&&src.midi!==null&&!tail){
+        let m0=src.midi;
+        const bluesKeep=(feel==='shuffle'||songType==='blues')&&[0,3,5,6,7,10].includes(mod12(m0-keyPc));   /* 블루스 리프는 조의 블루스 스케일 음이면 코드가 바뀌어도 그대로 */
+        if(!(isCT(seg,m0)||inScale(seg,m0)||bluesKeep)){const c=chordToneMidis(seg.root,seg.type,LO,HI).filter(x=>Math.abs(x-m0)<=2);m0=c.length?nearest(c,m0):null}
+        if(m0!==null&&okNote(m0,e.t,prevM)){forced.set(i,{m:m0,kind:'riff'});motifLock.add(i)}
       }
     }
     let m=null,f=forced.get(i);
