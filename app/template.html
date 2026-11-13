@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!--__PWA_HEAD__-->
-<title>즉흥 악보 생성기 v0.51.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
+<title>즉흥 악보 생성기 v0.52.0 Clu — 화성 분석 · 타깃음 라인 · 연주자 스타일</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -492,6 +492,22 @@ svg .selbar.pk{fill:rgba(243,134,38,.30);stroke:#e0701a;stroke-dasharray:none}
 .lockbar .lockhint{font-size:12.5px;opacity:.7;margin-right:4px}
 .btn.sm{padding:7px 12px;font-size:13px}
 .paper:fullscreen .lockbar,.paper.fs .lockbar{display:none}
+.paper.pickon #chips{display:none}
+.lockbar{flex-direction:column;align-items:stretch;gap:10px}
+.lockbar .lockhint{font-size:14px;opacity:.8}
+.pickacts{display:flex;flex-wrap:wrap;gap:8px}
+.pkbtn{min-height:44px;padding:0 14px;font-size:15px;font-family:inherit;background:transparent;color:var(--ink);border:1px solid rgba(37,42,34,.45);border-radius:9px;cursor:pointer;touch-action:manipulation}
+.pkbtn:disabled{opacity:.35;cursor:default}
+.pkbtn.like:not(:disabled){border-color:#3f8f55;color:#2c6e3e}
+.pkbtn.dislike:not(:disabled){border-color:#c0504d;color:#a23b38}
+.pkbtn.keep:not(:disabled){background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.fbcount{font-size:13.5px;color:#5c5a4f;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fbcount .full{color:#a0521a;font-weight:600}
+.fbcount button{min-height:36px;padding:0 12px;font-size:13.5px;font-family:inherit;background:transparent;color:var(--ink);border:1px solid rgba(37,42,34,.45);border-radius:8px;cursor:pointer}
+svg .selbar.lockd{fill:rgba(70,110,150,.13);stroke:#4f7aa3;stroke-width:1.5;stroke-dasharray:none}
+svg .selbar.liked{fill:rgba(63,143,85,.14);stroke:#3f8f55;stroke-width:1.5;stroke-dasharray:none}
+svg .selbar.disliked{fill:rgba(192,80,77,.13);stroke:#c0504d;stroke-width:1.5;stroke-dasharray:none}
+svg .selbar.cur{fill:rgba(209,165,69,.18);stroke:var(--brass);stroke-width:2.5;stroke-dasharray:6 4}
 .chips .bar.rng{background:rgba(200,150,62,.22);border-color:var(--brass)}
 .rangebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 0;font-size:12.5px}
 .rangebar label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
@@ -855,7 +871,7 @@ svg .abcjs-tempo{cursor:pointer}
 <body>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">Concept Prototype · v0.51.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">Concept Prototype · v0.52.0 · Clu<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1>즉흥 악보 생성기</h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -955,7 +971,7 @@ svg .abcjs-tempo{cursor:pointer}
      <section class="setsec">
       <h4>연습 도구</h4>
       <div class="tooldeck">
-        <button class="zbtn lockmode" type="button">🔒 마디 고정 모드</button>
+        <button class="zbtn lockmode" type="button">✋ 마디 고르기(평가·저장·고정)</button>
         <button class="zbtn loopmode" type="button" title="켜고 악보 아래 마디 번호를 눌러 시작·끝 마디를 고르면 그 구간을 반복 재생합니다">🔁 구간 반복</button>
         <span class="zlab">악보 크기</span><button class="zbtn" data-z="-" type="button" aria-label="악보 작게">−</button><span class="zval">100%</span><button class="zbtn" data-z="+" type="button" aria-label="악보 크게">+</button>
       </div>
@@ -963,7 +979,7 @@ svg .abcjs-tempo{cursor:pointer}
      </section>
      <section class="setsec">
       <h4>저장 · 내보내기</h4>
-    <div class="tb btns"><button class="btn ghost" id="btnSave" disabled>♡ 목록 저장</button><button class="btn ghost" id="btnExport" disabled>⬇ PNG 저장</button><button class="btn ghost" id="btnXml" disabled>⬇ MusicXML</button><button class="btn ghost" id="btnShare" disabled>📤 공유·메일</button><button class="btn ghost" id="btnFeedback" title="버그·개선 제안을 GitHub 이슈로 보냅니다">💬 피드백</button></div>
+    <div class="tb btns"><button class="btn ghost" id="btnSave" disabled>♡ 목록 저장</button><button class="btn ghost" id="btnExport" disabled>⬇ PNG 저장</button><button class="btn ghost" id="btnXml" disabled>⬇ MusicXML</button><button class="btn ghost" id="btnShare" disabled>📤 공유·메일</button><button class="btn ghost" id="btnFbExport" type="button" title="마디 좋아요·싫어요 평가를 파일로 내보냅니다">📤 마디 평가 내보내기</button><button class="btn ghost" id="btnFeedback" title="버그·개선 제안을 GitHub 이슈로 보냅니다">💬 피드백</button></div>
       <div class="saved">
     <h3>저장한 솔로</h3>
     <p class="note">이 기기에 저장되어 새로고침해도 남습니다. ♡ 저장은 <b>악보 그대로</b>(편집한 음 · 여러 코러스 포함) 담기므로 앱이 업데이트돼도 같은 악보로 돌아옵니다. 마디만 따로 두려면 「🔒 마디 고정 모드」에서 마디를 골라 「♡ 선택 마디 보관」. 아이폰은 사파리와 홈 화면 앱의 저장 공간이 따로라서, 옮기거나 다른 기기로 가져갈 때는 백업 파일을 쓰세요.</p>
@@ -993,15 +1009,20 @@ svg .abcjs-tempo{cursor:pointer}
         <div class="chpage" data-ch="0"><div class="seclab sololab">SOLO · 1코러스</div><div class="sheetwrap"><div id="staff"><div class="empty">⚙ 설정에서 곡을 고르고 「▶ 만들고 재생」을 누르면<br>이 종이 위에 새로운 솔로가 쓰입니다.</div></div></div></div>
       </div>
     </div>
-    <div class="sheettools" id="sheetTools"><button class="zbtn lockmode" type="button" title="마디를 골라 고정하고 나머지만 새로 만듭니다">🔒 마디 고정</button><button class="zbtn loopmode" type="button" title="시작·끝 마디를 고르면 그 구간을 반복 재생합니다">🔁 구간 반복</button></div>
+    <div class="sheettools" id="sheetTools"><button class="zbtn lockmode" type="button" title="마디를 골라 좋아요·싫어요 평가, 저장, 그 마디만 남기고 새로 생성">✋ 마디 고르기</button><button class="zbtn loopmode" type="button" title="시작·끝 마디를 고르면 그 구간을 반복 재생합니다">🔁 구간 반복</button></div>
     <div class="chips" id="chips"></div>
     <div class="rangebar" id="rangeBar"><label><input type="checkbox" id="loopOn"> 🔁 구간 반복</label><span class="rhint" id="rangeHint">악보나 아래 마디를 눌러 고르면 ▶ 재생이 그 마디부터</span><button class="btn ghost sm" id="btnRangeClr" style="display:none">구간 지우기</button></div>
+    <!-- v0.52 마디 고르기 막대 — 악보에서 마디를 골라 평가(좋아요·싫어요) · 보관 · 남기고 새로 생성. 아래 마디 번호 줄은 숨김 -->
     <div class="lockbar" id="lockBar" style="display:none">
-      <span class="lockhint" id="lockHint">마디를 눌러 고르세요</span>
-      <button class="btn ghost sm" id="btnLock">🔒 선택 마디 고정</button>
-      <button class="btn ghost sm" id="btnUnlock">고정 해제</button>
-      <button class="btn ghost sm" id="btnRegenRest">↻ 고정 마디는 두고 나머지 새로 생성</button>
-      <button class="btn ghost sm" id="btnSnip">♡ 선택 마디 보관</button>
+      <span class="lockhint" id="lockHint">악보에서 마디를 눌러 고르세요</span>
+      <div class="pickacts">
+        <button class="pkbtn like" id="btnLike" type="button">👍 좋아요</button>
+        <button class="pkbtn dislike" id="btnDislike" type="button">👎 싫어요</button>
+        <button class="pkbtn" id="btnSnip" type="button">♡ 마디 저장</button>
+        <button class="pkbtn keep" id="btnRegenRest" type="button">↻ 고른 마디만 남기고 새로 생성</button>
+        <button class="pkbtn" id="btnUnlock" type="button">고정 풀기</button>
+      </div>
+      <div class="fbcount" id="fbCount"></div>
     </div>
     <div class="editpop" id="editPop"></div>
   </div>
@@ -2246,7 +2267,11 @@ function drawSelBars(){
   document.querySelectorAll('#chPages svg .selbar').forEach(r=>r.remove());
   if(!cur.solo||!cur.solos)return;
   let ch=-1,bars=[];
-  if(cur.lockMode&&!cur.solo.drill){ch=curChorus();bars=[...(cur.barSel||[])]}
+  if(cur.lockMode&&!cur.solo.drill){ch=curChorus();
+    const lk=(cur.locks||{})[ch]||{},rt=fbRatedNow(ch);
+    Object.keys(lk).forEach(i=>bars.push([+i,'selbar lockd']));
+    Object.keys(rt).forEach(i=>bars.push([+i,rt[i]>0?'selbar liked':'selbar disliked']));
+    (cur.barSel||new Set()).forEach(i=>bars.push([i,'selbar cur']))}
   else if(cur.loopOn&&cur.loopSel){const L=cur.loopSel;ch=L.ch;const pk=L.picks||[];
     if(L.a!==null)for(let i=L.a;i<=(L.b===null?L.a:L.b);i++)if(!pk.includes(i))bars.push([i,L.b===null?'selbar rng pend':'selbar rng']);
     pk.forEach(i=>bars.push([i,'selbar pk']))}
@@ -2299,7 +2324,7 @@ function updRangeBar(){
   const h=$('#rangeHint');if(!h)return;
   const rb=$('#rangeBar');rb.style.display=(!cur.solo||cur.lockMode)?'none':'flex';
   const L=cur.loopSel,pfx=L&&cur.solos&&cur.solos.length>1?(L.ch+1)+'코러스 ':'',LB=loopBars(L),lbl=LB.length?barRangeLabel(LB)+'마디':'';
-  const pp=$('#paper');if(pp)pp.classList.toggle('loopon',!!cur.loopOn);   /* v0.51 구간 반복 중엔 아래 마디 번호 줄을 숨기고 악보로 고른다 */
+  const pp=$('#paper');if(pp){pp.classList.toggle('loopon',!!cur.loopOn);pp.classList.toggle('pickon',!!(cur.lockMode&&cur.solo&&!cur.solo.drill))}   /* v0.51 구간 반복 중엔 아래 마디 번호 줄을 숨기고 악보로 고른다 */
   const SB=selBarOK()?cur.selBar:null,spf=SB&&cur.solos&&cur.solos.length>1?(SB.ch+1)+'코러스 ':'';
   if(!cur.loopOn)h.textContent=SB?spf+(SB.bi+1)+'마디 고름 · ▶ 재생은 여기서'+(SB.ch||SB.bi?' 카운트 없이 바로':'')+' 시작 · 재생 중에 마디를 누르면 그 마디로 건너뜁니다':'악보나 아래 마디를 눌러 고르면 ▶ 재생이 그 마디부터 · 재생 중에 누르면 그 마디로 건너뜁니다';
   else if(!L)h.textContent='악보에서 첫 마디 → 끝 마디를 누르면 그 구간(노랑)을 반복 · 마디를 두 번 빠르게 누르면 그 마디만 따로 골라(주황) 이어서 반복';
@@ -2332,14 +2357,65 @@ function updLockBar(){
   const ch=curChorus(),nSel=cur.barSel?cur.barSel.size:0;
   let nLock=0;Object.values(cur.locks||{}).forEach(m=>nLock+=Object.keys(m).length);
   const pfx=(cur.solos&&cur.solos.length>1)?(ch+1)+'코러스 · ':'';
-  $('#lockHint').textContent=pfx+(nSel?'선택 '+nSel+'마디':'마디를 눌러 고르세요')+(nLock?' · 고정 '+nLock+'마디':'');
-  $('#btnLock').disabled=!nSel;$('#btnSnip').disabled=!nSel;$('#btnUnlock').disabled=!nLock;$('#btnRegenRest').disabled=!nLock;
+  $('#lockHint').textContent=pfx+(nSel?barRangeLabel(selBars())+'마디 고름':'악보에서 마디를 눌러 고르세요(여러 마디 가능)')+(nLock?' · 🔒 남겨 둔 마디 '+nLock+'개(파랑)':'');
+  $('#btnSnip').disabled=!nSel;$('#btnLike').disabled=!nSel;$('#btnDislike').disabled=!nSel;
+  $('#btnRegenRest').disabled=!nSel&&!nLock;$('#btnRegenRest').textContent=nSel?'↻ 고른 마디만 남기고 새로 생성':'↻ 남겨 둔 마디는 두고 새로 생성';
+  $('#btnUnlock').style.display=nLock?'':'none';$('#btnUnlock').textContent=nSel&&selBars().some(i=>(cur.locks[ch]||{})[i])?'고른 마디 고정 풀기':'고정 모두 풀기';
+  fbSyncCount();
 }
 function barNotesNow(ch,i){   /* 편집이 반영된 원조(실음) 마디 — 편집은 1코러스에만 있다 */
   const base=ch===0?applyEdits(JSON.parse(JSON.stringify(cur.soloBase)),cur.edits):cur.soloBases[ch];
   return JSON.parse(JSON.stringify(base.bars[i].notes));
 }
 function selBars(){return [...(cur.barSel||[])].sort((a,b)=>a-b)}
+/* ── v0.52 마디 평가(좋아요·싫어요) — 이 기기 localStorage에 쌓고 「📤 마디 평가 내보내기」로 파일을 받아 개발자에게 보낸다.
+   한 기록 = 곡·생성 설정(시드 등)·코러스·마디·코드·음(실음 midi, 틱)·앞뒤 음·기법 태그 → tools/feedback_report.js 로 모아 엔진에 반영.
+   헤드(불러온 원곡 멜로디) 마디는 음을 남기지 않는다(원곡 멜로디가 파일로 나가지 않게). 비밀번호·토큰 없이 파일로만 오간다 ── */
+const FB_KEY='clu.barfb.v1',FB_BATCH=100,FB_MAX=3000;
+function fbLoad(){try{const v=JSON.parse(localStorage.getItem(FB_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
+function fbStore(){try{localStorage.setItem(FB_KEY,JSON.stringify(cur.fb.slice(-FB_MAX)))}catch(e){}}
+function fbSolKey(ch){return [cur.selProg,cur.seed,cur.selDiff,cur.style,cur.selInst,cur.lyric,cur.topic,ch].join('|')}
+function fbRatedNow(ch){const k=fbSolKey(ch),o={};(cur.fb||[]).forEach(r=>{if(r.sk===k)o[r.bar]=r.r});return o}
+function fbRecord(ch,i,r){
+  const base=ch===0?applyEdits(JSON.parse(JSON.stringify(cur.soloBase)),cur.edits):cur.soloBases[ch],B=base.bars,b=B[i],sg=SONGDB[cur.selProg]||{};
+  const isMy=/^u_/.test(cur.selProg),head=!!b.head;
+  const nn=x=>x?x.notes.filter(n=>n.midi!==null&&n.midi!==undefined):[];
+  const pv=nn(B[i-1]),nx=nn(B[i+1]);
+  return {id:Date.now().toString(36)+'-'+ch+'-'+i,sk:fbSolKey(ch),ts:new Date().toISOString(),v:APP_VER,r,
+    song:{id:cur.selProg,n:sg.name||'',my:isMy,cls:sg.c||'',keyPc:base.keyPc,form:base.form||null},
+    set:{seed:cur.seed,diff:cur.selDiff,style:cur.style,inst:cur.selInst,lyric:cur.lyric,topic:cur.topic||null,feel:base.feel||null,bpm:+$('#bpm').value,choruses:cur.solos?cur.solos.length:1},
+    ch,bar:i,nb:B.length,bpb:base.bpb,chords:b.chords||[],tags:b.tags||[],head,edited:ch===0&&!!(cur.edits&&Object.keys(cur.edits).some(k=>+String(k).split(':')[0]===i)),
+    notes:head?null:b.notes.map(n=>[n.t,n.d,n.midi===undefined?null:n.midi].concat(n.trip?['t']:[])),
+    prev:head||!pv.length?null:pv[pv.length-1].midi,next:head||!nx.length?null:nx[0].midi};
+}
+function fbRate(r){
+  const bs=selBars();if(!bs.length||!cur.solo)return;
+  const ch=curChorus(),k=fbSolKey(ch);
+  bs.forEach(i=>{cur.fb=cur.fb.filter(x=>!(x.sk===k&&x.bar===i));cur.fb.push(fbRecord(ch,i,r))});   /* 같은 솔로 같은 마디는 마지막 평가로 */
+  fbStore();cur.barSel=new Set();renderChips();
+  const n=fbPending();if(n&&n%FB_BATCH===0)fbToast(n+'개 모였어요! 📤 평가 내보내기로 파일을 받아 보내 주세요');else fbToast((r>0?'👍 ':'👎 ')+barRangeLabel(bs)+'마디 평가 저장');
+}
+function fbPending(){return (cur.fb||[]).filter(x=>!x.x).length}
+function fbToast(t){const el=$('#fbCount');if(!el)return;cur._fbMsg=t;fbSyncCount();clearTimeout(cur._fbT);cur._fbT=setTimeout(()=>{cur._fbMsg='';fbSyncCount()},2600)}
+function fbSyncCount(){
+  const el=$('#fbCount');if(!el)return;const all=(cur.fb||[]).length,n=fbPending(),up=(cur.fb||[]).filter(x=>!x.x&&x.r>0).length;
+  el.innerHTML='';
+  const sp=document.createElement('span');sp.textContent=cur._fbMsg||(n?'보내지 않은 평가 '+n+'개(👍 '+up+' · 👎 '+(n-up)+')'+(n>=FB_BATCH?' — 내보내 보내 주세요':' · '+FB_BATCH+'개 모이면 알려 드려요'):all?'평가는 모두 내보냈어요':'고른 마디에 👍·👎를 누르면 이 기기에 쌓입니다');
+  if(n>=FB_BATCH&&!cur._fbMsg)sp.className='full';el.appendChild(sp);
+  if(n){const b=document.createElement('button');b.type='button';b.textContent='📤 내보내기';b.onclick=fbExport;el.appendChild(b)}
+  const eb=$('#btnFbExport');if(eb)eb.textContent='📤 마디 평가 내보내기'+(n?' ('+n+')':'');
+}
+function fbExport(){
+  const recs=(cur.fb||[]).filter(x=>!x.x);
+  if(!recs.length){fbToast('보낼 평가가 없어요');return}
+  const now=new Date(),pad=x=>String(x).padStart(2,'0'),stamp=now.getFullYear()+pad(now.getMonth()+1)+pad(now.getDate())+'-'+pad(now.getHours())+pad(now.getMinutes());
+  const data={app:'Clu',kind:'bar-feedback',format:1,v:APP_VER,exported:now.toISOString(),count:recs.length,records:recs.map(({x,...r})=>r)};
+  const name='clu-마디평가-'+stamp+'-'+recs.length+'개.json',blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+  const mark=()=>{recs.forEach(r=>r.x=1);fbStore();fbSyncCount();fbToast(recs.length+'개 내보냄 — 받은 파일을 개발자에게 보내 주세요')};
+  try{const f=new File([blob],name,{type:'application/json'});
+    if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){navigator.share({files:[f],title:'Clu 마디 평가'}).then(mark,()=>{});return}}catch(e){}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);mark();
+}
 const SNIP_KEY='clu.snips.v1';
 function loadSnips(){try{const v=JSON.parse(localStorage.getItem(SNIP_KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
 function storeSnips(){try{localStorage.setItem(SNIP_KEY,JSON.stringify(cur.snips))}catch(e){}}
@@ -2365,13 +2441,16 @@ function renderSnips(){
   });
 }
 cur.snips=loadSnips();cur.locks={};cur.barSel=new Set();cur.lockMode=false;renderSnips();
+cur.fb=fbLoad();
+$('#btnLike').onclick=()=>fbRate(1);$('#btnDislike').onclick=()=>fbRate(-1);
+$('#btnFbExport').onclick=fbExport;
 /* 마디 고정 모드 토글 — 켜면 마디 선택과 고정 도구가 나타난다 */
 document.addEventListener('click',e=>{
   const b=e.target.closest('.lockmode');if(!b)return;
   cur.lockMode=!cur.lockMode;
   if(!cur.lockMode)cur.barSel=new Set();else setLoopOn(false);
   renderSheet();
-  if(cur.lockMode){const el=$('#chips');if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}
+  if(cur.lockMode){const el=$('#chPages');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
 });
 document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('#chPages .abcjs-tempo')){e.preventDefault();tapTempo()}});
 /* v0.49 악보 마디를 누르면 그 마디를 고른다(아래 마디 번호 줄도 같이 표시) · 재생 중이면 그 마디로 건너뜀.
@@ -2383,9 +2462,9 @@ document.addEventListener('click',e=>{
   const ch=+pg.dataset.ch||0,bi=barAtPoint(ch,e.clientX,e.clientY);
   if(bi>=0)barPick(ch,bi);
 });
-$('#btnLock').onclick=()=>{if(!cur.locks)cur.locks={};cur.lockSong=cur.selProg;const ch=curChorus(),m=cur.locks[ch]||(cur.locks[ch]={});selBars().forEach(i=>{m[i]=barNotesNow(ch,i)});cur.barSel=new Set();renderChips()};
+function lockSelected(){if(!cur.locks)cur.locks={};cur.lockSong=cur.selProg;const ch=curChorus(),m=cur.locks[ch]||(cur.locks[ch]={});selBars().forEach(i=>{m[i]=barNotesNow(ch,i)});cur.barSel=new Set()}
 $('#btnUnlock').onclick=()=>{const ch=curChorus(),m=cur.locks[ch]||{};const bs=selBars().filter(i=>m[i]);if(bs.length)bs.forEach(i=>delete m[i]);else cur.locks[ch]={};cur.barSel=new Set();renderChips()};
-$('#btnRegenRest').onclick=()=>{const was=!!cur.audio;stopIfPlaying();gen(true);if(was){playAll();syncPlay()}};
+$('#btnRegenRest').onclick=()=>{const was=!!cur.audio;stopIfPlaying();if(cur.barSel&&cur.barSel.size)lockSelected();gen(true);if(was){playAll();syncPlay()}};   /* v0.52 고른 마디를 고정하고 바로 새로 생성 */
 $('#btnSnip').onclick=()=>{
   const bs=selBars();if(!bs.length)return;
   const ch=curChorus();
@@ -2910,7 +2989,7 @@ $('#btnGenPlay').onclick=()=>{stopIfPlaying();gen(true);closeSet();toPaper();sta
 document.addEventListener('click',e=>{
   const sh=$('#setSheet');if(sh.hidden||!sh.contains(e.target))return;
   const t=e.target.closest('.lockmode,.loopmode');
-  if(t){setTimeout(()=>{closeSet();const lp=t.classList.contains('loopmode'),el=$(lp?'#chPages':'#chips');if(el)el.scrollIntoView({behavior:'smooth',block:lp?'start':'center'})},0);return}
+  if(t){setTimeout(()=>{closeSet();const el=$('#chPages');if(el)el.scrollIntoView({behavior:'smooth',block:'start'})},0);return}
   const b=e.target.closest('#savedList button,#snipList button');
   if(b&&/불러/.test(b.textContent))setTimeout(()=>{closeSet();toPaper()},0);
 });

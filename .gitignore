@@ -9,3 +9,6 @@ __pycache__/
 
 # 테스트용 앱 빌드(python3 tools/build.py --app) — 직접 전달용, 커밋하지 않음
 dist/
+
+# v0.52 사용자 기기에서 온 마디 평가 파일 — 커밋하지 않음
+feedback/
