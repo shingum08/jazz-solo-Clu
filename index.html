@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- v0.55.0 화면 테마는 잠시 닫음(사용자 요청) — 다시 열 때 THEME_ON=true + 여기서 저장된 테마를 그리기 전에 적용 -->
-<title>EzImprovJazz v0.56.0 — 즉흥 재즈 솔로 연습 악보</title>
+<title>EzImprovJazz v0.57.0 — 즉흥 재즈 솔로 연습 악보</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -663,6 +663,15 @@ h1.brand{font-family:'Gowun Batang',serif;letter-spacing:-.01em}
 a.brandlink[href]:hover span{text-decoration:underline;text-decoration-color:var(--brass);text-underline-offset:.18em}
 .bmark{height:1.05em;width:auto;flex:none;transform:translateY(-.04em)}
 .bmark g,.bootmark g{stroke:var(--hi)}
+/* v0.57 홈페이지 연주 데모(app/#embed-demo) — 악보 한 장만, 재생 + 다른 솔로 */
+.embctl{display:none}
+html.embed body{background:var(--paper)}
+html.embed .paper.fs{padding:12px 14px 22px}
+html.embed #fsNew,html.embed #fsTap,html.embed #btnFull,html.embed #paperMeta{display:none!important}
+html.embed .embctl{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+html.embed .paper-head{flex-wrap:wrap;row-gap:6px}
+html.embed #fsPlay{min-width:48px;min-height:36px;font-size:15px;background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.emblab{font-size:12.5px;color:var(--ink-soft)}
 /* v0.56 로딩 화면 — 홈에서 「프로그램 실행」을 누르면 같은 화면이 이어지고, 첫 악보가 준비되면 걷힌다 */
 .boot{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:opacity .45s ease,visibility .45s}
 .boot.done{opacity:0;visibility:hidden}
@@ -1239,13 +1248,16 @@ svg .abcjs-tempo{cursor:pointer}
 <script>setTimeout(function(){var b=document.getElementById('boot');if(b)b.classList.add('done')},8000)/* v0.56 로딩 화면 안전장치 — 무슨 일이 있어도 8초 뒤에는 걷는다 */</script>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.56.0<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.57.0<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1 class="brand"><a class="brandlink" id="brandLink"><svg class="bmark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="-2 -32 300 282"><g stroke="#f3eee2" stroke-width="30" stroke-linecap="round"><path d="M15 22H183M15 128H119M15 234H183M15 22V234" fill="none"/></g><ellipse cx="183" cy="134" rx="44" ry="33" transform="rotate(-24 183 134)" fill="#d1a545"/><rect x="208" y="-16" width="20" height="150" rx="10" fill="#d1a545"/><path d="M218 -14c18 40 72 50 70 112-1 22-10 36-20 46 5-46-16-72-50-76z" fill="#d1a545"/></svg><span>EzImprovJazz</span></a></h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
   </div>
 </header>
 
+<script>/* v0.57 웹 빌드: 앱에서 새로고침하면 홈(/)으로 — 사용자 요청. 홈 데모(#embed-demo)는 제외 */
+(function(){try{var a=document.getElementById('brandLink'),n=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];
+  if(a&&a.getAttribute('href')&&location.hash!=='#embed-demo'&&n&&n.type==='reload')location.replace(a.getAttribute('href'))}catch(e){}})();</script>
 <main class="wrap">
   <!-- v0.45 상단 조작 막대 — 설정 열기 · 지금 곡 · 재생/일시정지 · 정지 · 음표색 (스크롤해도 위에 붙어 있음) -->
   <div class="topbar" id="topBar">
@@ -1389,7 +1401,7 @@ svg .abcjs-tempo{cursor:pointer}
     <div class="paper-head">
       <span class="t" id="paperTitle">악보를 고르세요</span>
       <span class="m" id="paperMeta"></span>
-      <span class="fsctl"><button class="fsplay" id="fsNew" type="button" title="같은 설정으로 새 솔로">↻ 새 솔로</button><button class="fsplay" id="fsPlay" type="button" aria-label="재생/정지">▶</button><button class="fsplay tapbtn" id="fsTap" data-tap="1" type="button" title="탭 템포">♩ 탭</button><button class="fsbtn" id="btnFull" type="button" aria-label="전체화면" title="악보 전체화면">⛶ 전체화면</button></span>
+      <span class="fsctl"><button class="fsplay" id="fsNew" type="button" title="같은 설정으로 새 솔로">↻ 새 솔로</button><button class="fsplay" id="fsPlay" type="button" aria-label="재생/정지">▶</button><button class="fsplay tapbtn" id="fsTap" data-tap="1" type="button" title="탭 템포">♩ 탭</button><button class="fsbtn" id="btnFull" type="button" aria-label="전체화면" title="악보 전체화면">⛶ 전체화면</button><span class="embctl"><span class="emblab" id="embLab"></span><button class="fsplay" id="embNext" type="button">다른 솔로 <span id="embNo"></span></button></span></span>
     </div>
     <div id="drillWrap" style="display:none"></div><div id="chartWrap" style="display:none"><div class="seclab">CHART · 코드톤 차트 (코드 기호 + 뿌리·3·5·7음 음표)</div><div id="chartStaff"></div></div>
     <div id="soloWrap">
@@ -6268,7 +6280,7 @@ function acctUI(msg){
   if(s)$('#acctWho').textContent=s.email||'(이메일 확인 중)';
   $('#acctMsg').textContent=cur._acctMsg||'';
 }
-if(acctOn()){
+if(acctOn()&&location.hash!=='#embed-demo'){
   $('#acctLoginBtn').onclick=acctLogin;$('#acctSignupBtn').onclick=acctSignup;$('#acctResetBtn').onclick=acctReset;
   $('#acctLogoutBtn').onclick=acctLogout;$('#acctSyncBtn').onclick=()=>acctPull();$('#acctPwBtn').onclick=acctNewPw;
   acctFromHash();acctUI();if(acctSess())acctPull();
@@ -6308,6 +6320,31 @@ function syncNow(){
 ['#songSel','#bpm','#chorusSel'].forEach(q=>$(q).addEventListener('change',()=>setTimeout(syncNow,0)));
 ['#btnTrDn','#btnTrUp'].forEach(q=>$(q).addEventListener('click',()=>setTimeout(syncNow,0)));
 gen();syncNow();syncPlay();
+/* ── v0.57 홈페이지 연주 데모 — 홈 첫 화면 iframe(app/#embed-demo) 안에서 돈다 ──
+   Tea for Two(퍼블릭 도메인 · 코드 진행만) 120 BPM 1코러스, 반주 포함. 데모 5개(난이도 × 연습 주제, 시드 고정)를 넘겨 보고,
+   한 곡이 끝나면 다음 데모로 이어서 재생(BGM처럼). 기기 저장소는 건드리지 않는다(설정은 저장되지 않음 · 계정 동기화 끔) */
+const EMB_SONG='pd-tea-for-two',EMB_BPM=120,EMB_TONE='tenor',EMB_GAP_MS=900;
+const EMB_DEMOS=[{d:1,tp:'ct',sd:12001},{d:2,tp:'auto',sd:22002},{d:2,tp:'gt',sd:32003},{d:2,tp:'penta',sd:42004},{d:3,tp:'auto',sd:52005}];
+const EMB_TP_L={auto:'자유',ct:'코드톤 라인',gt:'가이드톤 라인',penta:'펜타토닉',scale:'기본 스케일',dom:'활용 스케일'};
+if(location.hash==='#embed-demo'&&SONGDB[EMB_SONG]){
+  document.documentElement.classList.add('embed');
+  $('#paper').classList.add('fs');document.body.classList.add('fslock');
+  songSel.value=EMB_SONG;songSel.onchange();
+  $('#bpm').value=EMB_BPM;$('#bpmVal').textContent=EMB_BPM+' BPM';$('#chorusSel').value='1';
+  cur.headMode='off';$('#headSel').value='off';cur.tone=EMB_TONE;$('#toneSel').value=EMB_TONE;
+  try{prefetchSamples(currentFeel(),cur.tone)}catch(e){}
+  let embI=0,embOn=false,embStop=false;
+  const embShow=i=>{embI=(i+EMB_DEMOS.length)%EMB_DEMOS.length;const D=EMB_DEMOS[embI];
+    cur.selDiff=D.d;$('#diffSel').value=String(D.d);cur.topic=D.tp;$('#topicSel').value=D.tp;cur.seed=D.sd;gen(false);
+    $('#embLab').textContent='난이도 '+D.d+' · '+EMB_TP_L[D.tp]+' · '+EMB_BPM+' BPM';$('#embNo').textContent=(embI+1)+'/'+EMB_DEMOS.length};
+  const _syncPlay=syncPlay;
+  syncPlay=function(){_syncPlay();   /* 끝까지 재생돼 멈추면(■·다른 솔로가 아니면) 다음 데모를 이어서 */
+    if(cur.playReq){embOn=true;return}
+    if(embOn&&!embStop){embOn=false;setTimeout(()=>{if(cur.playReq)return;embShow(embI+1);startPlay()},EMB_GAP_MS)}
+    else embOn=false;embStop=false};
+  $('#embNext').onclick=()=>{const was=!!cur.playReq&&!cur.paused;embStop=true;stopIfPlaying();embOn=false;embShow(embI+1);if(was)startPlay();setFsLabel()};
+  embShow(0);setFsLabel();
+}
 /* v0.56 로딩 화면 걷기 — 첫 악보를 그렸고 글꼴이 준비되면(최대 BOOT_MAX_MS). 너무 빨리 사라져 깜빡이지 않게 페이지 연 뒤 최소 BOOT_MIN_MS */
 (function(){const b=$('#boot');if(!b)return;const BOOT_MIN_MS=600,BOOT_MAX_MS=2500;let done=false;
   const fin=()=>{if(done)return;done=true;setTimeout(()=>{b.classList.add('done');setTimeout(()=>{try{b.remove()}catch(e){}},600)},Math.max(0,BOOT_MIN_MS-performance.now()))};

@@ -1,5 +1,6 @@
-/* v0.56 홈페이지 시험 — 홈(/)에서 로그인 → 로딩 화면 → 앱(/app/)이 같은 계정으로 이어받아 동기화, 메일 링크 넘기기, 예시 솔로 넘기기
-   사용: python3 tools/build.py --web && node --no-warnings tools/test_landing_v056.mjs   (Supabase는 가짜 서버로 흉내) */
+/* v0.56·v0.57 홈페이지 시험 — 홈(/)에서 로그인 → 로딩 화면 → 앱(/app/)이 같은 계정으로 이어받아 동기화, 메일 링크 넘기기,
+   v0.57: 첫 화면 연주 데모(iframe app/#embed-demo) · 앱 새로고침 → 홈 · 홈에서 비밀번호 바꾸기
+   사용: python3 tools/build.py --web && node --no-warnings tools/test_landing.mjs   (Supabase는 가짜 서버로 흉내) */
 import {createRequire} from 'node:module';
 import fs from 'node:fs';import path from 'node:path';
 const require=createRequire(import.meta.url);
@@ -12,7 +13,7 @@ async function sb(route){const q=route.request(),u=new URL(q.url()),m=q.method()
   const J=(o,st=200)=>route.fulfill({status:st,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify(o)});
   if(m==='OPTIONS')return route.fulfill({status:204,headers:{'access-control-allow-origin':'*','access-control-allow-headers':'*','access-control-allow-methods':'*'}});
   if(u.pathname==='/auth/v1/token'){const x=users[body.email];if(!x||x.pw!==body.password)return J({error_description:'Invalid login credentials'},400);return J({access_token:'tok-'+x.id,refresh_token:'r',expires_in:3600,user:{id:x.id,email:body.email}})}
-  if(u.pathname==='/auth/v1/user')return J({id:uid,email:'t@x.kr'});
+  if(u.pathname==='/auth/v1/user'){if(m==='PUT'&&uid){const e=Object.keys(users).find(k=>users[k].id===uid);users[e].pw=body.password}return J({id:uid,email:'t@x.kr'})}
   if(u.pathname==='/rest/v1/user_store'){if(!uid)return J({message:'no auth'},401);const R=rows[uid]||(rows[uid]={});
     if(m==='GET')return J(Object.entries(R).map(([key,v])=>({key,value:v.value,updated_at:v.updated_at})));
     if(m==='POST')return J(body.map(r=>{R[r.key]={value:r.value,updated_at:new Date(Date.now()+seq++).toISOString()};return {...r,updated_at:R[r.key].updated_at}}),201)}
@@ -26,7 +27,13 @@ async function page(){const c=await b.newContext({viewport:{width:390,height:844
   await p.route(/^https?:\/\//,r=>{const u=r.request().url();if(u.includes('supabase.co'))return sb(r);if(u.startsWith(ORIGIN))return site(r);return r.abort()});return p}
 console.log('홈 → 로그인 → 앱');
 let p=await page();await p.goto(ORIGIN+'/');
-const n0=await p.textContent('#demoCount');await p.click('#btnDemo');ok(n0==='1 / 5'&&await p.textContent('#demoCount')==='2 / 5','예시 솔로 넘기기 (1 / 5 → 2 / 5)');
+await p.waitForTimeout(2600);{const f=p.frame({url:/embed-demo/});
+  const a=await f.evaluate(()=>({lab:$('#embLab').textContent,song:cur.selProg,bpm:+$('#bpm').value,boot:!!document.getElementById('boot'),fs:$('#paper').classList.contains('fs')}));
+  ok(a.song==='pd-tea-for-two'&&a.bpm===120&&a.fs&&!a.boot&&/난이도 1 · 코드톤 라인 · 120 BPM/.test(a.lab),'첫 화면 데모: Tea for Two 120 BPM, 데모 1 '+a.lab);
+  await f.click('#embNext');const b2=await f.evaluate(()=>[$('#embLab').textContent,$('#embNo').textContent,cur.seed]);
+  ok(b2[1]==='2/5'&&/자유/.test(b2[0])&&b2[2]===22002,'다른 솔로 → 2/5 자유 '+b2[0]);
+  ok(!(await f.evaluate(()=>localStorage.getItem('clu.auth.v1'))),'데모는 로그인 저장소를 건드리지 않음')}
+ok(await p.isVisible('.notice a[href="#songs"]')&&await p.isVisible('#songs .steps'),'공지 띠 · iReal Pro 포럼 받는 방법');
 ok(await p.isHidden('#lgSignup'),'베타가 아니면 가입하기 숨김');
 await p.click('.cta [data-launch]');ok(await p.evaluate(()=>document.querySelector('#loginDlg').open),'로그인 안 했으면 「프로그램 실행」이 로그인 창을 연다');
 await p.fill('#lgEmail','t@x.kr');await p.fill('#lgPw','wrong');await p.click('#lgSubmit');await p.waitForTimeout(300);
@@ -40,7 +47,10 @@ ok(!s.boot,'앱 로딩 화면이 걷힘');ok(s.brand==='../','앱 제목을 누�
 ok(rows.u0&&Object.keys(rows.u0).length===4,'앱이 계정과 동기화(저장소 4종)');
 await p.goto(ORIGIN+'/');await p.waitForTimeout(200);
 ok(await p.textContent('#who')==='t@x.kr','홈 위쪽에 로그인한 이메일');
+await p.click('#btnLogin');await p.fill('#lgNewPw','newpass99');await p.click('#lgPwBtn');await p.waitForTimeout(300);
+ok(await p.textContent('#lgMsg2')==='비밀번호를 바꿨어요.'&&users['t@x.kr'].pw==='newpass99','홈 계정 창에서 비밀번호 바꾸기');await p.click('#lgClose');
 await p.click('.cta [data-launch]');await p.waitForURL(ORIGIN+'/app/');ok(true,'로그인돼 있으면 「프로그램 실행」이 바로 앱으로');
+await p.waitForTimeout(800);await p.reload();await p.waitForURL(ORIGIN+'/');ok(true,'앱에서 새로고침하면 홈으로');
 console.log('메일 링크(비밀번호 재설정)');
 p=await page();await p.goto(ORIGIN+'/#access_token=tok-u0&refresh_token=r&expires_in=3600&type=recovery');
 await p.waitForURL(/\/app\//);await p.waitForTimeout(1800);
@@ -49,4 +59,4 @@ console.log('로그인 없이 시작');
 p=await page();await p.goto(ORIGIN+'/');await p.click('#top [data-launch]');await p.click('#lgGuest');await p.waitForURL(ORIGIN+'/app/');
 ok(await p.evaluate(()=>!localStorage.getItem('clu.auth.v1')),'로그인 없이 앱이 열림');
 ok(errs.length===0,'페이지 오류 없음 '+JSON.stringify(errs));
-await b.close();console.log(fail?'실패 '+fail:'v0.56 홈페이지 시험 통과');process.exit(fail?1:0);
+await b.close();console.log(fail?'실패 '+fail:'v0.57 홈페이지 시험 통과');process.exit(fail?1:0);

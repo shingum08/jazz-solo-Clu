@@ -57,7 +57,8 @@ PY
 
 ```bash
 python3 tools/build.py --web                          # dist/web/ — 홈(index.html) + 앱(app/index.html)
-node tools/make_landing_demo.js                       # 엔진이 바뀌었을 때만: 홈 첫 화면 예시 솔로(app/landing/demo.json)·링크 미리보기(og.jpg) 다시 그림 → 다시 --web
-node --no-warnings tools/test_landing_v056.mjs        # 홈 → 로그인 → 로딩 → 앱 이어받기 (가짜 Supabase)
+node tools/make_og.js                                 # 엔진이 바뀌었을 때만: 링크 미리보기(app/landing/og.jpg) 다시 그림 → 다시 --web
+                                                      # 홈 첫 화면 연주 데모는 앱 자체(app/#embed-demo, template.html의 EMB_DEMOS)
+node --no-warnings tools/test_landing.mjs             # 홈 데모 · 로그인 → 로딩 → 앱 이어받기 · 새로고침 → 홈 (가짜 Supabase)
 node --no-warnings tools/test_acct_v055.mjs dist/web/app/index.html
 ```

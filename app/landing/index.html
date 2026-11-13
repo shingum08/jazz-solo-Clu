@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- EzImprovJazz 홈페이지(v0.56) — python3 tools/build.py --web 이 dist/web/index.html 로 만든다. 앱은 /app/
-     · 마커: __MARK__(심볼 SVG) · __DEMO_FIRST__/__DEMO_REST__(예시 솔로, tools/make_landing_demo.js) · __SB_CONFIG__(공개 키만)
+     · 마커: __MARK__(심볼 SVG) · __SB_CONFIG__(공개 키만). 첫 화면 연주 데모는 앱을 iframe(app/#embed-demo)으로 띄운다(v0.57)
      · 로그인은 앱과 같은 저장 키(clu.auth.v1)를 쓴다 — 여기서 로그인하면 앱이 그대로 이어받아 동기화한다 -->
 <title>EzImprovJazz — 코드 진행 위에 매번 새로운 재즈 솔로</title>
 <meta name="description" content="재즈 즉흥연주를 연습하는 관악기 연주자를 위한 솔로 악보 생성기. 코드 진행을 고르면 화성에 맞는 연습용 솔로를 만들고 반주와 함께 들려 줍니다.">
@@ -17,7 +17,6 @@
 <script>document.documentElement.classList.add('js')</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="prefetch" href="app/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500&family=Gowun+Batang:wght@700&display=swap" rel="stylesheet">
@@ -72,33 +71,12 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;color:#f6f2e8;letter-spacing:-
 .cta{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px}
 .cta small{color:var(--fog);font-size:14px}
 
-/* 보면대 위 악보 한 장 */
+/* 보면대 위 악보 한 장 — 실제 앱(app/#embed-demo)이 돈다: Tea for Two 120 BPM, 난이도·연습 주제별 솔로 5개 */
 .stand{margin:30px 0 0}
-.paper{position:relative;background:var(--paper);color:var(--ink);border-radius:6px;padding:22px 22px 14px;
+.paper{position:relative;background:var(--paper);border-radius:8px;overflow:hidden;
   box-shadow:0 1px 0 var(--paper-edge),0 30px 60px -24px rgba(0,0,0,.65),0 0 0 1px rgba(0,0,0,.04)}
-.ptop{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 2px 6px;font-family:var(--serif)}
-.ptop b{font-size:19px;font-weight:700}
-.ptop span{font-size:13.5px;color:#5c6473}
-.sheet{position:relative}
-.sheet svg{display:block;width:100%;height:auto}
-.sheet svg text{font-family:'Gowun Batang','Noto Serif KR',serif}
-/* 손으로 적어 나가듯 한 줄씩 드러남 — 줄마다 종이색 가림막이 오른쪽으로 걷힌다 */
-.cover{position:absolute;left:0;right:0;background:var(--paper);transform-origin:right center;transform:scaleX(0)}
-.js .cover{transform:scaleX(1)}
-.sheet.write .cover{animation:uncover .9s cubic-bezier(.5,0,.3,1) both}
-/* 넓은 화면은 악보 3줄(.sv-w), 좁은 화면은 4줄(.sv-n) — 가림막도 줄 수에 맞춘다 */
-.sv-n{display:none}
-.cover:nth-child(2){top:0;height:34%}
-.cover:nth-child(3){top:34%;height:33%}
-.cover:nth-child(4){top:67%;height:34%}
-.cover:nth-child(5){display:none}
-.sheet.write .cover:nth-child(3){animation-delay:.75s}
-.sheet.write .cover:nth-child(4){animation-delay:1.5s}
-.sheet.write .cover:nth-child(5){animation-delay:2.25s}
-@keyframes uncover{from{transform:scaleX(1)}to{transform:scaleX(0)}}
-.standbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;color:var(--fog);font-size:14px}
-.standbar .btn{min-height:40px;font-size:14.5px}
-.count{font-variant-numeric:tabular-nums}
+.paper iframe{display:block;width:100%;height:min(560px,70vh);border:0;background:var(--paper)}
+.standbar{margin-top:14px;color:var(--fog);font-size:14px}
 
 /* ── 구역 공통 ── */
 .sec{padding:84px 0;border-top:1px solid var(--line)}
@@ -120,6 +98,28 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;color:#f6f2e8;letter-spacing:-
 .feat{padding:22px 0;border-top:1px solid var(--line)}
 .feat dt{font:700 18px/1.4 var(--serif);color:#f6f2e8;margin-bottom:6px}
 .feat dd{margin:0;color:#c9c4b8;font-size:15.5px;max-width:34em}
+
+/* 공지 띠 — 곡은 iReal Pro 포럼에서 */
+.notice{border-bottom:1px solid rgba(209,165,69,.28);background:rgba(209,165,69,.08)}
+.noticein{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;min-height:46px;padding-top:8px;padding-bottom:8px;font-size:14.5px}
+.noticein b{color:var(--brass-hi);font-weight:500}
+.noticein a{color:var(--text);text-underline-offset:3px}
+
+/* 연습 주제 — 기법 이름 | 설명 */
+.techs{margin:40px 0 0;padding:0;list-style:none;max-width:980px}
+.techs li{display:grid;grid-template-columns:minmax(0,15em) minmax(0,1fr);gap:8px 32px;padding:18px 0;border-top:1px solid var(--line)}
+.techs li:last-child{border-bottom:1px solid var(--line)}
+.techs b{font:700 18px/1.45 var(--serif);color:#f6f2e8}
+.techs span{color:#c9c4b8;font-size:15.5px;max-width:40em}
+
+/* 곡 받아 오기 — 순서가 있는 단계 */
+.steps{margin:36px 0 0;padding:0;list-style:none;counter-reset:st;max-width:820px}
+.steps li{counter-increment:st;position:relative;padding:4px 0 22px 52px}
+.steps li::before{content:counter(st);position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;border:1px solid rgba(209,165,69,.6);color:var(--brass);font:500 16px/32px var(--serif);text-align:center}
+.steps li:not(:last-child)::after{content:"";position:absolute;left:17px;top:40px;bottom:6px;width:1px;background:var(--line)}
+.steps b{display:block;font:700 18px/1.5 var(--serif);color:#f6f2e8;margin-bottom:4px}
+.steps span{color:#c9c4b8;font-size:15.5px}
+.songs-note{margin:8px 0 0;color:var(--fog);font-size:14.5px;max-width:42em}
 
 /* 원곡은 담지 않아요 */
 .honest{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;align-items:start}
@@ -191,15 +191,14 @@ dialog.login::backdrop{background:rgba(5,8,12,.66)}
   .bars li:nth-child(4){border-top:1px solid var(--line)}
   .bars li:nth-child(2){box-shadow:inset -1px 0 0 rgba(243,238,226,.32)}
   .feats{grid-template-columns:1fr}
+  .techs li{grid-template-columns:1fr;gap:4px}
   .sec{padding:64px 0}
 }
 @media(max-width:560px){
   .topin .who{display:none}
   .topin{gap:8px}.topin .btn{padding:0 13px;font-size:14px}
   .brand{font-size:19px}
-  .paper{padding:16px 12px 10px}
-  .sv-w{display:none}.sv-n{display:block}
-  .cover:nth-child(2){top:0;height:25%}.cover:nth-child(3){top:25%;height:25%}.cover:nth-child(4){top:50%;height:25%}.cover:nth-child(5){display:block;top:75%;height:25%}
+  .paper iframe{height:min(520px,72vh)}
   .bars{grid-template-columns:1fr;border-left:1px solid rgba(243,238,226,.32)}
   .bars li{border-left:0;border-top:1px solid var(--line);padding:30px 18px 24px}
   .bars li:first-child{border-top:0}
@@ -210,7 +209,6 @@ dialog.login::backdrop{background:rgba(5,8,12,.66)}
   .cta .btn-big{width:100%}
 }
 @media(prefers-reduced-motion:reduce){
-  .js .cover,.sheet.write .cover{animation:none;transform:scaleX(0)}
   .bootin svg *,.bootbar i{animation:none}.bootbar i{width:100%}
   .boot,.top{transition:none}
 }
@@ -227,6 +225,7 @@ dialog.login::backdrop{background:rgba(5,8,12,.66)}
 </header>
 
 <main>
+  <div class="notice"><div class="wrap noticein"><b>공지</b><span>연습할 곡은 iReal Pro 포럼에서 받아 와 불러오면 돼요.</span><a href="#songs">받는 방법 보기</a></div></div>
   <section class="hero">
     <div class="wrap herogrid">
       <h1><span>코드 진행만 고르세요.</span><span>솔로는 매번 새로 써 드려요.</span></h1>
@@ -238,13 +237,9 @@ dialog.login::backdrop{background:rgba(5,8,12,.66)}
         </div>
       </div>
       <figure class="stand">
-        <div class="paper">
-          <div class="ptop"><b>재즈 블루스 F</b><span id="demoDiff">난이도 2</span></div>
-          <div class="sheet" id="sheet"><div id="sheetSvg"><!--__DEMO_FIRST__--></div><i class="cover"></i><i class="cover"></i><i class="cover"></i><i class="cover"></i></div>
-        </div>
+        <div class="paper"><iframe id="demoFrame" src="app/#embed-demo" title="Tea for Two 연주 데모 — 재생 버튼을 누르면 반주와 함께 들려요" loading="eager"></iframe></div>
         <figcaption class="standbar">
-          <span>같은 코드 진행으로 만든 솔로 <span class="count" id="demoCount">1 / 5</span></span>
-          <button class="btn btn-line" type="button" id="btnDemo">다른 솔로 보기</button>
+          <span>▶를 누르면 반주와 함께 들려요. 한 곡이 끝나면 다음 솔로로 이어져요.</span>
         </figcaption>
       </figure>
     </div>
@@ -262,6 +257,21 @@ dialog.login::backdrop{background:rgba(5,8,12,.66)}
     </div>
   </section>
 
+  <section class="sec" id="practice" aria-labelledby="hPrac">
+    <div class="wrap">
+      <h2 id="hPrac">기본 연습 기능으로 재즈 기법을 하나씩 익혀요</h2>
+      <p class="intro">「연습 주제」를 고르면 그 기법에 맞춘 솔로가 나와요. 「연습」 보기로 바꾸면 솔로 대신 코드마다 오르내리는 연습 음형을 만들어 손에 익힐 수 있어요.</p>
+      <ul class="techs">
+        <li><b>코드톤 라인</b><span>정박에 코드음(1·3·5·7음)을 두고 반음으로 이어요. 화성의 뼈대를 귀와 손에 익히는 첫걸음이에요.</span></li>
+        <li><b>가이드톤 라인</b><span>코드의 3음과 7음을 가장 가까운 음으로 이어, 코드가 바뀌는 순간이 선율만으로 들리게 해요.</span></li>
+        <li><b>펜타토닉</b><span>다섯 음으로 노래하듯 만드는 블루지한 라인이에요.</span></li>
+        <li><b>기본 스케일 · 활용 스케일</b><span>코드마다 맞는 스케일과, 리디안 ♭7·얼터드 같은 텐션 스케일을 솔로 속에서 써 봐요.</span></li>
+        <li><b>모티프 발전</b><span>앞 프레이즈의 짧은 동기를 시퀀스·반진행·반복으로 되풀이해 이야기하듯 풀어 가는 법을 보여 줘요.</span></li>
+        <li><b>난이도 · 노래와 비밥 사이</b><span>입문·중급·심화 세 단계에, 노래하듯 단순한 선율부터 비밥처럼 촘촘한 선율까지 비율을 조절해요.</span></li>
+      </ul>
+    </div>
+  </section>
+
   <section class="sec" aria-labelledby="hFeat">
     <div class="wrap">
       <h2 id="hFeat">악보 한 장에 담긴 것</h2>
@@ -273,6 +283,19 @@ dialog.login::backdrop{background:rgba(5,8,12,.66)}
         <div class="feat"><dt>내 악기 조로 바로</dt><dd>콘서트 C, B♭(테너 색소폰·트럼펫), E♭(알토 색소폰) 악보로 보고, 반음 단위로 조를 옮겨요.</dd></div>
         <div class="feat"><dt>보면대 위 휴대폰에서도</dt><dd>브라우저에서 바로 열리고 휴대폰·태블릿 화면에 맞춰져요. 로그인하면 저장한 솔로와 내 곡이 다른 기기에서도 이어져요.</dd></div>
       </dl>
+    </div>
+  </section>
+
+  <section class="sec" id="songs" aria-labelledby="hSongs">
+    <div class="wrap">
+      <h2 id="hSongs">연습할 곡은 iReal Pro 포럼에서 받아 와요</h2>
+      <p class="intro">기본으로 들어 있는 연습 진행 말고 스탠더드로 연습하고 싶다면, iReal Pro 포럼에 연주자들이 올려 둔 코드 차트를 불러오면 돼요.</p>
+      <ol class="steps">
+        <li><b>포럼에서 곡 찾기</b><span><a href="https://forums.irealpro.com" rel="noopener" target="_blank">iReal Pro 포럼</a>에서 연습할 곡이나 곡 목록을 찾아요.</span></li>
+        <li><b>링크 주소 복사하기</b><span>곡 링크를 눌러 iReal Pro 앱으로 열지 말고, 길게 누르거나 오른쪽 클릭해서 「링크 주소 복사」를 골라요.</span></li>
+        <li><b>EzImprovJazz에 붙여 넣기</b><span>프로그램에서 ⚙ 설정 → 📥 내 악보 불러오기 → 링크 칸에 붙여 넣고 「링크 불러오기」를 눌러요. MusicXML 파일도 같은 곳에서 불러올 수 있어요.</span></li>
+      </ol>
+      <p class="songs-note">불러온 곡은 이 기기의 「내 곡」에 저장되고, 로그인하면 다른 기기에서도 이어져요. 코드 진행만 가져와 솔로를 만들어요.</p>
     </div>
   </section>
 
@@ -302,7 +325,7 @@ dialog.login::backdrop{background:rgba(5,8,12,.66)}
       <h2 id="hFaq">자주 묻는 질문</h2>
       <div class="faq">
         <details><summary>로그인해야 쓸 수 있나요?</summary><p>아니요. 로그인 없이도 모든 기능을 쓸 수 있어요. 로그인하면 내 곡·즐겨찾기·저장한 솔로·보관한 마디가 계정에 저장돼 다른 기기에서도 이어서 쓸 수 있어요. 회원가입은 곧 열려요. 지금은 테스트 계정만 쓸 수 있어요.</p></details>
-        <details><summary>어떤 곡으로 연습할 수 있나요?</summary><p>ii–V–I·블루스 같은 연습 진행, 리듬 체인지·재즈 블루스·마이너 블루스 같은 공통 형식, 저작권이 끝난 스탠더드 몇 곡이 들어 있어요. 갖고 있는 리드시트는 MusicXML 파일이나 iReal Pro 공유 링크로 불러와 이 기기에 담아 쓸 수 있어요.</p></details>
+        <details><summary>어떤 곡으로 연습할 수 있나요?</summary><p>ii–V–I·블루스 같은 연습 진행, 리듬 체인지·재즈 블루스·마이너 블루스 같은 공통 형식, 저작권이 끝난 스탠더드 몇 곡이 들어 있어요. 스탠더드는 iReal Pro 포럼에서 곡 링크를 받아 불러오면 돼요(<a href="#songs">받는 방법</a>). MusicXML 파일도 불러올 수 있어요.</p></details>
         <details><summary>어떤 악기로 연습하면 좋나요?</summary><p>색소폰·트럼펫 같은 관악기를 중심으로 만들었어요. 악보는 콘서트 C, B♭, E♭ 중에서 고를 수 있어서 다른 선율 악기로도 쓸 수 있어요.</p></details>
         <details><summary>휴대폰에서도 되나요?</summary><p>네, 브라우저에서 바로 돼요. 처음 재생할 때는 악기 샘플을 받느라 2~5초쯤 걸릴 수 있어요.</p></details>
       </div>
@@ -350,13 +373,16 @@ dialog.login::backdrop{background:rgba(5,8,12,.66)}
         <button class="btn btn-brass" type="button" data-launch>프로그램 실행</button>
         <button class="btn btn-line" type="button" id="lgLogout">로그아웃</button>
       </div>
+      <hr>
+      <label class="fld">새 비밀번호<input id="lgNewPw" type="password" autocomplete="new-password" minlength="8"></label>
+      <button class="btn btn-line" type="button" id="lgPwBtn" style="width:100%">비밀번호 바꾸기</button>
+      <p class="lgmsg" id="lgMsg2" aria-live="polite"></p>
     </div>
   </div>
 </dialog>
 
 <div class="boot" id="boot" role="status" aria-live="polite" hidden><div class="bootin"><!--__MARK__--><b>EzImprovJazz</b><div class="bootbar"><i></i></div><p>악보 엔진을 준비하는 중…</p></div></div>
 
-<!--__DEMO_REST__-->
 <script>
 /* ── 홈페이지 동작(v0.56) ── 예시 솔로 넘기기 · 로그인(앱과 같은 저장 키) · 「프로그램 실행」 → 로딩 화면 → /app/ */
 (function(){
@@ -377,36 +403,23 @@ const sbOn=()=>!!(SB&&SB.url&&SB.key);
 /* 위쪽 막대 — 스크롤하면 아래 선 */
 const top=$('#top');addEventListener('scroll',()=>top.classList.toggle('scrolled',scrollY>8),{passive:true});
 
-/* ── 예시 솔로 ── */
-const tpl=[...document.querySelectorAll('template.demo')];
-const solos=[{diff:+($('#sheetSvg').dataset.diff||2),html:null}].concat(tpl.map(t=>({diff:+t.dataset.diff,html:t.innerHTML})));
-let di=0;const sheet=$('#sheet');
-function write(){sheet.classList.remove('write');void sheet.offsetWidth;sheet.classList.add('write')}
-function showDemo(i){
-  di=(i+solos.length)%solos.length;const s=solos[di];
-  if(s.html===null)s.html=$('#sheetSvg').innerHTML;
-  $('#sheetSvg').innerHTML=s.html;$('#demoDiff').textContent='난이도 '+s.diff;
-  $('#demoCount').textContent=(di+1)+' / '+solos.length;write();
-}
-$('#btnDemo').onclick=()=>showDemo(di+1);
-if(solos.length<2)$('#btnDemo').hidden=true;
-$('#demoCount').textContent='1 / '+solos.length;
-/* 첫 악보는 화면에 들어올 때 한 줄씩 적힌다 */
-try{const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){write();io.disconnect()}},{threshold:.3});io.observe(sheet)}catch(e){}
-
 /* ── 로그인 ── */
 const dlg=$('#loginDlg');
 function msg(t){$('#lgMsg').textContent=t||''}
 function errText(e){const m=String(e&&e.message||e);
   return /Invalid login credentials/i.test(m)?'이메일이나 비밀번호가 맞지 않아요.':/Email not confirmed/i.test(m)?'메일 인증이 아직 안 됐어요. 받은 메일의 링크를 눌러 주세요.':/already registered/i.test(m)?'이미 가입된 이메일이에요. 로그인해 주세요.':/Password should be/i.test(m)?'비밀번호는 8자 이상으로 해 주세요.':/rate limit/i.test(m)?'요청이 많아요. 잠시 뒤 다시 해 주세요.':/Failed to fetch|NetworkError|Load failed/i.test(m)?'인터넷 연결을 확인해 주세요.':m}
-async function sb(path,body,token){
+async function sb(path,body,token,method){
   const h={'apikey':SB.key,'content-type':'application/json'};if(token)h.authorization='Bearer '+token;
-  const r=await fetch(SB.url+path,{method:'POST',headers:h,body:JSON.stringify(body||{})});
+  const r=await fetch(SB.url+path,{method:method||'POST',headers:h,body:JSON.stringify(body||{})});
   const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
   if(!r.ok)throw new Error((j&&(j.msg||j.error_description||j.message||j.error))||('HTTP '+r.status));
   return j;
 }
-function save(j){const u=j.user||{};lsSet(ACCT_KEY,{access_token:j.access_token,refresh_token:j.refresh_token,expires_at:Date.now()+((+j.expires_in||3600)-60)*1000,email:u.email||'',uid:u.id||''})}
+/* 로그인 시간이 지났으면 새로 받아 둔다(앱과 같은 방식) */
+async function fresh(){const s=sess();if(!s)return null;if(Date.now()<s.expires_at)return s;
+  try{const j=await sb('/auth/v1/token?grant_type=refresh_token',{refresh_token:s.refresh_token});save(j,s);return sess()}
+  catch(e){try{localStorage.removeItem(ACCT_KEY)}catch(_){}ui();return null}}
+function save(j,keep){keep=keep||{};const u=j.user||{};lsSet(ACCT_KEY,{access_token:j.access_token,refresh_token:j.refresh_token,expires_at:Date.now()+((+j.expires_in||3600)-60)*1000,email:u.email||keep.email||'',uid:u.id||keep.uid||''})}
 function back(){return location.origin&&location.origin!=='null'?location.origin+location.pathname.replace(/[^/]*$/,'')+APP_URL:''}
 function ui(){
   const s=sess(),b=beta();
@@ -443,6 +456,12 @@ $('#lgReset').onclick=async()=>{
 };
 $('#lgLogout').onclick=async()=>{const s=sess();try{if(s)await sb('/auth/v1/logout',{},s.access_token)}catch(e){}try{localStorage.removeItem(ACCT_KEY)}catch(e){}ui();msg('로그아웃했어요. 이 기기의 자료는 그대로 남아 있어요.')};
 $('#lgGuest').onclick=()=>launch();
+$('#lgPwBtn').onclick=async()=>{
+  const pw=$('#lgNewPw').value,m=t=>{$('#lgMsg2').textContent=t};if(pw.length<8){m('새 비밀번호는 8자 이상으로 해 주세요.');return}
+  try{const s=await fresh();if(!s){m('로그인이 끝났어요. 다시 로그인해 주세요.');return}
+    await sb('/auth/v1/user',{password:pw},s.access_token,'PUT');$('#lgNewPw').value='';m('비밀번호를 바꿨어요.')}
+  catch(err){m('바꾸지 못했어요. '+errText(err))}
+};
 
 /* ── 프로그램 실행 — 로그인 안 했으면 먼저 로그인 창(「로그인 없이 시작」도 있음) ── */
 const boot=$('#boot');

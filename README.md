@@ -5,12 +5,13 @@
 코드 진행을 고르면 **매번 새로운** 연습용 즉흥 솔로 악보를 만들어 주고, 반주와 함께 들려 주는 단일 HTML 웹앱.
 규칙 기반 엔진이 **Weimar Jazz Database 실측 통계**를 확률로 사용해 "사람 같은" 라인을 만든다.
 
-수정 작업 버전 **v0.56.0 "EzImprovJazz"**. 배포 여부와 검증 결과는 별도로 확인해야 한다. 버전 이력 전체는 [CHANGELOG.md](CHANGELOG.md), 되돌릴 수 있는 시점은 [CHECKPOINTS.md](CHECKPOINTS.md)에 있다 — 이 README에는 현재 기능 요약만 둔다.
+수정 작업 버전 **v0.57.0 "EzImprovJazz"**. 배포 여부와 검증 결과는 별도로 확인해야 한다. 버전 이력 전체는 [CHANGELOG.md](CHANGELOG.md), 되돌릴 수 있는 시점은 [CHECKPOINTS.md](CHECKPOINTS.md)에 있다 — 이 README에는 현재 기능 요약만 둔다.
 
 > 마스터 기획안: [docs/blueprint-v1.0.pdf](docs/blueprint-v1.0.pdf) — 프로젝트 전체 로드맵(v1~v4), ML·RAG 확장 설계, 비용·법무 프레임.
 
 ## 주요 기능
 
+- **v0.57 EzImprovJazz**: 홈 첫 화면에서 Tea for Two 실제 연주 데모(5개, 이어 재생) · 앱 새로고침 → 홈 · iReal Pro 포럼 곡 받기 안내 · 연습 기능 소개 · 홈에서 비밀번호 바꾸기
 - **v0.56 EzImprovJazz**: 이름·심볼을 EzImprovJazz로 · 홈페이지(ezimprovjazz.com — 예시 솔로·로그인·「프로그램 실행」) · 앱 로딩 화면
 - **v0.55 Clu**: 계정(테스트) — Supabase 로그인, 내 곡·즐겨찾기·저장한 솔로·보관한 마디 기기 간 동기화(?beta=1)
 - **v0.54 Clu**: 화면 테마 6종을 만들었다가 v0.54.1에서 다시 닫음(코드는 보관, 기본 테마만)

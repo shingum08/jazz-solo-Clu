@@ -134,15 +134,11 @@ if '--web' in sys.argv:
     land=open(os.path.join(ld,'index.html'),encoding='utf-8').read()
     mark=re.sub(r'\s*<!--.*?-->','',open(os.path.join(root,'app','brand','mark.svg'),encoding='utf-8').read())
     mark=re.sub(r'\n\s*','',mark).strip().replace('<svg ','<svg aria-hidden="true" ')
-    demo=json.load(open(os.path.join(ld,'demo.json'),encoding='utf-8'))['solos']
     def lrep(old,new,n=1):
         global land
         if land.count(old)!=n: raise RuntimeError('홈페이지 마커를 찾지 못했습니다 — '+old)
         land=land.replace(old,new)
     lrep('<!--__MARK__-->',mark,3)
-    sv=lambda d:'<div class="sv sv-w">'+d['svg']+'</div><div class="sv sv-n">'+d['svgN']+'</div>'
-    lrep('<div id="sheetSvg"><!--__DEMO_FIRST__-->','<div id="sheetSvg" data-diff="'+str(demo[0]['diff'])+'">'+sv(demo[0]))
-    lrep('<!--__DEMO_REST__-->',''.join('<template class="demo" data-diff="'+str(d['diff'])+'">'+sv(d)+'</template>' for d in demo[1:]))
     lrep('/*__SB_CONFIG__*/null','/*__SB_CONFIG__*/'+(json.dumps(sb_cfg) if sb_cfg else 'null'))
     lrep('</head>','<meta name="robots" content="noindex,nofollow">\n</head>')   # 공개 출시(개인정보처리방침·약관 게시) 전까지
     open(os.path.join(wd,'index.html'),'w',encoding='utf-8').write(land)
