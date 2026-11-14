@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- v0.55.0 화면 테마는 잠시 닫음(사용자 요청) — 다시 열 때 THEME_ON=true + 여기서 저장된 테마를 그리기 전에 적용 -->
 <!--__PWA_HEAD__-->
-<title>EzImprovJazz v0.67.2 — 즉흥 재즈 솔로 연습 악보</title>
+<title>EzImprovJazz v0.68.0 — 즉흥 재즈 솔로 연습 악보</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -922,6 +922,24 @@ svg .abcjs-tempo{cursor:pointer}
   .paper-head{flex-wrap:wrap}
 }
 @media(max-width:360px){.topbar .btn{font-size:12.5px;padding:8px 1px;letter-spacing:-.03em}#btnTap{flex-basis:44px}}   /* v0.51 아주 좁은 화면(iPhone SE 1세대) */
+/* ── v0.68 고르는 칸(곡·단계·악기 등)이 바탕과 섞이지 않게 — 포인트색을 살짝 섞은 밝은 칸 + 놋쇠 테두리(테마마다 자동) ── */
+.toolbar select,.tb select,.setbox .advsel,.songacts select,.srow select,.toolbar input[type=search],.seg button:not(.on){
+  background-color:var(--panel);background-color:color-mix(in srgb,var(--brass) 13%,var(--panel));
+  border-color:var(--brass-deep);border-color:color-mix(in srgb,var(--brass) 55%,var(--line));color:var(--hi);font-weight:500}
+.toolbar select:hover,.tb select:hover,.setbox .advsel:hover,.songacts select:hover,.seg button:not(.on):hover{border-color:var(--brass);background-color:color-mix(in srgb,var(--brass) 20%,var(--panel))}
+.tb>label,.field>label{color:var(--brass)}
+/* ── v0.68 사용법 둘러보기(처음 한 번 + 「? 사용법」) ── */
+.tourbtn{min-width:40px}
+.tour{position:fixed;inset:0;z-index:2000}
+.tour .tourhole{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(4,7,11,.72),0 0 0 2px var(--brass);transition:all .28s ease;pointer-events:none}
+.tour .tourcard{position:fixed;width:min(340px,calc(100vw - 32px));background:var(--panel);color:var(--txt);border:1px solid var(--brass);border-radius:14px;padding:16px 16px 14px;box-shadow:0 18px 50px rgba(0,0,0,.45);transition:top .28s ease,left .28s ease}
+.tour .tourstep{margin:0 0 4px;font-size:12px;color:var(--brass);font-weight:600}
+.tour h3{margin:0 0 6px;font-size:17px;color:var(--hi);font-family:var(--font-body)}
+.tour p.tt{margin:0 0 14px;font-size:14.5px;line-height:1.6}
+.tour .touracts{display:flex;gap:8px;justify-content:flex-end}
+.tour .touracts button{min-height:40px;padding:8px 14px;border-radius:9px;font:inherit;font-size:14px;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--txt)}
+.tour .touracts .tnext{background:var(--brass);border-color:var(--brass);color:var(--on-accent);font-weight:600}
+@media (prefers-reduced-motion:reduce){.tour .tourhole,.tour .tourcard{transition:none}}
 </style>
 </head>
 <body>
@@ -929,7 +947,7 @@ svg .abcjs-tempo{cursor:pointer}
 <script>setTimeout(function(){var b=document.getElementById('boot');if(b)b.classList.add('done')},8000)/* v0.56 로딩 화면 안전장치 — 무슨 일이 있어도 8초 뒤에는 걷는다 */</script>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.67.2<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.68.0<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1 class="brand"><a class="brandlink" id="brandLink"><svg class="bmark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="brassH" x1="0" y1="112" x2="0" y2="362" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f8d98a"/><stop offset="0.5" stop-color="#e9b44c"/><stop offset="1" stop-color="#c98a2e"/></linearGradient><radialGradient id="glowH" cx="0.5" cy="0.42" r="0.75"><stop offset="0" stop-color="#1d2a4d"/><stop offset="1" stop-color="#0d1428"/></radialGradient></defs><rect width="512" height="512" rx="112" fill="url(#glowH)"/><g stroke="#4a5d8c" stroke-width="4" stroke-linecap="round" opacity=".85"><line x1="40" y1="134" x2="472" y2="134"/><line x1="40" y1="196" x2="472" y2="196"/><line x1="40" y1="258" x2="472" y2="258"/><line x1="40" y1="320" x2="472" y2="320"/><line x1="40" y1="382" x2="472" y2="382"/></g><g fill="url(#brassH)"><g transform="translate(36 0) skewX(-8)"><rect x="96" y="160" width="26" height="192" rx="13"/><path d="M109.0,160H204L194,186H109.0A13.0,13.0 0 0 1 109.0,160Z"/><path d="M109.0,243H182L172,269H109.0A13.0,13.0 0 0 1 109.0,243Z"/><path d="M109.0,326H204L194,352H109.0A13.0,13.0 0 0 1 109.0,326Z"/></g><g transform="translate(36 0) skewX(-8)"><rect x="240" y="160" width="26" height="192" rx="13"/><path d="M222,173a13,13 0 0 1 13,-13H288L278,186H235a13,13 0 0 1 -13,-13Z"/><path d="M222,339a13,13 0 0 1 13,-13H288L278,352H235a13,13 0 0 1 -13,-13Z"/></g><rect x="384" y="160" width="26" height="136" rx="13"/><path d="M384,282 a49,49 0 0 1 -98,0 l26,0 a23,23 0 0 0 46,0 z"/><circle cx="397" cy="134" r="20"/></g><path d="M100,436 Q256,474 404,436" stroke="#e9b44c" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.9"/><g class="nt"><ellipse cx="434" cy="430" rx="13" ry="10" fill="#e9b44c" transform="rotate(-18 434 430)"/><path d="M446,428 V396 Q460,400 465,409" stroke="#e9b44c" stroke-width="6" fill="none" stroke-linecap="round"/></g></svg><span>EzImprovJazz</span></a></h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -943,6 +961,7 @@ svg .abcjs-tempo{cursor:pointer}
   <!-- v0.45 상단 조작 막대 — 설정 열기 · 지금 곡 · 재생/일시정지 · 정지 · 음표색 (스크롤해도 위에 붙어 있음) -->
   <div class="topbar" id="topBar">
     <button class="btn setbtn" id="btnSettings" type="button" aria-haspopup="dialog">⚙ 설정</button>
+    <button class="btn ghost tourbtn" id="btnTour" type="button" aria-label="사용법 둘러보기" title="사용법 둘러보기">?</button>
     <button class="topfav" id="topFav" type="button" aria-label="이 곡 즐겨찾기" title="즐겨찾기">☆</button>
     <div class="nowsong"><b id="nowSong">—</b><span id="nowMeta"></span></div>
     <div class="topctl">
@@ -3331,5 +3350,41 @@ if(location.hash==='#embed-demo'&&SONGDB[EMB_SONG]){
 window.addEventListener('error',e=>{try{const bt=document.getElementById('boot');if(bt)bt.classList.add('done');const d=document.createElement('div');d.style.cssText='position:fixed;bottom:8px;left:8px;background:#a03b25;color:#fff;padding:8px 12px;z-index:99;font-size:12px;border-radius:6px';d.textContent='오류: '+e.message;document.body.appendChild(d)}catch(_){}});
 </script>
 <!--__MUSICXML_MODULE__-->
+<div class="tour" id="tour" hidden><div class="tourhole" id="tourHole"></div>
+  <div class="tourcard" id="tourCard" role="dialog" aria-modal="true" aria-labelledby="tourTitle"><p class="tourstep" id="tourStep"></p><h3 id="tourTitle"></h3><p class="tt" id="tourText"></p>
+  <div class="touracts"><button type="button" id="tourSkip">건너뛰기</button><button type="button" class="tnext" id="tourNext">다음</button></div></div></div>
+<script>/* ── v0.68 사용법 둘러보기 — 처음 들어오면 한 번, 그 뒤엔 머리줄 「?」로 다시 보기. 홈 데모(iframe) 안에서는 안 띄운다 ── */
+(function(){
+  if(location.hash==='#embed-demo')return;
+  const KEY='eij-tour-v1',$q=s=>document.querySelector(s);
+  const STEPS=[
+    {sel:'#btnSettings',set:false,t:'⚙ 설정부터 열어요',x:'곡, 단계, 악보 악기를 여기서 고르고 「만들고 재생」을 누르면 시작이에요.'},
+    {sel:'#songSel',set:true,t:'연습할 곡',x:'코드 진행을 골라요. 위의 「내 악보 불러오기」로 iReal Pro 포럼 곡도 가져올 수 있어요.'},
+    {sel:'#diffSel',set:true,t:'단계 1~5',x:'입문은 4분음표 위주로 차분하게, 단계가 오를수록 8분 라인·셋잇단·릭·16분 꾸밈음이 늘어나요.'},
+    {sel:'#notSel',set:true,t:'악보 악기',x:'B♭(테너·트럼펫), E♭(알토)처럼 내 악기 조로 악보를 적어 줘요. 소리는 그대로예요.'},
+    {sel:'#btnGenPlay',set:true,t:'▶ 만들고 재생',x:'솔로 악보를 만들고 베이스·피아노 반주와 함께 들려 줘요. 매번 새로운 솔로가 나와요.'},
+    {sel:'#btnNew',set:false,t:'↻ 새 솔로 · ▶ 재생',x:'같은 설정으로 다른 솔로를 바로 만들 수 있어요. 마음에 들 때까지 눌러 보세요.'},
+    {sel:'#sheetTools .lockmode',set:false,t:'✋ 마디 고르기',x:'좋은 마디는 고정하고 나머지만 다시 만들어요. 👍👎 평가는 솔로를 더 좋게 만드는 데 쓰여요.'},
+    {sel:'#btnTour',set:false,t:'다시 보고 싶을 때',x:'이 「?」를 누르면 언제든 이 안내를 다시 볼 수 있어요. 즐거운 연습 되세요!'}];
+  let k=0;const tour=$q('#tour'),hole=$q('#tourHole'),card=$q('#tourCard');
+  const setOpen=v=>{try{const sh=$q('#setSheet');if(v&&sh.hidden)openSet();else if(!v&&!sh.hidden)closeSet()}catch(e){}};
+  function place(){const st=STEPS[k],el=$q(st.sel);const tg=el&&(el.closest('.tb,.field')||el);
+    if(!tg||!tg.getClientRects().length){hole.style.cssText='left:50%;top:40%;width:0;height:0';card.style.left=Math.max(16,(innerWidth-card.offsetWidth)/2)+'px';card.style.top='40%';return}
+    const r=tg.getBoundingClientRect(),p=6;hole.style.left=(r.left-p)+'px';hole.style.top=(r.top-p)+'px';hole.style.width=(r.width+2*p)+'px';hole.style.height=(r.height+2*p)+'px';
+    const cw=card.offsetWidth,ch=card.offsetHeight;let top=r.bottom+14;if(top+ch>innerHeight-12)top=Math.max(12,r.top-ch-14);
+    card.style.top=top+'px';card.style.left=Math.min(Math.max(16,r.left+r.width/2-cw/2),innerWidth-cw-16)+'px'}
+  function show(){const st=STEPS[k];setOpen(st.set);
+    $q('#tourStep').textContent=(k+1)+' / '+STEPS.length;$q('#tourTitle').textContent=st.t;$q('#tourText').textContent=st.x;$q('#tourNext').textContent=k===STEPS.length-1?'시작하기':'다음';
+    const el=$q(st.sel);try{if(el)el.scrollIntoView({block:'center',behavior:'instant'})}catch(e){}
+    requestAnimationFrame(()=>setTimeout(place,60));setTimeout(()=>{try{$q('#tourNext').focus({preventScroll:true})}catch(e){}},80)}
+  function end(){tour.hidden=true;setOpen(false);try{localStorage.setItem(KEY,'1')}catch(e){}window.removeEventListener('resize',place);document.removeEventListener('keydown',onKey,true)}
+  function onKey(e){if(tour.hidden)return;if(e.key==='Escape'){e.preventDefault();e.stopPropagation();end()}else if(e.key==='ArrowRight'){e.preventDefault();next()}}
+  function next(){if(k>=STEPS.length-1)return end();k++;show()}
+  function start(){k=0;tour.hidden=false;window.addEventListener('resize',place);document.addEventListener('keydown',onKey,true);show()}
+  $q('#tourNext').addEventListener('click',next);$q('#tourSkip').addEventListener('click',end);
+  $q('#btnTour').addEventListener('click',start);
+  window.addEventListener('load',()=>{let seen=null;try{seen=localStorage.getItem(KEY)}catch(e){}if(!seen)setTimeout(start,1400)});
+})();
+</script>
 </body>
 </html>

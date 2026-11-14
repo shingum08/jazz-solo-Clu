@@ -14,7 +14,7 @@
 <meta property="og:description" content="코드 진행을 고르면 연습할 솔로 악보를 만들고, 반주와 함께 들려 줘요. 베타 기간 무료.">
 <meta property="og:image" content="https://ezimprovjazz.com/og.jpg">
 <meta property="og:url" content="https://ezimprovjazz.com/">
-<script>document.documentElement.classList.add('js')</script>
+<script>document.documentElement.classList.add('js');(function(){var skip=false;try{skip=sessionStorage.getItem('eij-intro')==='1'||matchMedia('(prefers-reduced-motion: reduce)').matches||location.hash}catch(e){}if(skip)document.documentElement.classList.add('nointro')})()</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -212,9 +212,41 @@ dialog.login::backdrop{background:rgba(5,8,12,.66)}
   .bootin svg *,.bootbar i{animation:none}.bootbar i{width:100%}
   .boot,.top{transition:none}
 }
+/* ── v0.68 오프닝 — 단어가 하나씩 떠올랐다 사라지고 심볼로 맺는다(한 탭 세션에 한 번 · 동작 줄이기 설정이면 생략 · 누르면 건너뜀) ── */
+.opn{display:none}
+.js:not(.nointro) .opn{display:flex}
+.opn{position:fixed;inset:0;z-index:2147483000;align-items:center;justify-content:center;background:radial-gradient(60% 50% at 50% 55%,rgba(209,165,69,.13),transparent 70%),#07090d;cursor:pointer;transition:opacity .7s ease,visibility .7s}
+.opn.out{opacity:0;visibility:hidden}
+.opn .iw{position:absolute;left:var(--gut);right:var(--gut);text-align:center;font:700 clamp(46px,11vw,132px)/1.05 var(--serif);letter-spacing:-.035em;color:#f6f2e8;opacity:0}
+.opn .iw.go{animation:iw 1.15s cubic-bezier(.2,.7,.2,1) both}
+.opn .iw.hi{background:linear-gradient(100deg,#f3d58f,#d1a545 55%,#b98a2a);-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes iw{0%{opacity:0;transform:scale(.9);filter:blur(14px)}38%{opacity:1;transform:scale(1);filter:blur(0)}72%{opacity:1;transform:scale(1.015);filter:blur(0)}100%{opacity:0;transform:scale(1.06);filter:blur(10px)}}
+.opn .ifin{position:absolute;display:flex;flex-direction:column;align-items:center;gap:14px;opacity:0;transform:translateY(10px);transition:opacity .8s ease,transform .8s ease}
+.opn .ifin.go{opacity:1;transform:none}
+.opn .ifin svg{height:clamp(56px,10vw,84px);width:auto}
+.opn .ifin b{font:700 clamp(30px,6vw,52px)/1 var(--serif);color:#f6f2e8;letter-spacing:-.02em}
+.opn .ifin span{font-size:clamp(15px,2.4vw,19px);color:var(--fog)}
+.opn .iskip{position:absolute;right:var(--gut);bottom:max(20px,env(safe-area-inset-bottom));background:none;border:1px solid rgba(243,238,226,.25);color:var(--fog);border-radius:999px;padding:8px 16px;font:500 14px/1 var(--sans);cursor:pointer}
+.opn .iskip:hover{color:#f6f2e8;border-color:rgba(243,238,226,.5)}
+body.opning{overflow:hidden}
 </style>
 </head>
 <body>
+<div class="opn" id="opening" aria-hidden="true">
+  <div class="iw">Ad-lib?</div><div class="iw">Improvise?</div><div class="iw hi">Just play.</div><div class="iw">Enjoy it.</div><div class="iw">Learn as you go.</div>
+  <div class="ifin"><!--__MARK__--><b>EzImprovJazz</b><span>재즈 즉흥연주, 이제 쉽게.</span></div>
+  <button class="iskip" type="button" id="introSkip" tabindex="-1">건너뛰기</button>
+</div>
+<script>/* v0.68 오프닝 순서 — 문구를 바꾸려면 위 .iw 만 고치면 된다 */
+(function(){var I=document.getElementById('opening');if(!I||document.documentElement.classList.contains('nointro'))return;
+  document.body.classList.add('opn-on');var W=I.querySelectorAll('.iw'),F=I.querySelector('.ifin'),T=[],STEP=1000,done=false;
+  function end(){if(done)return;done=true;T.forEach(clearTimeout);I.classList.add('out');document.body.classList.remove('opn-on');try{sessionStorage.setItem('eij-intro','1')}catch(e){}setTimeout(function(){I.remove()},800)}
+  W.forEach(function(w,i){T.push(setTimeout(function(){w.classList.add('go')},250+i*STEP))});
+  T.push(setTimeout(function(){F.classList.add('go')},250+W.length*STEP+100));
+  T.push(setTimeout(end,250+W.length*STEP+1900));
+  I.addEventListener('click',end);document.addEventListener('keydown',function k(e){if(!done){end();document.removeEventListener('keydown',k)}});
+})();
+</script>
 <header class="top" id="top">
   <div class="wrap topin">
     <a class="brand" href="./" aria-label="EzImprovJazz 홈"><!--__MARK__-->EzImprovJazz</a>
