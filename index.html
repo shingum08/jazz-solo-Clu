@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- v0.55.0 화면 테마는 잠시 닫음(사용자 요청) — 다시 열 때 THEME_ON=true + 여기서 저장된 테마를 그리기 전에 적용 -->
-<title>EzImprovJazz v0.68.0 — 즉흥 재즈 솔로 연습 악보</title>
+<title>EzImprovJazz v0.68.1 — 즉흥 재즈 솔로 연습 악보</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -1267,7 +1267,9 @@ svg .abcjs-tempo{cursor:pointer}
 .toolbar select:hover,.tb select:hover,.setbox .advsel:hover,.songacts select:hover,.seg button:not(.on):hover{border-color:var(--brass);background-color:color-mix(in srgb,var(--brass) 20%,var(--panel))}
 .tb>label,.field>label{color:var(--brass)}
 /* ── v0.68 사용법 둘러보기(처음 한 번 + 「? 사용법」) ── */
-.tourbtn{min-width:40px}
+header.site .wrap{position:relative}
+.tourbtn{position:absolute;right:0;top:30px;min-height:40px;padding:6px 14px;font-size:14px}   /* v0.68.1 머리 오른쪽 빈칸(음표색 위) — 재생 줄을 넓게 */
+@media(max-width:560px){.tourbtn{top:26px;padding:6px 12px}}
 .tour{position:fixed;inset:0;z-index:2000}
 .tour .tourhole{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(4,7,11,.72),0 0 0 2px var(--brass);transition:all .28s ease;pointer-events:none}
 .tour .tourcard{position:fixed;width:min(340px,calc(100vw - 32px));background:var(--panel);color:var(--txt);border:1px solid var(--brass);border-radius:14px;padding:16px 16px 14px;box-shadow:0 18px 50px rgba(0,0,0,.45);transition:top .28s ease,left .28s ease}
@@ -1285,9 +1287,10 @@ svg .abcjs-tempo{cursor:pointer}
 <script>setTimeout(function(){var b=document.getElementById('boot');if(b)b.classList.add('done')},8000)/* v0.56 로딩 화면 안전장치 — 무슨 일이 있어도 8초 뒤에는 걷는다 */</script>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.68.0<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.68.1<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1 class="brand"><a class="brandlink" id="brandLink"><svg class="bmark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="brassH" x1="0" y1="112" x2="0" y2="362" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f8d98a"/><stop offset="0.5" stop-color="#e9b44c"/><stop offset="1" stop-color="#c98a2e"/></linearGradient><radialGradient id="glowH" cx="0.5" cy="0.42" r="0.75"><stop offset="0" stop-color="#1d2a4d"/><stop offset="1" stop-color="#0d1428"/></radialGradient></defs><rect width="512" height="512" rx="112" fill="url(#glowH)"/><g stroke="#4a5d8c" stroke-width="4" stroke-linecap="round" opacity=".85"><line x1="40" y1="134" x2="472" y2="134"/><line x1="40" y1="196" x2="472" y2="196"/><line x1="40" y1="258" x2="472" y2="258"/><line x1="40" y1="320" x2="472" y2="320"/><line x1="40" y1="382" x2="472" y2="382"/></g><g fill="url(#brassH)"><g transform="translate(36 0) skewX(-8)"><rect x="96" y="160" width="26" height="192" rx="13"/><path d="M109.0,160H204L194,186H109.0A13.0,13.0 0 0 1 109.0,160Z"/><path d="M109.0,243H182L172,269H109.0A13.0,13.0 0 0 1 109.0,243Z"/><path d="M109.0,326H204L194,352H109.0A13.0,13.0 0 0 1 109.0,326Z"/></g><g transform="translate(36 0) skewX(-8)"><rect x="240" y="160" width="26" height="192" rx="13"/><path d="M222,173a13,13 0 0 1 13,-13H288L278,186H235a13,13 0 0 1 -13,-13Z"/><path d="M222,339a13,13 0 0 1 13,-13H288L278,352H235a13,13 0 0 1 -13,-13Z"/></g><rect x="384" y="160" width="26" height="136" rx="13"/><path d="M384,282 a49,49 0 0 1 -98,0 l26,0 a23,23 0 0 0 46,0 z"/><circle cx="397" cy="134" r="20"/></g><path d="M100,436 Q256,474 404,436" stroke="#e9b44c" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.9"/><g class="nt"><ellipse cx="434" cy="430" rx="13" ry="10" fill="#e9b44c" transform="rotate(-18 434 430)"/><path d="M446,428 V396 Q460,400 465,409" stroke="#e9b44c" stroke-width="6" fill="none" stroke-linecap="round"/></g></svg><span>EzImprovJazz</span></a></h1>
+    <button class="btn ghost tourbtn" id="btnTour" type="button" aria-label="사용법 둘러보기" title="사용법 둘러보기">? 사용법</button>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
   </div>
 </header>
@@ -1299,7 +1302,6 @@ svg .abcjs-tempo{cursor:pointer}
   <!-- v0.45 상단 조작 막대 — 설정 열기 · 지금 곡 · 재생/일시정지 · 정지 · 음표색 (스크롤해도 위에 붙어 있음) -->
   <div class="topbar" id="topBar">
     <button class="btn setbtn" id="btnSettings" type="button" aria-haspopup="dialog">⚙ 설정</button>
-    <button class="btn ghost tourbtn" id="btnTour" type="button" aria-label="사용법 둘러보기" title="사용법 둘러보기">?</button>
     <button class="topfav" id="topFav" type="button" aria-label="이 곡 즐겨찾기" title="즐겨찾기">☆</button>
     <div class="nowsong"><b id="nowSong">—</b><span id="nowMeta"></span></div>
     <div class="topctl">
