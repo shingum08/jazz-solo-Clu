@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- v0.55.0 화면 테마는 잠시 닫음(사용자 요청) — 다시 열 때 THEME_ON=true + 여기서 저장된 테마를 그리기 전에 적용 -->
 <!--__PWA_HEAD__-->
-<title>EzImprovJazz v0.65.0 — 즉흥 재즈 솔로 연습 악보</title>
+<title>EzImprovJazz v0.66.6 — 즉흥 재즈 솔로 연습 악보</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -929,7 +929,7 @@ svg .abcjs-tempo{cursor:pointer}
 <script>setTimeout(function(){var b=document.getElementById('boot');if(b)b.classList.add('done')},8000)/* v0.56 로딩 화면 안전장치 — 무슨 일이 있어도 8초 뒤에는 걷는다 */</script>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.65.0<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.66.6<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1 class="brand"><a class="brandlink" id="brandLink"><svg class="bmark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="brassH" x1="0" y1="112" x2="0" y2="362" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f8d98a"/><stop offset="0.5" stop-color="#e9b44c"/><stop offset="1" stop-color="#c98a2e"/></linearGradient><radialGradient id="glowH" cx="0.5" cy="0.42" r="0.75"><stop offset="0" stop-color="#1d2a4d"/><stop offset="1" stop-color="#0d1428"/></radialGradient></defs><rect width="512" height="512" rx="112" fill="url(#glowH)"/><g stroke="#4a5d8c" stroke-width="4" stroke-linecap="round" opacity=".85"><line x1="40" y1="134" x2="472" y2="134"/><line x1="40" y1="196" x2="472" y2="196"/><line x1="40" y1="258" x2="472" y2="258"/><line x1="40" y1="320" x2="472" y2="320"/><line x1="40" y1="382" x2="472" y2="382"/></g><g fill="url(#brassH)"><g transform="translate(36 0) skewX(-8)"><rect x="96" y="160" width="26" height="192" rx="13"/><path d="M109.0,160H204L194,186H109.0A13.0,13.0 0 0 1 109.0,160Z"/><path d="M109.0,243H182L172,269H109.0A13.0,13.0 0 0 1 109.0,243Z"/><path d="M109.0,326H204L194,352H109.0A13.0,13.0 0 0 1 109.0,326Z"/></g><g transform="translate(36 0) skewX(-8)"><rect x="240" y="160" width="26" height="192" rx="13"/><path d="M222,173a13,13 0 0 1 13,-13H288L278,186H235a13,13 0 0 1 -13,-13Z"/><path d="M222,339a13,13 0 0 1 13,-13H288L278,352H235a13,13 0 0 1 -13,-13Z"/></g><rect x="384" y="160" width="26" height="136" rx="13"/><path d="M384,282 a49,49 0 0 1 -98,0 l26,0 a23,23 0 0 0 46,0 z"/><circle cx="397" cy="134" r="20"/></g><path d="M100,436 Q256,474 404,436" stroke="#e9b44c" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.9"/><g class="nt"><ellipse cx="434" cy="430" rx="13" ry="10" fill="#e9b44c" transform="rotate(-18 434 430)"/><path d="M446,428 V396 Q460,400 465,409" stroke="#e9b44c" stroke-width="6" fill="none" stroke-linecap="round"/></g></svg><span>EzImprovJazz</span></a></h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -1011,6 +1011,10 @@ svg .abcjs-tempo{cursor:pointer}
       <div class="field"><label>음원 세트(비교용)</label><select id="soundSet" class="advsel"><option value="musyng" selected>A · 현재 음원 (MusyngKite · 동일조건 공유)</option><option value="ccby">B · FluidR3 (출처 표시만)</option><option value="cc0">C · 피아노·테너 CC0(VCSL) + FluidR3 베이스</option><option value="synth">D · 내장 신스 (샘플 없음)</option></select></div>
       <div class="field"><label>솔로 음량 <span class="bpmval" id="lvVal">100%</span></label><input type="range" id="leadvol" min="0" max="150" value="100" step="5"></div>
       <div class="field"><label>반주 음량 <span class="bpmval" id="bvVal">80%</span></label><input type="range" id="backvol" min="0" max="150" value="80" step="5"></div>
+    </div>
+    <div class="quotebox">
+      <div class="qhead"><label><input type="checkbox" id="naturalOn" checked> 선율 다듬기(v0.66 · 기본 켬) — 코러스 이음매 · 두 음 왕복 줄이기 · 셋잇단 모양 · 해결 착지 · 2·4박 텐션(단계 4·5) · 악센트</label><span class="advnote">끄면 같은 시드로 v0.65 방식의 솔로와 악센트가 나옵니다. 「새 솔로」를 누르지 말고 이 스위치만 켰다 껐다 하면서 같은 곡·같은 자리를 번갈아 들어 비교해 보세요.</span></div>
+      <div class="qrow"><div class="qcol"><label class="qlab" for="lickAmt">릭 빈도 — 릭 사전의 한 마디 릭(비밥 스케일 · 7→3 해결 · 3→♭9 아르페지오 등)이 나오는 정도. 단계 3 이상에서만 쓰입니다.</label><select id="lickAmt" class="advsel" style="max-width:240px"><option value="0">끔</option><option value="0.5">적게</option><option value="1" selected>보통</option><option value="1.7">많이</option></select></div></div>
     </div>
     <div class="quotebox">
       <div class="qhead"><label><input type="checkbox" id="motifOn" checked> 모티프 발전(기본 켬) — 앞 프레이즈의 첫머리 3~4음을 시퀀스·반진행·반복으로 되풀이</label><span class="advnote">연주자가 "말 걸고 받아치듯" 같은 동기를 변형해 다시 꺼내는 흐름을 만듭니다. 악보 태그에 「모티프 발전: 시퀀스↑」처럼 표시됩니다. 끄면 이전과 같은 생성.</span></div>
@@ -2043,6 +2047,12 @@ function themeQuoteFor(c,nCh){
 }
 /* ── v0.28 모티프 발전 · 헤드 차용 ── */
 cur.motifOn=true;cur.headFrags=[];
+/* v0.66 선율 다듬기 스위치 — 끄면 같은 시드로 v0.65 방식(생성·악센트). 번갈아 들어 비교하는 용도 */
+cur.naturalOn=true;
+/* v0.66.4 릭 빈도 */
+cur.lickAmt=1;
+if($('#lickAmt'))$('#lickAmt').addEventListener('change',()=>{cur.lickAmt=+$('#lickAmt').value;const was=!!cur.audio;stopIfPlaying();regen();if(was){playAll();syncPlay()}});
+if($('#naturalOn'))$('#naturalOn').addEventListener('change',()=>{cur.naturalOn=$('#naturalOn').checked;const was=!!cur.audio;stopIfPlaying();regen();if(was){playAll();syncPlay()}});
 $('#motifOn').addEventListener('change',()=>{cur.motifOn=$('#motifOn').checked;const was=!!cur.audio;stopIfPlaying();regen();if(was){playAll();syncPlay()}});
 function readHeadAbc(){
   const txt=$('#headAbcIn').value;let msg='';
@@ -2138,12 +2148,12 @@ function chorusLabel(c){   /* 코러스 탭·악보 머리 이름 — 헤드 코
 function gen(newSeed){
   cur.themeOn=false;   /* v0.47 테마 인용 끔(숨김) */
   const keyPc=origKey();
-  const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selLv,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length,cur.lyric,cur.headMode,$('#headAbcIn').value.length].join('|');
+  const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selLv,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length,cur.lyric,cur.headMode,$('#headAbcIn').value.length,cur.naturalOn,cur.lickAmt].join('|');
   if(newSeed||cur.seed===undefined||cur.sig===undefined){cur.seed=Math.floor(Math.random()*1e6);cur.edits={};cur.sel=null}
   else if(sig!==cur.sig){cur.edits={};cur.sel=null}
   cur.sig=sig;
   const nCh=Math.max(1,Math.min(12,+$('#chorusSel').value||1));cur.chorus=nCh;
-  const op={useLicks:cur.useLicks!==false,style:cur.style,groups:cur.useGroups,feel:currentFeel(),topic:cur.topic,motif:cur.motifOn!==false,headMotifs:cur.headFrags||[],level:cur.selLv,lyric:lyricAmt(cur.lyric==null?LYRIC_MAP.def:cur.lyric),bpm:+$('#bpm').value};
+  const op={useLicks:cur.useLicks!==false,style:cur.style,groups:cur.useGroups,feel:currentFeel(),topic:cur.topic,motif:cur.motifOn!==false,headMotifs:cur.headFrags||[],level:cur.selLv,lyric:lyricAmt(cur.lyric==null?LYRIC_MAP.def:cur.lyric),bpm:+$('#bpm').value,natural:cur.naturalOn!==false,lickAmt:cur.lickAmt};
   const mk=i=>Object.assign({},op,{quote:themeQuoteFor(i,nCh),arc:{i,n:nCh}});   /* v0.27 코러스 곡선 */
   const hp=headPlan(),NT=nCh+(hp?(hp.mode==='inout'?2:1):0);cur.headCh=hp?{first:true,last:hp.mode==='inout'}:null;   /* v0.46 헤드 코러스(코러스 수는 솔로만 셈) */
   if(cur.view==='drill'){cur.soloBase=null;cur.soloBases=[]}   /* 연습 악보는 applyView에서 사용자 조·기보에 맞춰 만든다 */
@@ -2161,8 +2171,9 @@ function gen(newSeed){
     cur.soloBases=[cur.soloBase];}
   for(let c=1;c<NT&&cur.view!=='drill';c++){
     const sd=(cur.seed+c*7919)%1000003,isOut=hp&&hp.mode==='inout'&&c===NT-1;
-    const so=isOut?spliceHeadBars(generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,Object.assign(mk(nCh-1),{quote:null})),hp.lock,hp.rg)
-                  :generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,mk(hp?c-1:c));
+    const cy=carryOf(cur.soloBases[c-1]);   /* v0.66 앞 코러스(헤드·고정 마디를 끼운 뒤)의 끝음·주제를 이어받는다 */
+    const so=isOut?spliceHeadBars(generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,Object.assign(mk(nCh-1),{quote:null,carry:cy})),hp.lock,hp.rg)
+                  :generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,Object.assign(mk(hp?c-1:c),{carry:cy}));
     if(cur.locks&&cur.locks[c]&&Object.keys(cur.locks[c]).length)spliceLockedBars(so,cur.locks[c]);
     cur.soloBases.push(so);
   }

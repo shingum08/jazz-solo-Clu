@@ -103,12 +103,31 @@ function buildAudioEvents(solo,bpm,sw){
     let dur=(en-st)*(legato?1.02:0.86);
     const isOff=n.T%6===3&&!n.trip;
     const pv=flat[i-1]&&flat[i-1].midi!==null?flat[i-1].midi:null;
+    const isEnd=!!(n.phEnd||flat[k].phEnd)||(endT-n.T)>=9;
     let vel=0.82;
+    if(typeof cur!=='undefined'&&cur&&cur.naturalOn===false){   /* v0.65 방식(비교용) */
     if(isOff)vel=0.95;                                    /* 엇박 8분 강조 */
     if(n.t%24===0)vel=Math.max(vel,0.9);
     if(pv!==null&&n.midi<pv-2&&n.d<=3&&!isOff)vel=0.62;   /* 하행 라인의 박 위 음은 살짝 고스트 */
     if(n.phStart)vel=Math.max(vel,0.9);
-    const isEnd=!!(n.phEnd||flat[k].phEnd)||(endT-n.T)>=9;
+    }else{
+    /* v0.66 악센트 — 「엇박마다 똑같이 세게, 마디 첫 박도 세게」는 기계적으로 들린다. 실제 연주처럼 줄기의 모양을 따른다:
+       봉우리(앞뒤보다 높은 음)·위로 뛴 음·당김음(엇박에서 길게 끌거나 뒤가 쉼)을 세게, 골짜기(앞뒤보다 낮은 정박 8분)는 삼키듯 여리게,
+       엇박 8분은 조금만 세게, 높은 음일수록 조금 크게. 마디 첫 박이라고 세게 치지는 않는다 */
+      const pvE=i>0&&flat[i-1].midi!==null&&flat[i-1].T+flat[i-1].d===n.T?flat[i-1]:null;   /* 쉼 없이 바로 앞에 붙은 음 */
+      const pm=pvE?pvE.midi:null,nm=legato?nx.midi:null,short=(endT-n.T)<=3;
+      vel=isOff?0.87:0.8;
+      if(n.trip)vel=n.T%6===0?0.85:0.77;
+      if(pm!==null&&nm!==null&&n.midi>pm&&n.midi>nm)vel+=0.1;                 /* 봉우리 */
+      else if(pm!==null&&n.midi-pm>=4)vel+=0.06;                              /* 위로 뛴 음 */
+      if(isOff&&(!short||!legato))vel+=0.07;                                  /* 당김음·엇박에서 끊는 음 */
+      if(!isOff&&!n.trip&&short&&pm!==null&&nm!==null&&n.midi<pm&&n.midi<nm)vel=0.6;   /* 골짜기 = 고스트 */
+      else if(!isOff&&!n.trip&&short&&legato&&pm!==null&&n.midi<pm-2)vel=Math.min(vel,0.68);   /* 내려가는 줄기의 정박 음은 살짝 여리게 */
+      vel+=Math.max(-0.03,Math.min(0.05,(n.midi-70)*0.004));
+      if(n.phStart)vel=Math.max(vel,0.88);
+      if(isEnd&&short&&isOff)vel=Math.max(vel,0.95);                           /* 엇박에서 짧게 끊는 끝음 */
+      vel=Math.max(0.55,Math.min(1,vel));
+    }
     evs.push({start:st,dur:Math.max(0.06,dur),midi:n.midi,vel,end:isEnd});
   }
   return evs;
