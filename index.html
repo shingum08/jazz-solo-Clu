@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- v0.55.0 화면 테마는 잠시 닫음(사용자 요청) — 다시 열 때 THEME_ON=true + 여기서 저장된 테마를 그리기 전에 적용 -->
-<title>EzImprovJazz v0.67.0 — 즉흥 재즈 솔로 연습 악보</title>
+<title>EzImprovJazz v0.67.1 — 즉흥 재즈 솔로 연습 악보</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -1267,7 +1267,7 @@ svg .abcjs-tempo{cursor:pointer}
 <script>setTimeout(function(){var b=document.getElementById('boot');if(b)b.classList.add('done')},8000)/* v0.56 로딩 화면 안전장치 — 무슨 일이 있어도 8초 뒤에는 걷는다 */</script>
 <header class="site">
   <div class="wrap">
-    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.67.0<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
+    <div class="eyebrow">즉흥 재즈 솔로 연습 · 베타 v0.67.1<button class="instbtn" id="btnInstall" hidden>📲 앱으로 설치</button></div>
     <div class="insthelp" id="instHelp" hidden></div>
     <h1 class="brand"><a class="brandlink" id="brandLink"><svg class="bmark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="brassH" x1="0" y1="112" x2="0" y2="362" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f8d98a"/><stop offset="0.5" stop-color="#e9b44c"/><stop offset="1" stop-color="#c98a2e"/></linearGradient><radialGradient id="glowH" cx="0.5" cy="0.42" r="0.75"><stop offset="0" stop-color="#1d2a4d"/><stop offset="1" stop-color="#0d1428"/></radialGradient></defs><rect width="512" height="512" rx="112" fill="url(#glowH)"/><g stroke="#4a5d8c" stroke-width="4" stroke-linecap="round" opacity=".85"><line x1="40" y1="134" x2="472" y2="134"/><line x1="40" y1="196" x2="472" y2="196"/><line x1="40" y1="258" x2="472" y2="258"/><line x1="40" y1="320" x2="472" y2="320"/><line x1="40" y1="382" x2="472" y2="382"/></g><g fill="url(#brassH)"><g transform="translate(36 0) skewX(-8)"><rect x="96" y="160" width="26" height="192" rx="13"/><path d="M109.0,160H204L194,186H109.0A13.0,13.0 0 0 1 109.0,160Z"/><path d="M109.0,243H182L172,269H109.0A13.0,13.0 0 0 1 109.0,243Z"/><path d="M109.0,326H204L194,352H109.0A13.0,13.0 0 0 1 109.0,326Z"/></g><g transform="translate(36 0) skewX(-8)"><rect x="240" y="160" width="26" height="192" rx="13"/><path d="M222,173a13,13 0 0 1 13,-13H288L278,186H235a13,13 0 0 1 -13,-13Z"/><path d="M222,339a13,13 0 0 1 13,-13H288L278,352H235a13,13 0 0 1 -13,-13Z"/></g><rect x="384" y="160" width="26" height="136" rx="13"/><path d="M384,282 a49,49 0 0 1 -98,0 l26,0 a23,23 0 0 0 46,0 z"/><circle cx="397" cy="134" r="20"/></g><path d="M100,436 Q256,474 404,436" stroke="#e9b44c" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.9"/><g class="nt"><ellipse cx="434" cy="430" rx="13" ry="10" fill="#e9b44c" transform="rotate(-18 434 430)"/><path d="M446,428 V396 Q460,400 465,409" stroke="#e9b44c" stroke-width="6" fill="none" stroke-linecap="round"/></g></svg><span>EzImprovJazz</span></a></h1>
     <p class="sub">재즈 스탠더드 <b style="color:var(--brass);font-weight:500">261곡</b>의 코드 진행 위에 매번 새로운 연습용 솔로를 만듭니다. 곡 검색 · 아티스트 스타일 · 반음 단위 조 변환을 지원합니다.</p>
@@ -1930,7 +1930,8 @@ const RELAX={p:0.5,density:0.58,songBonus:0.35,salt:0x5f3759df};
    theme  1코러스 첫 동기를 뒤 코러스 섹션 첫머리에서 다시 꺼낼 확률(p) · 마지막 코러스 끝 섹션(last) — 「처음 한 말로 맺기」
    outside 바깥 소리 장치(반음 헤미올라·얼터드 색)를 쓸 최소 곡선 위치와 장르 */
 const NATURAL={seam:true,
-  climb:{p:{3:0.6,4:0.85,5:0.95},first:0.5,last:1.1,minTop:77,minRise:9,hold:[12,18,24],asc:[4,5,6],desc:[4,5,6,7],tries:16},   /* v0.66.6 고음 끌기: 코러스마다 확률(단계별) · 첫/마지막 코러스 배수 · 고음 하한(F5) · 최소 상승 폭 · 끄는 길이(틱) · 오르는/내리는 8분 수 */
+  climb:{p:{3:0.4,4:0.55,5:0.65},first:0.5,last:1.1,minTop:77,minRise:9,hold:[12,18,24],asc:[4,5,6],desc:[4,5,6,7],tries:16,shapes:{e8:1,q4:0.6,leap:0.6},leapHold:[9,12,18]},   /* v0.66.6 고음 끌기: 코러스마다 확률(단계별) · 첫/마지막 코러스 배수 · 고음 하한(F5) · 최소 상승 폭 · 끄는 길이(틱) · 오르는/내리는 8분 수 */
+  flow:{lv:4,minD:0.8,longP:0.3,longLen:[11,17],shortLen:[1,3],shortAfterLong:0.55,cap:20,crossP:0.7,gapLong:[2,4],gapShort:[1,2],inLong:0.2,inAll:0.5,denseGapP:0.35,rE:0.72,rQ:1.35,rUh:1.5,rH:1.25},   /* v0.67 예시 솔로: 긴 문장(12박↑)과 짧은 한마디를 섞고 긴 문장 뒤엔 2~4박 숨 — 단계 4·5, 성긴 곳(밀도<0.8) 제외 */
   six:{cap:{3:0,4:2,5:3},capSlow:{3:1,4:3,5:4},slowBpm:132,maxBpm:200,p:0.35,offbeat:0.6},   /* v0.67 16분 꾸밈음: 코러스당 최대 개수(단계별 · 느린 곡) · 이 템포 넘으면 안 씀 · 후보마다 확률 · 엇박 자리 가중 */
   song:{lyr:{1:1,2:1,3:0.85,4:0.6,5:0.5},rich:{2:0.25,3:0.6,4:0.85,5:0.9}},   /* v0.66.5 lyr: 단계별 노래 프레이즈 비율 배수(비밥 100 = 엔진 0.3에서 시작) · rich: 노래 프레이즈 셀 중 8분 채움 셀 비율 */
   osc:{aba:1.0,abaLeap:2.2,zig:1.2,stack:0.8,recover:0.7,fill:0.3,flow:0.25,turn:0.3,cyc3:0.7,anchor:1,runStep:1.7,runThird:1.35,zigzag:0.5},
@@ -2149,23 +2150,29 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
   const phrases=[];
   let beat=rng()<0.6||ARC.i>0?0:(diff===1?2:1);   /* v0.64 둘째 코러스부터는 첫 박에서 바로(앞 코러스 끝에서 물고 들어옴) */
   const totalBeats=NB*BPB;
+  const FLW=NAT&&LVN>=NATURAL.flow.lv?NAT.flow:null;let lastKind=null;   /* v0.67 */
   while(beat<totalBeats-1){
     const dHere=densityAt(beat),grow=PHRASE_FLOW.lenLo+(PHRASE_FLOW.lenHi-PHRASE_FLOW.lenLo)*Math.max(0,Math.min(1,(dHere-0.55)/0.65));   /* v0.64 촘촘한 곳일수록 긴 문장 */
     let L=Math.round(sampleQuart(rng,phLenQ.map(x=>x*lenScale*(diff===1?1:grow)),diff===1?3:3,Math.min(capBeats,diff===1?7:capBeats)));
     if(diff===1){beat=Math.ceil(beat/2)*2;}
+    let kind=null;   /* v0.67 긴 문장 · 짧은 한마디 */
+    if(FLW&&dHere>=FLW.minD&&!relaxAt(beat)){const rr=rng();if(lastKind==='long'){if(rr<FLW.shortAfterLong)kind='short'}else if(rr<FLW.longP)kind='long';
+      if(kind){const R=kind==='long'?FLW.longLen:FLW.shortLen;L=R[0]+Math.floor(rng()*(R[1]-R[0]+1))}}
     let end=beat+L; /* 마지막 음이 시작되는 박(포함) */
     /* 형식 경계(8마디·블루스 4마디)에 가까우면 그 직전에 종지하도록 맞춘다 */
     const secBeats=P*BPB;
     const nextB=Math.ceil((beat+1)/secBeats)*secBeats;
-    if(nextB<totalBeats&&end>=nextB-3&&end<=nextB+3&&!(diff>=2&&dHere>=0.95&&rng()<PHRASE_FLOW.crossP)){end=nextB-2+(rng()<0.4?1:0);if(end-beat<2)end=beat+2}   /* v0.64 촘촘한 곳은 섹션 경계를 넘어 이어 가기도 */
-    end=Math.min(end,beat+capAt(beat)-1,totalBeats-1);
-    if(end<=beat)break;
-    phrases.push({s:beat,e:end});
+    if(nextB<totalBeats&&end>=nextB-3&&end<=nextB+3&&!(kind==='long'&&rng()<FLW.crossP)&&!(diff>=2&&dHere>=0.95&&rng()<PHRASE_FLOW.crossP)){end=nextB-2+(rng()<0.4?1:0);if(end-beat<2)end=beat+2}   /* v0.64 촘촘한 곳은 섹션 경계를 넘어 이어 가기도 */
+    end=Math.min(end,beat+(kind==='long'?FLW.cap:capAt(beat))-1,totalBeats-1);
+    if(end<=beat&&kind!=='short')break;if(end<beat)break;
+    phrases.push({s:beat,e:end,long:kind==='long'});
     let g=sampleQuart(rng,gapQ,diff===1?2:1,6);
     if(inst==='wind')g=Math.max(g,1.2);
     const slow=feel==='ballad'||feel==='bossa'||feel==='latin';
     g=Math.min(g,slow?BPB-1:BPB+1);   /* 프레이즈 사이 쉼 — 느린 계열(발라드·보사·라틴)은 더 촘촘히 */
-    {const r=rng(),sparse=densityAt(end)<0.8,dense=densityAt(end)>=0.95;if(!sparse&&r<(dense?PHRASE_FLOW.denseGapP:REST_MIX.gapShortP))g=Math.min(g,1.4);else if(r<1-REST_MIX.longGapP*(sparse?2:1))g=Math.min(g,REST_MIX.gapMax)}   /* v0.60 짧은 숨(1박)을 자주, 긴 쉼은 가끔만 · v0.63 첫 코러스 앞부분(성긴 곳)은 숨을 넉넉히 */
+    {const r=rng(),sparse=densityAt(end)<0.8,dense=densityAt(end)>=0.95;if(!sparse&&r<(dense?(FLW?FLW.denseGapP:PHRASE_FLOW.denseGapP):REST_MIX.gapShortP))g=Math.min(g,1.4);else if(r<1-REST_MIX.longGapP*(sparse?2:1))g=Math.min(g,REST_MIX.gapMax)}   /* v0.60 짧은 숨(1박)을 자주, 긴 쉼은 가끔만 · v0.63 첫 코러스 앞부분(성긴 곳)은 숨을 넉넉히 */
+    if(kind){const R=kind==='long'?FLW.gapLong:FLW.gapShort;g=R[0]+rng()*(R[1]-R[0])}   /* v0.67 긴 문장 뒤엔 넉넉히 숨 */
+    lastKind=kind;
     beat=end+1+Math.round(g);
     /* 곡 첫 박 근처로 새 섹션을 시작하도록 — 섹션 경계 1박 전(픽업)이나 경계에서 */
     const nb2=Math.ceil(beat/secBeats)*secBeats;
@@ -2361,6 +2368,7 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         if(k2==='T'&&prev==='T'&&prev2==='T')continue;   /* v0.61 셋잇단 3연속 금지 */
         if(isFirst&&k2==='Uh')continue;
         if(!isFirst&&k2==='R')w*=densityAt(bt)>=0.95?PHRASE_FLOW.inR:REST_MIX.inR;   /* v0.64 촘촘한 곳은 프레이즈 안 쉼을 더 줄임 */
+        if(FLW){if(k2==='E')w*=FLW.rE;else if(k2==='Q')w*=FLW.rQ;else if(k2==='Uh')w*=FLW.rUh;else if(k2==='H')w*=FLW.rH;if(!isFirst&&(k2==='R'||k2==='Ur'||k2==='Qs'))w*=ph.long?FLW.inLong:FLW.inAll}   /* Qs(8분+8분 쉼)도 문장을 끊는다 */   /* v0.67 예시 솔로: 8분 줄이고 4분·당김 붙임줄 늘림 · 긴 문장 안에서는 쉬지 않게 */
         if(mixQ&&!(hl&&bt>=hl.s&&bt<hl.e)){if(k2==='Q'||k2==='Qs')w*=prev==='E'&&prev2==='E'?3:prev==='E'?1.6:0.8;else if(k2==='E')w*=prev==='Q'||prev==='Qs'?2:1;else if(k2==='T')w*=0.3;else if(k2==='H'||k2==='R')w*=0.4}
         if(isLast&&!(k2==='Q'||k2==='Qs'||k2==='E'||k2==='Uh'||(k2==='Ur'&&diff>=2)))continue;
         if((k2==='H'||k2==='Uh')&&CUT_TOK[prev])continue;
@@ -3784,14 +3792,14 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         const notes=events.filter(e=>e.ph===ph&&e.midi!==null);if(notes.length<4)continue;
         const lst=notes[notes.length-1],Eend=lst.t+lst.d;if(Eend%3)continue;
         const nxt=events.find(e=>e.t>=Eend&&e.midi!==null);if(nxt&&nxt.t<Eend+3)continue;   /* 뒤에 쉼이 있어야 */
-        for(const n of CL.desc)for(const hl of CL.hold)for(const k of CL.asc){
-          const H=Eend-(3*n+6)-hl,W0=H-3*k;
+        for(const sh in CL.shapes)for(const n of CL.desc)for(const hl of (sh==='leap'?CL.leapHold:CL.hold))for(const k of (sh==='e8'?CL.asc:sh==='q4'?[2,3]:[1])){   /* v0.67 모양: e8 8분 아르페지오 상행 · q4 4분 아르페지오 상행 · leap 한 박 쉬고 도약해 정점(예시 솔로) */
+          const st8=sh==='q4'?6:sh==='leap'?6:3,H=Eend-(3*n+6)-hl,W0=H-st8*k;
           if(H<0||H%6||!(H%TPB===0||(BPB===4&&H%TPB===12)))continue;   /* 끄는 음은 마디 첫 박 또는 셋째 박 */
           if(W0<notes[0].t)continue;
           const win=events.filter(e=>e.t+e.d>W0&&e.t<Eend);
           if(win.some(e=>e.ph!==ph||(e.midi!==null&&!free(e))))continue;
           const st=win.find(e=>e.t<W0);if(st&&(W0-st.t<3||(W0-st.t)%3))continue;
-          cands.push({ph,Eend,H,W0,hl,n,k,nxt,w:0.5+Eend/TOT+(hl>=18?0.3:0)});
+          cands.push({ph,Eend,H,W0,hl,n,k,nxt,sh,st8,w:(0.5+Eend/TOT+(hl>=18?0.3:0))*CL.shapes[sh]});
         }
       }
       const build=c=>{
@@ -3802,13 +3810,14 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
           if(good)tops.push(m)}
         if(!tops.length)return null;
         const top=tops[tops.length>1&&rng()<0.35?1:0];
+        if(c.sh==='leap'){if(pv===null||top-pv<5||top-pv>12)return null}   /* 쉼 뒤 5~12반음 위로 도약 */
         const asc=[top];
-        for(let j=c.k-1;j>=0;j--){const t=c.W0+3*j,sg=segOf(t),hi=asc[0],opt=[];
+        if(c.sh!=='leap')for(let j=c.k-1;j>=0;j--){const t=c.W0+c.st8*j,sg=segOf(t),hi=asc[0],opt=[];
           for(let m=hi-2;m>=Math.max(LO,hi-MAXLEAP);m--){if(tone(sg,m)<1.5)continue;const iv=hi-m;opt.push({m,w:iv>=3&&iv<=5?3:1})}
           if(!opt.length)return null;let r=rng()*opt.reduce((a,o)=>a+o.w,0),pk=opt[0];for(const o of opt){r-=o.w;if(r<=0){pk=o;break}}asc.unshift(pk.m)}
         asc.pop();   /* 마지막은 끄는 음(top) */
-        if(top-asc[0]<CL.minRise)return null;
-        if(pv!==null&&Math.abs(asc[0]-pv)>MAXLEAP)return null;
+        if(c.sh!=='leap'){if(top-asc[0]<(c.sh==='q4'?7:CL.minRise))return null;
+          if(pv!==null&&Math.abs(asc[0]-pv)>MAXLEAP)return null}
         const mkDesc=arp=>{const desc=[];let cur=top;
         for(let j=0;j<=c.n;j++){const t=c.H+c.hl+3*j,sg=segOf(t);let pick=null;
           if(arp){for(let m=cur-1;m>=cur-5;m--)if(tone(sg,m)>=2){pick=m;break}}
@@ -3828,8 +3837,8 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
         const olds=events.filter(e=>e.ph===c.ph&&e.midi!==null),wasFirst=olds.length&&olds[0].t>=c.W0,st=events.find(e=>e.t<c.W0&&e.t+e.d>c.W0);
         if(st)st.d=c.W0-st.t;
         const keep=events.filter(e=>!(e.t>=c.W0&&e.t<c.Eend)),nw=[];
-        P.asc.forEach((m,j)=>nw.push({t:c.W0+3*j,d:3,midi:m,ph:c.ph,climb:true}));
-        nw.push({t:c.H,d:c.hl,midi:P.top,ph:c.ph,climb:true});
+        if(c.sh!=='leap')P.asc.forEach((m,j)=>nw.push({t:c.W0+c.st8*j,d:c.st8,midi:m,ph:c.ph,climb:true}));
+        nw.push({t:c.H,d:c.hl,midi:P.top,ph:c.ph,climb:true,disp:c.sh==='leap'&&P.top-(events.filter(e=>e.midi!==null&&e.t<c.W0).pop()||{midi:P.top}).midi>MAXLEAP});
         P.desc.forEach((m,j)=>nw.push({t:c.H+c.hl+3*j,d:j===c.n?6:3,midi:m,ph:c.ph,climb:true}));
         if(wasFirst)nw[0].first=true;nw[nw.length-1].last=true;
         const at=keep.findIndex(e=>e.t>=c.W0);keep.splice(at<0?keep.length:at,0,...nw);
