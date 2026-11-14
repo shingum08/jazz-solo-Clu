@@ -445,6 +445,7 @@ const RELAX={p:0.5,density:0.58,songBonus:0.35,salt:0x5f3759df};
    outside 바깥 소리 장치(반음 헤미올라·얼터드 색)를 쓸 최소 곡선 위치와 장르 */
 const NATURAL={seam:true,
   climb:{p:{3:0.6,4:0.85,5:0.95},first:0.5,last:1.1,minTop:77,minRise:9,hold:[12,18,24],asc:[4,5,6],desc:[4,5,6,7],tries:16},   /* v0.66.6 고음 끌기: 코러스마다 확률(단계별) · 첫/마지막 코러스 배수 · 고음 하한(F5) · 최소 상승 폭 · 끄는 길이(틱) · 오르는/내리는 8분 수 */
+  six:{cap:{3:0,4:2,5:3},capSlow:{3:1,4:3,5:4},slowBpm:132,maxBpm:200,p:0.35,offbeat:0.6},   /* v0.67 16분 꾸밈음: 코러스당 최대 개수(단계별 · 느린 곡) · 이 템포 넘으면 안 씀 · 후보마다 확률 · 엇박 자리 가중 */
   song:{lyr:{1:1,2:1,3:0.85,4:0.6,5:0.5},rich:{2:0.25,3:0.6,4:0.85,5:0.9}},   /* v0.66.5 lyr: 단계별 노래 프레이즈 비율 배수(비밥 100 = 엔진 0.3에서 시작) · rich: 노래 프레이즈 셀 중 8분 채움 셀 비율 */
   osc:{aba:1.0,abaLeap:2.2,zig:1.2,stack:0.8,recover:0.7,fill:0.3,flow:0.25,turn:0.3,cyc3:0.7,anchor:1,runStep:1.7,runThird:1.35,zigzag:0.5},
   beat:{tensLv:4,tensCost:0.6,passLv:5,passCost:0.9,endTensLv:4},
@@ -2402,6 +2403,25 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
     if(!bar.notes.some(n=>n.midi!==null))tag(b,'쉼(호흡)');
   });
   phrases.forEach(ph=>tag(Math.floor(ph.e/BPB),'프레이즈 종지'));
+  /* ── ⑧ v0.67 16분 꾸밈음 — 8분 하나를 16분 둘로 쪼개 다음 음으로 반음 미끄러져 들어간다(13-♭13 → 5, ♯11-11 → ♭3 같은 꾸밈).
+     연주자 예시 솔로에서 음의 약 5%가 이런 16분 두 음. 틱 격자는 그대로 두고 16분 = 1.5틱(0.5 단위)으로 적는다 —
+     꾸밈음을 끄면(선율 다듬기 끔·단계 3 이하·빠른 곡) 예전과 한 음도 다르지 않다.
+     조건: 셋잇단·붙임줄 아님, 8분(3틱) 바로 뒤에 같은 마디 8분 이상 음, 두 음 사이 2~3반음 → 첫 16분은 원래 음, 둘째는 다음 음 쪽으로 반음 */
+  if(NAT&&NAT.six&&topic==='auto'&&(opts.bpm||prog.bpm||140)<=NAT.six.maxBpm){
+    const SX=NAT.six,slow=(opts.bpm||prog.bpm||140)<=SX.slowBpm||feel==='ballad';let cap=(slow?SX.capSlow:SX.cap)[LVN]||0;
+    const cands=[];
+    if(cap>0)result.forEach((bar,b)=>{if((bar.tags||[]).some(x=>/릭|인용|블루스/.test(x)))return;
+      for(let k=0;k+1<bar.notes.length;k++){const a=bar.notes[k],c=bar.notes[k+1];
+        if(a.midi===null||c.midi===null||a.trip||c.trip||a.tie||a.d!==3||c.t!==a.t+3||c.d<3)continue;
+        const iv=c.midi-a.midi;if(Math.abs(iv)<2||Math.abs(iv)>3)continue;
+        const mid=a.midi+Math.sign(iv);if(mid<LO||mid>HI)continue;
+        cands.push({b,k,mid,w:(a.t%6===3?SX.offbeat:1-SX.offbeat)+(iv<0?0.3:0)})}});   /* 내려가며 미끄러지는 쪽이 흔하다 */
+    const used=new Set();
+    while(cap>0&&cands.length){let r=rng()*cands.reduce((x,o)=>x+o.w,0),ci=0;for(;ci<cands.length-1;ci++){r-=cands[ci].w;if(r<=0)break}
+      const o=cands.splice(ci,1)[0];if(used.has(o.b)||rng()>SX.p)continue;   /* 한 마디에 하나 */
+      const bar=result[o.b],a=bar.notes[o.k];a.d=1.5;a.six=true;bar.notes.splice(o.k+1,0,{t:a.t+1.5,d:1.5,midi:o.mid,six:true});
+      used.add(o.b);cap--;tag(o.b,'16분 꾸밈음');stats.six=(stats.six||0)+1}
+  }
   /* v0.66 다음 코러스로 넘겨줄 것 — 끝음·마지막 방향·첫 동기(주제). UI는 carryOf(앞 코러스 솔로)를 다음 코러스의 opts.carry로 준다 */
   let carryOut=null;
   if(NAT){
@@ -2462,7 +2482,9 @@ function spell(midi,rootPc,scale){const s=spellParts(midi,rootPc,scale);return s
 function abcDur(ticks,trip){
   if(trip)return ticks===4?'2':(ticks===2?'':ticks+'/3');
   const v=ticks/3;
-  return Number.isInteger(v)?String(v):ticks+'/3';
+  if(Number.isInteger(v))return String(v);
+  if(!Number.isInteger(ticks)){const n=Math.round(ticks*2),g=n%3===0?3:1;return (n/g===1?'':String(n/g))+'/'+(6/g)}   /* v0.67 16분(1.5틱) = /2, 점8분(4.5틱) = 3/2 */
+  return ticks+'/3';
 }
 function toAbc(solo,tempo,transpose,octShift,perLine){
   transpose=transpose||0;octShift=octShift||0;const PL=perLine>0?perLine:4;   /* v0.59 줄당 마디 수(좁은 화면은 2) */

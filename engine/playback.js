@@ -86,7 +86,7 @@ const FEEL_SOUND={swing:{comp:'piano',bass:'bass'},ballad:{comp:'piano',bass:'ba
   latin:{comp:'piano',bass:'bass'},shuffle:{comp:'piano',bass:'bass'},funk:{comp:'epiano',bass:'ebass'}};
 const LEAD_SOUND={tenor:'tenor',alto:'alto',trumpet:'trumpet',flute:'flute',vibes:'vibes',clarinet:'clarinet'};
 function feelSwing(feel,bpm,style){return (feel==='bossa'||feel==='latin'||feel==='funk')?0.5:(feel==='ballad'?Math.min(0.6,swingRatio(bpm,style)):(feel==='shuffle'?0.66:swingRatio(bpm,style)))}
-function tickToBeat(t,sw){const beat=Math.floor(t/6),r=t%6;const fr={0:0,2:1/3,3:sw,4:2/3,1:1/6,5:5/6}[r];return beat+fr}
+function tickToBeat(t,sw){const beat=Math.floor(t/6),r=t%6;let fr={0:0,2:1/3,3:sw,4:2/3,1:1/6,5:5/6}[r];if(fr===undefined)fr=r<3?r/3*sw:sw+(r-3)/3*(1-sw);return beat+fr}   /* v0.67 16분(1.5·4.5틱)은 스윙된 8분 안에서 반씩 */
 function buildAudioEvents(solo,bpm,sw){
   const spb=60/bpm,evs=[];
   const TPB=(solo.bpb||4)*6;
