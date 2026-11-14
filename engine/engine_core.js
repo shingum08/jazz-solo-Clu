@@ -446,6 +446,7 @@ const RELAX={p:0.5,density:0.58,songBonus:0.35,salt:0x5f3759df};
 const NATURAL={seam:true,
   climb:{p:{3:0.4,4:0.55,5:0.65},first:0.5,last:1.1,minTop:77,minRise:9,hold:[12,18,24],asc:[4,5,6],desc:[4,5,6,7],tries:16,shapes:{e8:1,q4:0.6,leap:0.6},leapHold:[9,12,18]},   /* v0.66.6 고음 끌기: 코러스마다 확률(단계별) · 첫/마지막 코러스 배수 · 고음 하한(F5) · 최소 상승 폭 · 끄는 길이(틱) · 오르는/내리는 8분 수 */
   flow:{lv:4,minD:0.8,longP:0.3,longLen:[11,17],shortLen:[1,3],shortAfterLong:0.55,cap:20,crossP:0.7,gapLong:[2,4],gapShort:[1,2],inLong:0.2,inAll:0.5,denseGapP:0.35,rE:0.72,rQ:1.35,rUh:1.5,rH:1.25},   /* v0.67 예시 솔로: 긴 문장(12박↑)과 짧은 한마디를 섞고 긴 문장 뒤엔 2~4박 숨 — 단계 4·5, 성긴 곳(밀도<0.8) 제외 */
+  dtime:{p:{4:0.5,5:0.7},maxBpm:96,maxStep:4},   /* v0.67.2 발라드 더블 타임 런: 코러스마다 확률(단계 4·5) · 이 템포 이하(발라드는 늘) · 16분 사이 최대 반음 수 */
   six:{cap:{3:0,4:2,5:3},capSlow:{3:1,4:3,5:4},slowBpm:132,maxBpm:200,p:0.35,offbeat:0.6},   /* v0.67 16분 꾸밈음: 코러스당 최대 개수(단계별 · 느린 곡) · 이 템포 넘으면 안 씀 · 후보마다 확률 · 엇박 자리 가중 */
   song:{lyr:{1:1,2:1,3:0.85,4:0.6,5:0.5},rich:{2:0.25,3:0.6,4:0.85,5:0.9}},   /* v0.66.5 lyr: 단계별 노래 프레이즈 비율 배수(비밥 100 = 엔진 0.3에서 시작) · rich: 노래 프레이즈 셀 중 8분 채움 셀 비율 */
   osc:{aba:1.0,abaLeap:2.2,zig:1.2,stack:0.8,recover:0.7,fill:0.3,flow:0.25,turn:0.3,cyc3:0.7,anchor:1,runStep:1.7,runThird:1.35,zigzag:0.5},
@@ -2430,6 +2431,29 @@ function generateSolo(progId,keyPc,diff,seed,inst,opts){
       const o=cands.splice(ci,1)[0];if(used.has(o.b)||rng()>SX.p)continue;   /* 한 마디에 하나 */
       const bar=result[o.b],a=bar.notes[o.k];a.d=1.5;a.six=true;bar.notes.splice(o.k+1,0,{t:a.t+1.5,d:1.5,midi:o.mid,six:true});
       used.add(o.b);cap--;tag(o.b,'16분 꾸밈음');stats.six=(stats.six||0)+1}
+  }
+  /* ── ⑧-b v0.67.2 발라드 더블 타임 런 — 느린 곡에서 두 박(12틱)을 16분 여덟 개로 채운다. 첫 음은 원래 음, 다음 음 쪽으로 스케일을 밟고
+     8분 자리(정박·엇박)에는 코드톤을 우선. 코러스마다 많아야 한 번. 릭·인용·블루스·노래·고음 끌기 마디 제외 */
+  if(NAT&&NAT.dtime&&topic==='auto'&&BPB===4&&(feel==='ballad'||(opts.bpm||prog.bpm||140)<=NAT.dtime.maxBpm)&&rng()<(NAT.dtime.p[LVN]||0)){
+    const DT=NAT.dtime,cands=[];
+    result.forEach((bar,b)=>{if((bar.tags||[]).some(x=>/릭|인용|블루스|노래|고음 끌기|16분/.test(x)))return;
+      for(const s0 of [0,12]){const inS=bar.notes.filter(n=>n.t<s0+12&&n.t+n.d>s0);
+        if(!inS.length||inS.some(n=>n.midi===null||n.trip||n.t<s0||n.t+n.d>s0+12)||inS[0].t!==s0)continue;
+        if(inS[inS.length-1].tie)continue;if(s0===0&&b>0){const pl=result[b-1].notes[result[b-1].notes.length-1];if(pl&&pl.tie)continue}
+        const after=bar.notes.find(n=>n.t>=s0+12)||(s0===12&&b+1<NB?result[b+1].notes[0]:null);
+        let any=null;for(let bb=b;bb<NB&&any===null;bb++){const q=result[bb].notes.find(n=>n.midi!==null&&(bb>b||n.t>=s0+12));if(q)any=q.midi}   /* 쉼 건너 다음 음(도약 한도) */
+        cands.push({b,s0,a0:inS[0].midi,any,nx:after&&after.midi!==null&&after.t%TPB===(s0+12)%TPB?after.midi:null})}});
+    for(let tr=0;tr<8&&cands.length;tr++){const c=cands.splice(Math.floor(rng()*cands.length),1)[0],T0=c.b*TPB+c.s0;
+      let goal=c.nx!==null?c.nx:c.a0-(5+Math.floor(rng()*4));if(goal<LO+2)goal=Math.min(HI-1,c.a0+6);const ms=[c.a0];let ok=true,rev=0;   /* 아래가 막히면 위로 */
+      for(let i=1;i<8;i++){const t=T0+i*1.5,sg=segs[segAt(Math.floor(t))],pv=ms[i-1],left=goal-pv,steps=8-i+(c.nx!==null?1:0),ideal=pv+left/steps;
+        let best=null,bc=1e9;for(let m=pv-DT.maxStep;m<=pv+DT.maxStep;m++){if(m===pv||m<LO||m>HI)continue;const r=mod12(m-sg.root);if(!sg.scale.includes(r))continue;
+          const turn=i>=2&&(m-pv)*(pv-ms[i-2])<0;if(turn&&rev>=1)continue;   /* 방향은 많아야 한 번 바꾼다(지그재그 금지) */
+          const cost=Math.abs(m-ideal)+((i%2===0&&!sg.ct.includes(r))?0.8:0)+(turn?1.2:0);if(cost<bc){bc=cost;best=m}}
+        if(best===null){ok=false;break}if(i>=2&&(best-ms[i-1])*(ms[i-1]-ms[i-2])<0)rev++;ms.push(best)}
+      if(!ok||(c.nx!==null&&Math.abs(c.nx-ms[7])>2)||(c.any!==null&&Math.abs(c.any-ms[7])>MAXLEAP))continue;
+      const bar=result[c.b];bar.notes=bar.notes.filter(n=>n.t<c.s0||n.t>=c.s0+12);
+      ms.forEach((m,i)=>bar.notes.push({t:c.s0+i*1.5,d:1.5,midi:m,dt:true}));bar.notes.sort((x,y)=>x.t-y.t);
+      tag(c.b,'더블 타임 런');stats.dtime=(stats.dtime||0)+1;break}
   }
   /* v0.66 다음 코러스로 넘겨줄 것 — 끝음·마지막 방향·첫 동기(주제). UI는 carryOf(앞 코러스 솔로)를 다음 코러스의 opts.carry로 준다 */
   let carryOut=null;
