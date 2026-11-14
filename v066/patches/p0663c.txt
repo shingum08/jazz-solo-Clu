@@ -1,0 +1,17 @@
+rate:{2:1.5,3:1.5},rateC:2,again:0.12,carry:0.3,cellAgain:0.6,alts:true},
+-----TO-----
+rate:{2:1.5,3:1.5},rateC:2,golden:1.6,feel:{ballad:0.5},again:0.12,carry:0.2,cellAgain:0.6,alts:true},
+=====8<=====
+      lk('trip');
+      if(rng()>=(chain>=0?NAT.lick.chain:res?rate*(NAT?NAT.lick.rate[diff]||1:1):rateC*(NAT?NAT.lick.rateC:1)))continue;
+-----TO-----
+      lk('trip');
+      /* v0.66.3 Ⅱ–Ⅴ–Ⅰ이 한 프레이즈 안에 통째로 들어 있는 자리(다음 마디에 릭을 이어 붙일 수 있는 자리)는 더 자주 쓴다 */
+      let golden=false;
+      if(NAT&&res&&!sgV&&chain<0&&b<NB-2){
+        const e2=events.filter(e=>e.t>=t1&&e.t<t1+TPB),n2=segAt(t1+TPB);
+        golden=segAt(t1+TPB-1)===nxI&&segs[n2].t0===t1+TPB&&mod12(segs[n2].root-nx.root)===5&&e2.length>=2&&e2[0].t===t1&&!e2.some(e=>e.ph!==P||e.song||e.blu||e.hl||e.quote);
+        if(golden)lk('golden');
+      }
+      const fl=NAT?(NAT.lick.feel[feel]||1):1;
+      if(rng()>=(chain>=0?NAT.lick.chain:res?rate*(NAT?(NAT.lick.rate[diff]||1)*(golden?NAT.lick.golden:1):1)*fl:rateC*(NAT?NAT.lick.rateC:1)*fl))continue;

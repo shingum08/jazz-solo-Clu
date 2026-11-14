@@ -1,0 +1,131 @@
+  outside:{minArc:0.34,feels:['swing','shuffle']},
+-----TO-----
+  outside:{minArc:0.34,feels:['swing','shuffle']},
+  /* v0.66.3 릭 — half: 두 박씩 바뀌는 Ⅱ–Ⅴ 마디에도 · start: 프레이즈 첫 마디에도 · chain: 앞 릭 착지음에서 다음 릭을 이어 붙일 확률
+     cap/capLong: 코러스당 최대(24마디 이상 형식은 capLong) · rate/rateC: 기존 확률에 곱하는 값 · again/carry: 같은 릭을 이 코러스/앞 코러스에서 이미 썼을 때 무게 · cellAgain: 같은 셀을 또 쓸 때마다 곱하는 값 */
+  lick:{half:true,start:true,chain:0.6,cap:2,capLong:3,longForm:24,rate:{2:1,3:1},rateC:1,again:0.12,carry:0.3,cellAgain:0.6},
+=====8<=====
+  const lickUse={};
+-----TO-----
+  const lickUse={};
+  const lk=k=>{if(opts.debug){const o=stats.lk||(stats.lk={});o[k]=(o[k]||0)+1}};   /* v0.66.3 릭 자리 진단(디버그 때만) */
+=====8<=====
+      if(segAt(t1-1)!==s0||segs[s0].t0!==t0)continue;
+      const sg=segs[s0],nxI=b<NB-1?segAt(t1):-1,nx=nxI>=0?segs[nxI]:null;
+      const res=!!(nx&&nx.t0===t1&&mod12(nx.root-sg.root)===5);
+-----TO-----
+      /* v0.66.3 짧은 Ⅱ–Ⅴ 마디(두 박씩, 뿌리가 4도 위로)도 릭 자리로 본다 — half 릭을 쓰고 음은 앞 코드(Ⅱ) 뿌리 기준 */
+      let sgV=null;
+      if(segAt(t1-1)!==s0||segs[s0].t0!==t0){
+        const s1=NAT&&NAT.lick.half?segAt(t0+12):-1;
+        if(s1<0||segs[s0].t0!==t0||s1===s0||segs[s1].t0!==t0+12||segAt(t1-1)!==s1||mod12(segs[s1].root-segs[s0].root)!==5)continue;
+        sgV=segs[s1];
+      }
+      const sg=segs[s0],nxI=b<NB-1?segAt(t1):-1,nx=nxI>=0?segs[nxI]:null;
+      const nxC=nx?(nx.cls==='domalt'?'dom':nx.cls):null;
+      /* v0.66.3 Ⅴ7→Ⅰ7(블루스)도 해결 자리로 본다 — 예전 릭은 착지음이 Ⅰ의 1·3·5음일 때만 */
+      const toOK=L=>L.to.includes(nxC)||!!(NAT&&!L.v&&nxC==='dom'&&L.to.includes('maj')&&[0,4,7].includes(mod12(L.t-5)));
+      lk('seg');
+      const res=!!(nx&&nx.t0===t1&&mod12(nx.root-(sgV||sg).root)===5);if(sgV&&!res)continue;
+=====8<=====
+      const pool=CURATED_LICKS.filter(L=>!(L.minDiff&&diff<L.minDiff)&&L.cls.includes(sg.cls)&&
+-----TO-----
+      const pool=CURATED_LICKS.filter(L=>(NAT||!L.v)&&!L.half===!sgV&&(!sgV||L.cls2.includes(sgV.cls==='domalt'?'dom':sgV.cls))&&!(L.dm&&(sgV||sg).cls==='dom'&&diff<L.dm)&&!(topic==='alt'&&L.v&&!L.alt)&&!(L.minDiff&&diff<L.minDiff)&&L.cls.includes(sg.cls)&&
+=====8<=====
+        (res?(L.to&&L.to.includes(nx.cls==='domalt'?'dom':nx.cls)&&L.tr===5):
+-----TO-----
+        (res?(L.to&&toOK(L)&&L.tr===5):
+=====8<=====
+      if(!pool.length)continue;
+      const inBar=events.filter(e=>e.t>=t0&&e.t<t1);
+-----TO-----
+      if(!pool.length)continue;
+      lk('pool');
+      const inBar=events.filter(e=>e.t>=t0&&e.t<t1);
+=====8<=====
+      if(!events.some(e=>e.ph===P&&e.t<t0))continue;   /* 프레이즈가 이 마디 앞에서 이미 시작돼 있어야(첫 음 표시 유지) */
+-----TO-----
+      lk('phr');
+      /* 프레이즈가 이 마디 앞에서 이미 시작돼 있어야(첫 음 표시 유지).
+         v0.66.3 프레이즈가 이 마디 첫 박(또는 첫 박 뒤 8분)에서 시작해도 넣는다 — 릭의 첫 음이 프레이즈 첫 음 표시를 물려받는다 */
+      const startsHere=!events.some(e=>e.ph===P&&e.t<t0);
+      if(startsHere&&!(NAT&&NAT.lick.start&&inBar[0].t-t0<=3))continue;
+      lk('started');
+=====8<=====
+      if(perCh[0]>=LICK_MAX_PER_CHORUS)continue;
+-----TO-----
+      lk('tgt');
+      /* v0.66.3 ① 프레이즈가 이 마디에서 시작하면 릭도 같은 자리에서 시작해야 한다
+         ② 앞 마디 릭이 이 마디 첫 박에 착지했으면 그 착지음에서 시작하는 릭만 이어 붙인다(Ⅱ→Ⅴ→Ⅰ 두 마디 릭) — 한 덩어리로 세고 세 마디째로는 잇지 않는다
+         ③ 앞 릭의 이어지는 음(nx)이 있는 마디는 건너뛴다 */
+      let chain=-1;
+      if(NAT){
+        if(inBar.some(e=>e.lickN!==undefined))continue;
+        if(startsHere)for(let q=pool.length-1;q>=0;q--)if(pool[q].n[0][0]!==inBar[0].t-t0)pool.splice(q,1);
+        const h=inBar.find(e=>e.lickT!==undefined);
+        if(h){
+          const A=lickPlan[h.lickT];
+          if(!NAT.lick.chain||h.t!==t0||inBar.length<2||!res||!A||A.chained)continue;
+          const pcA=mod12(A.root+A.L.t);
+          for(let q=pool.length-1;q>=0;q--){const L0=pool[q];if(L0.n[0][0]!==0||mod12(sg.root+L0.n[0][2])!==pcA)pool.splice(q,1)}
+          chain=h.lickT;
+        }
+        if(!pool.length)continue;
+      }
+      if(chain<0&&perCh[0]>=(NAT?(NB>=NAT.lick.longForm?NAT.lick.capLong:NAT.lick.cap):LICK_MAX_PER_CHORUS))continue;
+      lk('cap');
+=====8<=====
+      if(rng()>=(res?rate:rateC))continue;
+-----TO-----
+      lk('trip');
+      if(rng()>=(chain>=0?NAT.lick.chain:res?rate*(NAT?NAT.lick.rate[diff]||1:1):rateC*(NAT?NAT.lick.rateC:1)))continue;
+      lk('rate');
+=====8<=====
+      const L=pickW(rng,pool.map(L0=>({v:L0,w:L0.w||1})));
+-----TO-----
+      const L=pickW(rng,pool.map(L0=>({v:L0,w:(L0.w||1)*(NAT?(lickPlan.some(p=>p.L.id===L0.id)?NAT.lick.again:1)*(CARRY&&CARRY.licks&&CARRY.licks[L0.id]?NAT.lick.carry:1):1)})));
+=====8<=====
+trip:d===2?1:undefined,first:false,last:!res&&wasLast&&k===L.n.length-1,midi:null,lick:id,lickK:k}));
+-----TO-----
+trip:d===2?1:undefined,first:startsHere&&k===0,last:!res&&wasLast&&k===L.n.length-1,midi:null,lick:id,lickK:k}));
+=====8<=====
+      lickPlan.push({L,bar:b,root:sg.root});perCh[0]++;
+-----TO-----
+      if(chain>=0){const f=events.find(e=>e.lick===id&&e.lickK===0);if(f)f.lickT=chain}   /* 이어 붙인 릭의 첫 음 = 앞 릭의 착지음 */
+      lickPlan.push({L,bar:b,root:sg.root,chained:chain>=0});if(chain<0)perCh[0]++;
+=====8<=====
+    let best=null;
+    if(ok)for(let o=-4;o<=4;o++){
+-----TO-----
+    const fx=NAT&&e.lickT!==undefined&&forced.has(i)?forced.get(i).m:null;   /* v0.66.3 이어 붙인 릭 — 첫 음은 앞 릭이 정한 착지음 그대로 */
+    let best=null;
+    if(ok)for(let o=-4;o<=4;o++){
+=====8<=====
+      const sc=Math.abs((ms[0]+(noT?ms[ms.length-1]:mt))/2-pitchGoal(e.t))
+-----TO-----
+      if(fx!==null&&ms[0]!==fx)continue;
+      const sc=Math.abs((ms[0]+(noT?ms[ms.length-1]:mt))/2-pitchGoal(e.t))
+=====8<=====
+    tag(P.bar,'릭: '+P.L.name);stats.licks=(stats.licks||0)+1;lickUse[P.L.id]=(lickUse[P.L.id]||0)+1;
+-----TO-----
+    tag(P.bar,'릭: '+P.L.name);stats.licks=(stats.licks||0)+1;lickUse[P.L.id]=(lickUse[P.L.id]||0)+1;
+    if(P.chained)stats.lickChain=(stats.lickChain||0)+1;
+=====8<=====
+      if(c.minDiff&&diff<c.minDiff)continue;
+      const okCls=c.cls===seg.cls||(c.cls==='dom'&&seg.cls==='domalt'&&!c.to);
+-----TO-----
+      if(c.minDiff&&diff<c.minDiff)continue;
+      if(c.v&&!NAT)continue;   /* v0.66.3 새 어휘는 '선율 다듬기'가 켜져 있을 때만 */
+      const okCls=c.cls===seg.cls||(c.cls==='dom'&&seg.cls==='domalt'&&!c.to&&!c.v);
+=====8<=====
+      pool.push({v:c,w:(c.src==='WJD'?Math.log(1+c.np)*(c.to?1.6:1):1.6)*(c.to?2:1)});
+-----TO-----
+      pool.push({v:c,w:(c.src==='WJD'?Math.log(1+c.np)*(c.to?1.6:1):(c.w||1.6))*(c.to?2:1)*(NAT&&lickUse[c.id||c.name]?Math.pow(NAT.lick.cellAgain,lickUse[c.id||c.name]):1)});
+=====8<=====
+Math.sign(le.midi-pe.midi):0,theme};
+-----TO-----
+Math.sign(le.midi-pe.midi):0,theme,licks:Object.assign({},CARRY&&CARRY.licks,lickUse)};
+=====8<=====
+theme:solo.head?null:(solo.carry.theme||null)};
+-----TO-----
+theme:solo.head?null:(solo.carry.theme||null),licks:solo.carry.licks||null};

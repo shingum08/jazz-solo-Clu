@@ -1,0 +1,47 @@
+rate:{2:1.5,3:1.5},rateC:2,golden:1.6,feel:{ballad:0.5},again:0.12,carry:0.2,cellAgain:0.6,alts:true},
+-----TO-----
+rate:{2:1.5,3:1.5},rateC:2,golden:1.6,feel:{ballad:0.5},again:0.12,carry:0.2,cellAgain:0.6,alts:true,late:true},
+=====8<=====
+    const rate=topic==='alt'?0.6:(LICK_RATE[diff]||0),perCh=[0];
+-----TO-----
+    const rate=topic==='alt'?0.6:(LICK_RATE[diff]||0),perCh=[0];
+    /* v0.66.4 릭 빈도(설정 화면): 0 = 끔 · 0.5 적게 · 1 보통 · 1.7 많이 — 확률에 곱하고, '많이'는 코러스당 최대를 하나 늘린다 */
+    const LAMT=NAT&&opts.lickAmt!==undefined&&opts.lickAmt!==null?Math.max(0,+opts.lickAmt):1;
+=====8<=====
+    for(let b=0;b<NB&&(rate>0||rateC>0);b++){
+-----TO-----
+    for(let b=0;b<NB&&(rate>0||rateC>0)&&LAMT>0;b++){
+=====8<=====
+      if(segAt(t1-1)!==s0||segs[s0].t0!==t0){
+        const s1=NAT&&NAT.lick.half?segAt(t0+12):-1;
+        if(s1<0||segs[s0].t0!==t0||s1===s0||segs[s1].t0!==t0+12||segAt(t1-1)!==s1||mod12(segs[s1].root-segs[s0].root)!==5)continue;
+        sgV=segs[s1];
+      }
+-----TO-----
+      if(segAt(t1-1)!==s0||segs[s0].t0!==t0){
+        /* v0.66.4 여러 마디 이어지는 코드의 뒷마디도 릭 자리(스탠더드의 두 마디짜리 Ⅱ·Ⅴ, 모달 곡) */
+        if(!(NAT&&NAT.lick.late&&segAt(t1-1)===s0)){
+          const s1=NAT&&NAT.lick.half?segAt(t0+12):-1;
+          if(s1<0||segs[s0].t0!==t0||s1===s0||segs[s1].t0!==t0+12||segAt(t1-1)!==s1||mod12(segs[s1].root-segs[s0].root)!==5)continue;
+          sgV=segs[s1];
+        }
+      }
+=====8<=====
+          chain=h.lickT;
+        }
+        if(!pool.length)continue;
+      }
+-----TO-----
+          chain=h.lickT;
+        }
+        if(chain<0&&lickPlan.some(p=>p.bar===b-1))continue;   /* 이어 붙이는 경우가 아니면 릭을 두 마디 연달아 넣지 않는다 */
+        if(!pool.length)continue;
+      }
+=====8<=====
+NB<NAT.lick.shortForm?NAT.lick.capShort:NAT.lick.cap):LICK_MAX_PER_CHORUS))continue;
+-----TO-----
+NB<NAT.lick.shortForm?NAT.lick.capShort:NAT.lick.cap)+(LAMT>1.4?1:0):LICK_MAX_PER_CHORUS))continue;
+=====8<=====
+      const fl=NAT?(NAT.lick.feel[feel]||1):1;
+-----TO-----
+      const fl=NAT?(NAT.lick.feel[feel]||1)*LAMT:1;

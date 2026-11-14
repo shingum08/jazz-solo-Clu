@@ -1,0 +1,42 @@
+--- analysis/ui_orig.js	2026-11-14 01:50:09.000000000 +0900
++++ work/ui.js	2026-11-14 12:08:48.000000000 +0900
+@@ -190,6 +190,12 @@
+ }
+ /* ── v0.28 모티프 발전 · 헤드 차용 ── */
+ cur.motifOn=true;cur.headFrags=[];
++/* v0.66 선율 다듬기 스위치 — 끄면 같은 시드로 v0.65 방식(생성·악센트). 번갈아 들어 비교하는 용도 */
++cur.naturalOn=true;
++/* v0.66.4 릭 빈도 */
++cur.lickAmt=1;
++if($('#lickAmt'))$('#lickAmt').addEventListener('change',()=>{cur.lickAmt=+$('#lickAmt').value;const was=!!cur.audio;stopIfPlaying();regen();if(was){playAll();syncPlay()}});
++if($('#naturalOn'))$('#naturalOn').addEventListener('change',()=>{cur.naturalOn=$('#naturalOn').checked;const was=!!cur.audio;stopIfPlaying();regen();if(was){playAll();syncPlay()}});
+ $('#motifOn').addEventListener('change',()=>{cur.motifOn=$('#motifOn').checked;const was=!!cur.audio;stopIfPlaying();regen();if(was){playAll();syncPlay()}});
+ function readHeadAbc(){
+   const txt=$('#headAbcIn').value;let msg='';
+@@ -285,12 +291,12 @@
+ function gen(newSeed){
+   cur.themeOn=false;   /* v0.47 테마 인용 끔(숨김) */
+   const keyPc=origKey();
+-  const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selLv,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length,cur.lyric,cur.headMode,$('#headAbcIn').value.length].join('|');
++  const sig=[cur.view==='drill'?'drill':'solo',cur.selProg,cur.selDiff,cur.selLv,cur.selInst,cur.useLicks,cur.style,cur.useGroups,cur.feel,cur.topic,cur.themeOn,cur.themeCh,cur.motifOn,(cur.headFrags||[]).length,cur.lyric,cur.headMode,$('#headAbcIn').value.length,cur.naturalOn,cur.lickAmt].join('|');
+   if(newSeed||cur.seed===undefined||cur.sig===undefined){cur.seed=Math.floor(Math.random()*1e6);cur.edits={};cur.sel=null}
+   else if(sig!==cur.sig){cur.edits={};cur.sel=null}
+   cur.sig=sig;
+   const nCh=Math.max(1,Math.min(12,+$('#chorusSel').value||1));cur.chorus=nCh;
+-  const op={useLicks:cur.useLicks!==false,style:cur.style,groups:cur.useGroups,feel:currentFeel(),topic:cur.topic,motif:cur.motifOn!==false,headMotifs:cur.headFrags||[],level:cur.selLv,lyric:lyricAmt(cur.lyric==null?LYRIC_MAP.def:cur.lyric),bpm:+$('#bpm').value};
++  const op={useLicks:cur.useLicks!==false,style:cur.style,groups:cur.useGroups,feel:currentFeel(),topic:cur.topic,motif:cur.motifOn!==false,headMotifs:cur.headFrags||[],level:cur.selLv,lyric:lyricAmt(cur.lyric==null?LYRIC_MAP.def:cur.lyric),bpm:+$('#bpm').value,natural:cur.naturalOn!==false,lickAmt:cur.lickAmt};
+   const mk=i=>Object.assign({},op,{quote:themeQuoteFor(i,nCh),arc:{i,n:nCh}});   /* v0.27 코러스 곡선 */
+   const hp=headPlan(),NT=nCh+(hp?(hp.mode==='inout'?2:1):0);cur.headCh=hp?{first:true,last:hp.mode==='inout'}:null;   /* v0.46 헤드 코러스(코러스 수는 솔로만 셈) */
+   if(cur.view==='drill'){cur.soloBase=null;cur.soloBases=[]}   /* 연습 악보는 applyView에서 사용자 조·기보에 맞춰 만든다 */
+@@ -308,8 +314,9 @@
+     cur.soloBases=[cur.soloBase];}
+   for(let c=1;c<NT&&cur.view!=='drill';c++){
+     const sd=(cur.seed+c*7919)%1000003,isOut=hp&&hp.mode==='inout'&&c===NT-1;
+-    const so=isOut?spliceHeadBars(generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,Object.assign(mk(nCh-1),{quote:null})),hp.lock,hp.rg)
+-                  :generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,mk(hp?c-1:c));
++    const cy=carryOf(cur.soloBases[c-1]);   /* v0.66 앞 코러스(헤드·고정 마디를 끼운 뒤)의 끝음·주제를 이어받는다 */
++    const so=isOut?spliceHeadBars(generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,Object.assign(mk(nCh-1),{quote:null,carry:cy})),hp.lock,hp.rg)
++                  :generateSolo(cur.selProg,keyPc,cur.selDiff,sd,cur.selInst,Object.assign(mk(hp?c-1:c),{carry:cy}));
+     if(cur.locks&&cur.locks[c]&&Object.keys(cur.locks[c]).length)spliceLockedBars(so,cur.locks[c]);
+     cur.soloBases.push(so);
+   }

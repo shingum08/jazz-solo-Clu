@@ -1,0 +1,52 @@
+  lick:{half:true,start:true,chain:0.6,cap:2,capLong:3,longForm:24,rate:{2:1,3:1},rateC:1,again:0.12,carry:0.3,cellAgain:0.6},
+-----TO-----
+  lick:{half:true,start:true,chain:0.85,capShort:1,shortForm:12,cap:2,capLong:3,longForm:24,rate:{2:1.5,3:1.5},rateC:2,again:0.12,carry:0.3,cellAgain:0.6,alts:true},
+=====8<=====
+      const res=!!(nx&&nx.t0===t1&&mod12(nx.root-(sgV||sg).root)===5);if(sgV&&!res)continue;
+-----TO-----
+      let res=!!(nx&&nx.t0===t1&&mod12(nx.root-(sgV||sg).root)===5);if(sgV&&!res)continue;
+=====8<=====
+      const pool=CURATED_LICKS.filter(L=>(NAT||!L.v)&&
+-----TO-----
+      let pool=CURATED_LICKS.filter(L=>(NAT||!L.v)&&
+=====8<=====
+      if(!pool.length)continue;
+      lk('pool');
+-----TO-----
+      /* v0.66.3 뿌리가 4도 위로 가지만 맞는 해결 릭이 없는 자리(ⅰ→ⅳ, Ⅰ→Ⅳ …)는 코드 릭 자리로 쓴다 */
+      if(NAT&&res&&!sgV&&!pool.length){res=false;
+        pool=CURATED_LICKS.filter(L=>!L.half&&!L.to&&!L.nx&&!(L.minDiff&&diff<L.minDiff)&&L.cls.includes(sg.cls)&&!(REST_MIX.straight.includes(feel)&&L.n.some(x=>x[1]===2))&&
+          L.n.every(x=>sg.scale.includes(mod12(x[2]))||(sg.ct||[]).includes(mod12(x[2]))))}
+      if(!pool.length)continue;
+      lk('pool');
+=====8<=====
+      if(chain<0&&perCh[0]>=(NAT?(NB>=NAT.lick.longForm?NAT.lick.capLong:NAT.lick.cap):LICK_MAX_PER_CHORUS))continue;
+-----TO-----
+      if(chain<0&&perCh[0]>=(NAT?(NB>=NAT.lick.longForm?NAT.lick.capLong:NB<NAT.lick.shortForm?NAT.lick.capShort:NAT.lick.cap):LICK_MAX_PER_CHORUS))continue;
+=====8<=====
+      if(chain>=0){const f=events.find(e=>e.lick===id&&e.lickK===0);if(f)f.lickT=chain}   /* 이어 붙인 릭의 첫 음 = 앞 릭의 착지음 */
+      lickPlan.push({L,bar:b,root:sg.root,chained:chain>=0});if(chain<0)perCh[0]++;
+-----TO-----
+      /* 이어 붙인 릭의 첫 음 = 앞 릭의 착지음. 앞 릭을 다른 릭으로 바꿔 놓더라도 착지음은 같아야 한다 */
+      if(chain>=0){const f=events.find(e=>e.lick===id&&e.lickK===0);if(f)f.lickT=chain;const A=lickPlan[chain];A.alts=A.alts.filter(x=>mod12(x.t)===mod12(A.L.t))}
+      /* 음역·도약에 걸려 못 놓을 때 대신 쓸, 리듬이 같은 다른 릭 */
+      const sameShape=(a,c)=>a.n.length===c.n.length&&a.n.every((x,k)=>x[0]===c.n[k][0]&&x[1]===c.n[k][1])&&(a.t===null||a.t===undefined)===(c.t===null||c.t===undefined)&&!a.nx&&!c.nx;
+      lickPlan.push({L,bar:b,root:sg.root,chained:chain>=0,alts:NAT&&NAT.lick.alts?pool.filter(L0=>L0!==L&&sameShape(L0,L)):[]});if(chain<0)perCh[0]++;
+=====8<=====
+    let best=null;
+    if(ok)for(let o=-4;o<=4;o++){
+      const base=mod12(P.root)+60+12*o,ms=P.L.n.map(x=>base+x[2]),mt=noT?null:base+P.L.t,mx=nxI.map((k,q)=>base+P.L.nx[q][2]);
+-----TO-----
+    let best=null;
+    const fit=LL=>{let best=null;for(let o=-4;o<=4;o++){
+      const base=mod12(P.root)+60+12*o,ms=LL.n.map(x=>base+x[2]),mt=noT?null:base+LL.t,mx=nxI.map((k,q)=>base+LL.nx[q][2]);
+=====8<=====
+      if(!best||sc<best.sc)best={ms,mt,mx,sc};
+    }
+    if(!best){span.concat(
+-----TO-----
+      if(!best||sc<best.sc)best={ms,mt,mx,sc};
+    }return best};
+    /* v0.66.3 음역·도약에 걸려 못 놓으면 리듬이 같은 다른 릭으로 바꿔 본다 */
+    if(ok){best=fit(P.L);if(!best&&P.alts)for(const A of P.alts){best=fit(A);if(best){P.L=A;break}}}
+    if(!best){span.concat(

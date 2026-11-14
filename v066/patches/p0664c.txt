@@ -1,0 +1,9 @@
+    if(ok){best=fit(P.L);if(!best&&P.alts)for(const A of P.alts){best=fit(A);if(best){P.L=A;break}}}
+-----TO-----
+    if(ok){best=fit(P.L);
+      if(!best&&P.alts&&P.alts.length){
+        /* 덜 쓴 릭부터, 같은 횟수면 마디마다 다른 순서로 — 늘 같은 대체 릭만 걸리지 않게 */
+        const used=x=>(lickUse[x.id]||0)+(CARRY&&CARRY.licks&&CARRY.licks[x.id]?1:0),k=P.bar%P.alts.length;
+        const alts=P.alts.slice(k).concat(P.alts.slice(0,k)).sort((x,y)=>used(x)-used(y));
+        for(const A of alts){best=fit(A);if(best){P.L=A;break}}
+      }}

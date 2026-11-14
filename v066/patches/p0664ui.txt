@@ -1,0 +1,14 @@
+cur.naturalOn=true;
+-----TO-----
+cur.naturalOn=true;
+/* v0.66.4 릭 빈도 */
+cur.lickAmt=1;
+if($('#lickAmt'))$('#lickAmt').addEventListener('change',()=>{cur.lickAmt=+$('#lickAmt').value;const was=!!cur.audio;stopIfPlaying();regen();if(was){playAll();syncPlay()}});
+=====8<=====
+Mode,$('#headAbcIn').value.length,cur.naturalOn].join('|');
+-----TO-----
+Mode,$('#headAbcIn').value.length,cur.naturalOn,cur.lickAmt].join('|');
+=====8<=====
+ric),bpm:+$('#bpm').value,natural:cur.naturalOn!==false};
+-----TO-----
+ric),bpm:+$('#bpm').value,natural:cur.naturalOn!==false,lickAmt:cur.lickAmt};

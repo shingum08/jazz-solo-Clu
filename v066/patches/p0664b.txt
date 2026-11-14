@@ -1,0 +1,19 @@
+alts:true,late:true},
+-----TO-----
+alts:true,late:true,waltz:true},
+=====8<=====
+&&BPB===4&&(topic==='auto'||topic==='alt')&&diff>=2){
+-----TO-----
+&&(BPB===4||(BPB===3&&NAT&&NAT.lick.waltz))&&(topic==='auto'||topic==='alt')&&diff>=2){   /* v0.66.4 3/4 박자 릭(m:3) */
+=====8<=====
+          const s1=NAT&&NAT.lick.half?segAt(t0+12):-1;
+-----TO-----
+          const s1=NAT&&NAT.lick.half&&BPB===4?segAt(t0+12):-1;
+=====8<=====
+      let pool=CURATED_LICKS.filter(L=>(NAT||!L.v)&&
+-----TO-----
+      let pool=CURATED_LICKS.filter(L=>(NAT||!L.v)&&(L.m||4)===BPB&&
+=====8<=====
+        pool=CURATED_LICKS.filter(L=>!L.half&&!L.to&&!L.nx&&
+-----TO-----
+        pool=CURATED_LICKS.filter(L=>!L.half&&(L.m||4)===BPB&&!L.to&&!L.nx&&
